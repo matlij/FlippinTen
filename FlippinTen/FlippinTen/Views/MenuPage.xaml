@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="FlippinTen.Views.MenuPage"
+             Title="{Binding Title}"
+             BackgroundColor="{StaticResource AppBackgroundColor}">
+    <StackLayout Margin="20,35,20,35">
+        <Label Text="Välkommen till VändTia!"
+               FontAttributes="Bold"
+               FontSize="Large"
+               VerticalOptions="CenterAndExpand" 
+               HorizontalOptions="CenterAndExpand" 
+               Margin="0,0,0,20"/>
+
+        <Label Text="Pågående spel"
+               FontSize="Large"
+               HorizontalOptions="Center"/>
+        <ListView ItemsSource="{Binding OnGoingGames}"
+                  ItemTapped="OnListViewItemTapped"
+                  HeightRequest="200"
+                  IsPullToRefreshEnabled="True"
+                  IsRefreshing="{Binding IsBusy, Mode=OneWay}"
+                  RefreshCommand="{Binding LoadGamesCommand}">
+            <d:ListView.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Item One</x:String>
+                    <x:String>Item Two</x:String>
+                    <x:String>Item Three</x:String>
+                </x:Array>
+            </d:ListView.ItemsSource>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Label VerticalOptions="Center"
+                               FontSize="Medium" 
+                               Text="{Binding Name, StringFormat='Spelnamn: {0}'}"
+                               d:Text="{Binding ., StringFormat='Spelnamn: {0}'}"/>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Grid Padding="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1"
+                    Text="Hämta spel"
+                    Style="{StaticResource buttonStyle}"
+                    Command="{Binding LoadGamesCommand}"/>
+            <Button Grid.Column="0"
+                    Text="Skapa nytt spel"
+                    Style="{StaticResource buttonStyle}"
+                    Clicked="OnCreateGameClicked"/>
+        </Grid>
+    </StackLayout>
+</ContentPage>

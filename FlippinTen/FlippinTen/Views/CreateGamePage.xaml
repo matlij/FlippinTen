@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="FlippinTen.Views.CreateGamePage"
+             Title="{Binding Title}"
+             BackgroundColor="{StaticResource AppBackgroundColor}">
+    <StackLayout Margin="20,35,20,20">
+        <Label Text="Skapa nytt spel"
+               FontSize="Large"
+               FontAttributes="Bold"/>
+        <Entry Text="test"
+               Placeholder="Namn"
+               x:Name="name"/>
+        <Entry Text="kalle"
+               Placeholder="Moståndare"
+               x:Name="opponent"/>
+        <Button Text="Skapa"
+                Style="{StaticResource buttonStyle}"
+                Clicked="OnCreateGameClicked"/>
+    </StackLayout>
+</ContentPage>

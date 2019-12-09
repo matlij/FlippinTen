@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "path": "FlippinTen.sln",
+    "projects": [
+      "FlippinTenWeb\\FlippinTenWeb.csproj",
+      "FlippinTen\\FlippinTen.Android\\FlippinTen.Android.csproj",
+      "FlippinTen\\FlippinTen\\FlippinTen.csproj",
+      "Models\\Models.csproj"
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="FlippinTen.App">
+    <Application.Resources>
+        <!-- Colors -->
+        <Color x:Key="AppBackgroundColor">#AAD7A8</Color> <!--#55AA55-->
+        <Color x:Key="iOSNavigationBarColor">WhiteSmoke</Color>
+        <Color x:Key="AndroidNavigationBarColor">#2196F3</Color>
+        <Color x:Key="iOSNavigationBarTextColor">Black</Color>
+        <Color x:Key="AndroidNavigationBarTextColor">White</Color>
+
+        <!-- Implicit styles --><!--
+        <Style TargetType="{x:Type NavigationPage}">
+            <Setter Property="BarBackgroundColor"
+                    Value="{OnPlatform iOS={StaticResource iOSNavigationBarColor},
+                                       Android={StaticResource AndroidNavigationBarColor}}" />
+            <Setter Property="BarTextColor"
+                    Value="{OnPlatform iOS={StaticResource iOSNavigationBarTextColor},
+                                       Android={StaticResource AndroidNavigationBarTextColor}}" />
+        </Style>-->
+
+        <Style x:Key="buttonStyle" TargetType="Button">
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <!--<Setter Property="VerticalOptions" Value="CenterAndExpand" />-->
+            <!--<Setter Property="BorderColor" Value="#66CED6" />-->
+            <Setter Property="BackgroundColor" Value="#78C6B5" />
+            <!--<Setter Property="BorderRadius" Value="5" />
+                <Setter Property="BorderWidth" Value="2" />-->
+            <Setter Property="WidthRequest" Value="200" />
+            <Setter Property="TextColor" Value="#FFFFFF" />
+        </Style>
+
+    </Application.Resources>
+</Application>

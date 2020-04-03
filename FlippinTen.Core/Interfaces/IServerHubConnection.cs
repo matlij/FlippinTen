@@ -10,5 +10,6 @@ namespace FlippinTen.Core.Utilities
         Task<bool> StartConnection();
         void Subscribe<T>(string methodName, Action<T> handler);
         void Subscribe<T1, T2>(string methodName, Action<T1, T2> handler);
+        void Subscribe(string methodName, Action handler);
     }
 }

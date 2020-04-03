@@ -1,4 +1,5 @@
-﻿using FlippinTen.Core.Interfaces;
+﻿using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
@@ -14,17 +15,19 @@ namespace FlippinTen.ConsoleApp
 {
     class GameMenuConsole
     {
-        private readonly IGameMenuService _menuService;
+        private readonly CardGameService _gameService;
+        private readonly ICardGameUtilities _gameUtilities;
 
-        public GameMenuConsole(IGameMenuService menuService)
+        public GameMenuConsole(CardGameService gameService, ICardGameUtilities gameUtilities)
         {
             //_hubConnection = new ServerHubConnection(new HubConnectionBuilder(), $"{UriConstants.BaseUri}{UriConstants.GameHub}");
-            _menuService = menuService;
+            _gameService = gameService;
+            _gameUtilities = gameUtilities;
         }
 
-        public async Task<GamePlay> PickGame(string playerName)
+        public async Task<CardGame> PickGame(string playerName)
         {
-            var onGoingGames = await _menuService.GetGames(playerName);
+            var onGoingGames = await _gameService.Get(playerName);
 
             do
             {
@@ -56,7 +59,7 @@ namespace FlippinTen.ConsoleApp
             } while (true);
         }
 
-        private async Task<GamePlay> CreateGame(string playerName)
+        private async Task<CardGame> CreateGame(string playerName)
         {
             do
             {
@@ -74,7 +77,10 @@ namespace FlippinTen.ConsoleApp
                     Console.WriteLine("Ogiltigt namn på utmanare. Prova igen.");
                 }
 
-                return await _menuService.CreateGame(playerName, gameName, opponent);
+                var players = new List<string> { playerName, opponent };
+                var game = _gameUtilities.CreateGame(gameName, players);
+
+                return await _gameService.Add(game);
             } while (true);
         }
     }

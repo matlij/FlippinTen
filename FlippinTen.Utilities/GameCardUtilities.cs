@@ -1,12 +1,10 @@
-﻿using Models;
-using Models.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FlippinTen.Utilities
+namespace FlippinTen.Core.Utilities
 {
-    public class CardGameUtilities : ICardGameUtilities
+    public class GameCardUtilities
     {
         public Stack<Card> GetDeckOfCards()
         {

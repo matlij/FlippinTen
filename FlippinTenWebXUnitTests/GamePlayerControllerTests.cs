@@ -1,63 +1,73 @@
-﻿using FlippinTenWeb.Controllers;
-using FlippinTenWeb.Services;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+﻿using FlippinTenWebApi.Controllers;
+using FlippinTenWebApi.DataAccess;
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using Microsoft.Extensions.Logging;
+using Models.Entities;
 using Moq;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace FlippinTenWebXUnitTests
 {
-    public class GamePlayerControllerTests
+    public class CardGameerControllerTests
     {
-        private Mock<IGameLogicLayer> _gameLogicLayer;
-        private GamePlay _game;
-        private GamePlayController _controller;
+        private Mock<IGameRepository> _repositoy;
+        private CardGame _game;
+        private GameController _controller;
 
-        public GamePlayerControllerTests()
+        public CardGameerControllerTests()
         {
-            _gameLogicLayer = new Mock<IGameLogicLayer>();
+            _repositoy = new Mock<IGameRepository>();
 
-            _game = new GamePlay(new List<Player>())
+            _game = new CardGame()
             {
-                Identifier = "TestGame"
+                Identifier = "TestId",
+                Name = "TestName",
+                Players = new List<Player>()
+                { 
+                    new Player()
+                }
             };
 
-            _gameLogicLayer.Setup(g => g.GetGame(It.IsAny<string>())).Returns(_game);
+            _repositoy.Setup(g => g.Store(It.IsAny<CardGame>())).Returns(true);
 
-            _controller = new GamePlayController(_gameLogicLayer.Object);
+            _controller = new GameController(_repositoy.Object, new Mock<ILogger<GameController>>().Object);
         }
 
         [Fact]
-        public void Get_ReturnGamePlay()
+        public void Post()
         {
-            var result = _controller.Get("TestGame");
+            var result = _controller.Post(_game);
 
             var objectResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<GamePlay>(objectResult.Value);
+            var model = Assert.IsAssignableFrom<CardGame>(objectResult.Value);
             Assert.Equal("TestGame", model.Identifier);
         }
 
-        [Fact]
-        public void Patch_UpdateGame()
-        {
-            //var operation = new List<Operation> { new Operation("replace", nameof(GamePlay.PlayerTurnIndex), "" };
-            //var patchDocument = new JsonPatchDocument();
-            var test = "[{ \"op\": \"replace\", \"path\": \"PlayerTurnIndex\", \"value\": \"5\" }]";
-            var json = JsonConvert.DeserializeObject<JsonPatchDocument<GamePlay>>(test);
+        //[Fact]
+        //public void Get_ReturnCardGame()
+        //{
+        //    var result = _controller.Get("TestGame");
 
-            var result = _controller.Patch("TestGame", json);
+        //    var objectResult = Assert.IsType<OkObjectResult>(result);
+        //    var model = Assert.IsAssignableFrom<CardGame>(objectResult.Value);
+        //    Assert.Equal("TestGame", model.Identifier);
+        //}
 
-            //var objectResult = Assert.IsType<OkObjectResult>(result);
-            //var model = Assert.IsAssignableFrom<GamePlay>(objectResult.Value);
-            //Assert.Equal("TestGame", model.Identifier);
-        }
+        //[Fact]
+        //public void Patch_UpdateGame()
+        //{
+        //    //var operation = new List<Operation> { new Operation("replace", nameof(CardGame.PlayerTurnIndex), "" };
+        //    //var patchDocument = new JsonPatchDocument();
+        //    var test = "[{ \"op\": \"replace\", \"path\": \"PlayerTurnIndex\", \"value\": \"5\" }]";
+        //    var json = JsonConvert.DeserializeObject<JsonPatchDocument<CardGame>>(test);
+
+        //    //var result = _controller.Patch("TestGame", json);
+
+        //    //var objectResult = Assert.IsType<OkObjectResult>(result);
+        //    //var model = Assert.IsAssignableFrom<CardGame>(objectResult.Value);
+        //    //Assert.Equal("TestGame", model.Identifier);
+        //}
     }
 }
 

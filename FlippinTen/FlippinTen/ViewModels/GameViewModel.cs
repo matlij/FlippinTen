@@ -1,27 +1,24 @@
-﻿using FlippinTen.Core.Interfaces;
+﻿using FlippinTen.Core;
+using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Models;
-using Microsoft.AspNetCore.SignalR.Client;
-using Models;
-using Models.Constants;
-using Models.Events;
-using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 
 namespace FlippinTen.ViewModels
 {
     public class GameViewModel : BaseViewModel
     {
-        private readonly IGamePlayService _gamePlayService;
+        private readonly CardGame _cardGame;
+        private readonly OnlineGameService _onlineGameService;
+        private readonly string _userIdentifier;
         private const string _invalidMove = "Ogiltigt drag...";
 
         private bool _connected;
         public bool Connected
         {
-            get { return _gamePlayService.Player.IsConnected; }
+            get { return _cardGame. GetPlayer(_userIdentifier).IsConnected; }
             set { SetProperty(ref _connected, value); }
         }
 
@@ -55,29 +52,27 @@ namespace FlippinTen.ViewModels
 
         public int CardOnTableCount
         {
-            get { return _gamePlayService.Game.CardsOnTable.Count; }
+            get { return _cardGame.CardsOnTable.Count; }
             //set { SetProperty(ref _cardOnTableCount, value); }
         }
 
         public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
 
-        //public Command PlayCardCommand { get; set; }
-
-        public GameViewModel(IGamePlayService playService)
+        public GameViewModel(CardGame cardGame, OnlineGameService onlineGameService, string userIdentifier)
         {
             WaitingForPlayers = true;
 
-            Title = $"Spel: {playService.Game.Name}";
-
-            _gamePlayService = playService;
-
-            _gamePlayService.OnPlayerJoined += OnPlayerJoined;
-            _gamePlayService.OnTurnedPlayed += OnTurnedPlayed;
+            Title = $"Spel: {cardGame.Name}";
+            _cardGame = cardGame;
+            _onlineGameService = onlineGameService;
+            _userIdentifier = userIdentifier;
+            _onlineGameService.OnPlayerJoined += OnPlayerJoined;
+            _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
         }
 
         public async Task<bool> PlayCard(CardCollection card)
         {
-            var result = await _gamePlayService.PlayCard(card);
+            var result = await _onlineGameService.Play(_cardGame, (c) => c.PlayCard(card.CardNr));
 
             if (result)
             {
@@ -99,7 +94,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            var result = await _gamePlayService.PlayChanceCard();
+            var result = await _onlineGameService.Play(_cardGame, g => g.PlayChanceCard());
 
             IsBusy = false;
 
@@ -120,7 +115,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            var result = await _gamePlayService.PickUpCards();
+            var result = await _onlineGameService.Play(_cardGame, c => c.PickUpCards());
 
             IsBusy = false;
 
@@ -139,7 +134,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            Connected = await _gamePlayService.ConnectToGame();
+            Connected = await _onlineGameService.ConnectToGame(_cardGame.Identifier, _userIdentifier);
 
             IsBusy = false;
 
@@ -156,19 +151,20 @@ namespace FlippinTen.ViewModels
 
         private void UpdatePlayerTurnStatus()
         {
-            PlayerTurnStatus = _gamePlayService.IsPlayersTurn()
+            PlayerTurnStatus = _cardGame.CurrentPlayer.UserIdentifier == _userIdentifier
                 ? "Din tur att spela!"
                 : "Väntar på moståndare.";
         }
 
         private void UpdateCardCollections()
         {
-            TopCardOnTable = _gamePlayService.Game.CardsOnTable.Count > 0
-                ? _gamePlayService.Game.CardsOnTable.Peek()
+            TopCardOnTable = _cardGame.CardsOnTable.Count > 0
+                ? _cardGame.CardsOnTable.Peek()
                 : null;
 
             CardsOnHand.Clear();
-            foreach (var cardOnHand in _gamePlayService.Player.CardsOnHand)
+            var player = _cardGame.GetPlayer(_userIdentifier);
+            foreach (var cardOnHand in player.CardsOnHand)
                 CardsOnHand.Add(cardOnHand);
         }
 
@@ -179,7 +175,7 @@ namespace FlippinTen.ViewModels
 
         private void OnPlayerConnected()
         {
-            var allPlayersOnline = _gamePlayService.IsAllPlayersOnline();
+            var allPlayersOnline = _cardGame.AllPlayersOnline();
             WaitingForPlayers = !allPlayersOnline;
 
             if (allPlayersOnline)

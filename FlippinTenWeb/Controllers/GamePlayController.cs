@@ -4,6 +4,7 @@ using FlippinTenWeb.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Models.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -65,7 +66,7 @@ namespace FlippinTenWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]GamePlay game)
+        public IActionResult Post([FromBody]CardGame game)
         {
             if (string.IsNullOrEmpty(game.Name) || game.Players?.Count == 0)
             {
@@ -84,7 +85,7 @@ namespace FlippinTenWeb.Controllers
         }
 
         [HttpPatch("identifier")]
-        public IActionResult Patch(string identifier, [FromBody]JsonPatchDocument<GamePlay> patchDocument)
+        public IActionResult Patch(string identifier, [FromBody]JsonPatchDocument<CardGame> patchDocument)
         {
             if (string.IsNullOrEmpty(identifier) || patchDocument is null)
             {

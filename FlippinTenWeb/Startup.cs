@@ -24,7 +24,7 @@ namespace FlippinTenWeb
             //TODO, remove singleton
             services.AddSingleton<IGameRepository, GameRepository>();
             services.AddTransient<IGameLogicLayer, GameLogicLayer>();
-            services.AddTransient<ICardGameUtilities, CardGameUtilities>();
+            services.AddTransient<IGameCardUtilities, GameCardUtilities>();
 
             services.AddMvc();
         }

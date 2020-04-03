@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Models.Events
+namespace FlippinTen.Core
 {
     public class PlayerJoinedEventArgs : EventArgs
     {
         public string GameName { get; set; }
-        public string PlayerName { get; set; }
+        public string UserIdentifier { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FlippinTen.Bootstrap;
 using FlippinTen.Core;
+using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
@@ -47,11 +48,11 @@ namespace FlippinTen.Views
 
         private async void OnListViewItemTapped(object sender, ItemTappedEventArgs e)
         {
-            var tappedItem = e.Item as GamePlay;
+            var tappedItem = e.Item as CardGame;
 
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var gameplayService = new GamePlayService(hubConnection, new CardGameEngine(tappedItem, DatabaseConstants.PlayerName));
-            var gameView = new GameViewModel(gameplayService);
+            var onlineGameService = new OnlineGameService(hubConnection);
+            var gameView = new GameViewModel(tappedItem, onlineGameService, DatabaseConstants.PlayerName);
 
             await Navigation.PushAsync(new GamePage(gameView));
         }

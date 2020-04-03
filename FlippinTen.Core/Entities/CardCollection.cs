@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Models
+namespace FlippinTen.Core.Entities
 {
     public class CardCollection
     {

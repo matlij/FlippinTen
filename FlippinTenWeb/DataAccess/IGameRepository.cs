@@ -1,14 +1,15 @@
 ﻿using Models;
+using Models.Entities;
 using System.Collections.Generic;
 
 namespace FlippinTenWeb.DataAccess
 {
     public interface IGameRepository
     {
-        GamePlay Get(string identifier);
-        ICollection<GamePlay> Get();
-        IEnumerable<GamePlay> GetFromPlayer(string playerName);
-        bool Store(GamePlay game);
-        bool Update(GamePlay game);
+        CardGame Get(string identifier);
+        ICollection<CardGame> Get();
+        IEnumerable<CardGame> GetFromPlayer(string userIdentifier);
+        bool Store(CardGame game);
+        void Update(CardGame game);
     }
 }

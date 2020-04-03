@@ -1,4 +1,5 @@
 ﻿using FlippinTen.Core;
+using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
@@ -30,7 +31,7 @@ namespace FlippinTen.Views
         {
             InitializeComponent();
 
-            BindingContext = _viewModel = new GameViewModel(null);
+            BindingContext = _viewModel = new GameViewModel(null, null, null);
         }
 
         protected async override void OnAppearing()

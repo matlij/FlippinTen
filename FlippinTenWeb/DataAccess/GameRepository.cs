@@ -1,4 +1,5 @@
 ﻿using Models;
+using Models.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,24 +10,24 @@ namespace FlippinTenWeb.DataAccess
 {
     public class GameRepository : IGameRepository
     {
-        private ConcurrentDictionary<string, GamePlay> _games;
+        private ConcurrentDictionary<string, CardGame> _games;
 
         public GameRepository()
         {
-            _games = new ConcurrentDictionary<string, GamePlay>();
+            _games = new ConcurrentDictionary<string, CardGame>();
         }
 
-        public bool Store(GamePlay game)
+        public bool Store(CardGame game)
         {
             return _games.TryAdd(game.Identifier, game);
         }
 
-        public ICollection<GamePlay> Get()
+        public ICollection<CardGame> Get()
         {
             return _games.Values;
         }
 
-        public GamePlay Get(string identifier)
+        public CardGame Get(string identifier)
         {
             if (!_games.TryGetValue(identifier, out var game))
                 return null;
@@ -34,26 +35,15 @@ namespace FlippinTenWeb.DataAccess
             return game;
         }
 
-        public IEnumerable<GamePlay> GetFromPlayer(string playerName)
+        public IEnumerable<CardGame> GetFromPlayer(string userIdentifier)
         {
             return _games.Values
-                .Where(g => g.Players.FirstOrDefault(p => p.Name == playerName) != null);
+                .Where(g => g.Players.FirstOrDefault(p => p.UserIdentifier == userIdentifier) != null);
         }
 
-        public bool Update(GamePlay game)
+        public void Update(CardGame game)
         {
-            try
-            {
-                _games.AddOrUpdate(game.Identifier, game, (key, oldValue) => game);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Add or update game failed: {ex.Message}");
-
-                return false;
-            }
+            _games.AddOrUpdate(game.Identifier, game, (key, oldValue) => game);
         }
     }
 }

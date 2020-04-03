@@ -1,71 +1,65 @@
 ﻿using Akavache;
+using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using Models;
+using FlippinTen.Core.Translations;
+using FlippinTen.Utilities;
 using Models.Constants;
+//using Models.Constants;
+//using Models.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using dto = Models.Entities;
 
 namespace FlippinTen.Core.Services
 {
     public class GameMenuService : BaseService, IGameMenuService
     {
         private readonly IGenericRepository _repository;
+        private readonly ICardGameUtilities _gameUtilities;
 
-        public GameMenuService(IGenericRepository repository, IBlobCache cache = null) : base(cache)
+        public GameMenuService(IGenericRepository repository, ICardGameUtilities gameUtilities, IBlobCache cache = null) 
+            : base(cache)
         {
             _repository = repository;
+            _gameUtilities = gameUtilities;
         }
 
-        public async Task<List<GamePlay>> GetGames(string playerName)
+        public async Task<List<CardGame>> GetGames(string playerName)
         {
-            List<GamePlay> gamesFromCache = await GetFromCache<List<GamePlay>>(playerName);
-            if (gamesFromCache != null)
-                return gamesFromCache;
-
             var uri = new UriBuilder(UriConstants.BaseUri)
             {
                 Path = UriConstants.GamePlayUri,
                 Query = $"playerName={playerName}"
             };
 
-            List<GamePlay> games = await _repository.GetAsync<List<GamePlay>>(uri.ToString());
+            var games = await _repository.GetAsync<List<dto.CardGame>>(uri.ToString());
 
-            //await Cache.InsertObject(playerName, games, TimeSpan.FromSeconds(30));
-
-            return games;
+            return games.Select(g => g.AsCardGame()).ToList();
         }
 
-        public async Task<GamePlay> CreateGame(string playerName, string gameName, string opponent)
+        public async Task<CardGame> CreateGame(string playerIdentifier, string opponentIdentifier, string gameName)
         {
-            if (string.IsNullOrEmpty(playerName)) throw new ArgumentNullException(nameof(playerName));
-            if (string.IsNullOrEmpty(gameName)) throw new ArgumentNullException(nameof(playerName));
-            if (string.IsNullOrEmpty(opponent)) throw new ArgumentNullException(nameof(opponent));
+            if (string.IsNullOrEmpty(playerIdentifier)) throw new ArgumentNullException(nameof(playerIdentifier));
+            if (string.IsNullOrEmpty(opponentIdentifier)) throw new ArgumentNullException(nameof(opponentIdentifier));
+            if (string.IsNullOrEmpty(gameName)) throw new ArgumentNullException(nameof(gameName));
 
-            var players = new List<Player>()
-            {
-                new Player(Guid.NewGuid().ToString()) { Name = playerName },
-                new Player(Guid.NewGuid().ToString()) { Name = opponent }
-            };
-            var newGame = new GamePlay(players)
-            {
-                Name = gameName
-            };
+            var players = new List<string> { playerIdentifier, opponentIdentifier };
+            var newGame = _gameUtilities.CreateGame(gameName, players);
 
             var uri = new UriBuilder(UriConstants.BaseUri)
             {
                 Path = UriConstants.GamePlayUri
             };
 
-            GamePlay response = await _repository.PostAsync(uri.ToString(), newGame);
+            var response = await _repository.PostAsync(uri.ToString(), newGame.AsCardGameDto());
+            if (response == null)
+            {
+                return null;
+            }
 
-            //var gamesFromCache = await GetFromCache<List<GamePlay>>(playerName);
-            //if (gamesFromCache != null)
-            //{
-            //    gamesFromCache.Add(response);
-            //}
-
-            return response;
+            return newGame;
         }
     }
 }

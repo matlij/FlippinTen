@@ -1,9 +1,12 @@
 ﻿using FlippinTen.Core;
+using FlippinTen.Core.Entities;
+using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Models;
 using FlippinTen.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models;
-using Models.Enums;
+//using Models.Entities;
+//using Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +17,7 @@ namespace FlippinTenTests
     [TestClass]
     public class CardGameEngineTests
     {
-        private CardGameEngine _sut;
-        private GamePlay _game;
+        private CardGame _sut;
         private Player _player;
         private Player _opponent;
         private CardCollection _dummyCardCollection1;
@@ -36,36 +38,30 @@ namespace FlippinTenTests
             _dummyCardCollectionWithCardTwo = new CardCollection { Cards = new List<Card> { new Card(2, CardType.Clubs) } };
             _dummyCardCollectionWithCardTen = new CardCollection { Cards = new List<Card> { new Card(10, CardType.Clubs) } };
 
-            _player = new Player(Guid.NewGuid().ToString())
-            {
-                Name = "TestPlayer"
-            };
+            _player = new Player("TestPlayer");
+            _opponent = new Player("TestOpponent");
 
-            _opponent = new Player(Guid.NewGuid().ToString())
-            {
-                Name = "TestOpponent"
-            };
+            //_game = new CardGame()
+            //{
+            //    Name = "TestGame",
+            //    CardsOnTable = new Stack<Card>(),
+            //    DeckOfCards = cardGameUtilities.GetDeckOfCards(),
+            //};
 
-            var cardGameUtilities = new CardGameUtilities();
-            _game = new GamePlay(new List<Player>() { _player, _opponent })
-            {
-                Name = "TestGame",
-                CardsOnTable = new Stack<Card>(),
-                DeckOfCards = cardGameUtilities.GetDeckOfCards()
-            };
-
-            _sut = new CardGameEngine(_game, _player.Name);
+            //var cardGameUtilities = new CardGameUtilities(new CardUtilities());
+            var players = new List<Player> { _player, _opponent };
+            _sut = new CardGame("GameId", "GameName", players, new Stack<Card>(), new Stack<Card>(), players.First());
         }
 
         [TestMethod]
         public void PickUpCards_CardsAddedToPlayerAndRemovedFromTabel()
         {
             //Arrange
-            _game.CardsOnTable.Push(_dummyCard1);
-            _game.CardsOnTable.Push(_dummyCard2);
+            _sut.CardsOnTable.Push(_dummyCard1);
+            _sut.CardsOnTable.Push(_dummyCard2);
 
             //Act
-            _sut.PickUpCardsFromTable();
+            _sut.PickUpCards();
 
             //Assert
             Assert.AreEqual(2, _player.CardsOnHand.Count);
@@ -73,7 +69,7 @@ namespace FlippinTenTests
             Assert.IsNotNull(_player.CardsOnHand.FirstOrDefault(c => c.CardNr == _dummyCard1.Number));
             Assert.IsNotNull(_player.CardsOnHand.FirstOrDefault(c => c.CardNr == _dummyCard2.Number));
 
-            Assert.AreEqual(0, _game.CardsOnTable.Count);
+            Assert.AreEqual(0, _sut.CardsOnTable.Count);
         }
 
         [TestMethod]
@@ -86,7 +82,7 @@ namespace FlippinTenTests
             _sut.PlayCard(_dummyCardCollection1.CardNr);
 
             //Assert
-            Assert.AreEqual(_opponent.Identifier, _sut.Game.PlayerTurnIdentifier);
+            Assert.AreEqual(_opponent.UserIdentifier, _sut.CurrentPlayer.UserIdentifier);
         }
 
         [TestMethod]
@@ -100,7 +96,7 @@ namespace FlippinTenTests
 
             //Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(_dummyCardCollection1.CardNr, _sut.Game.CardsOnTable.Peek().Number);
+            Assert.AreEqual(_dummyCardCollection1.CardNr, _sut.CardsOnTable.Peek().Number);
         }
 
         [TestMethod]
@@ -108,22 +104,22 @@ namespace FlippinTenTests
         {
             //Arrange
             _player.CardsOnHand.Add(_dummyCardCollection1);
-            _sut.Game.CardsOnTable.Push(_dummyCard2);
+            _sut.CardsOnTable.Push(_dummyCard2);
 
             //Act
             var result = _sut.PlayCard(_dummyCardCollection1.CardNr);
 
             //Assert
             Assert.IsFalse(result);
-            Assert.AreEqual(_dummyCardCollection2.CardNr, _sut.Game.CardsOnTable.Peek().Number);
+            Assert.AreEqual(_dummyCardCollection2.CardNr, _sut.CardsOnTable.Peek().Number);
         }
 
         [TestMethod]
         public void PlayChanceCard_ChanceCardHigher_ShouldSucceed()
         {
             //Arrange
-            _sut.Game.CardsOnTable.Push(_dummyCard1);
-            _sut.Game.DeckOfCards.Push(_dummyCard2);
+            _sut.CardsOnTable.Push(_dummyCard1);
+            _sut.DeckOfCards.Push(_dummyCard2);
 
             //Act
             var result = _sut.PlayChanceCard();
@@ -136,8 +132,8 @@ namespace FlippinTenTests
         public void PlayChanceCard_ChanceCardLower_ShouldFail()
         {
             //Arrange
-            _sut.Game.CardsOnTable.Push(_dummyCard2);
-            _sut.Game.DeckOfCards.Push(_dummyCard1);
+            _sut.CardsOnTable.Push(_dummyCard2);
+            _sut.DeckOfCards.Push(_dummyCard1);
 
             //Act
             var result = _sut.PlayChanceCard();
@@ -157,14 +153,14 @@ namespace FlippinTenTests
 
             //Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(_player.Identifier, _game.PlayerTurnIdentifier);
+            //Assert.AreEqual(_player.UserIdentifier, _sut.PlayerTurnIdentifier);
         }
 
         [TestMethod]
         public void PlayCard_CardNrTwo_ShouldAddCardToTable()
         {
             //Arrange
-            _game.CardsOnTable.Push(_dummyCard2);
+            _sut.CardsOnTable.Push(_dummyCard2);
             _player.CardsOnHand.Add(_dummyCardCollectionWithCardTwo);
 
             //Act
@@ -172,7 +168,7 @@ namespace FlippinTenTests
 
             //Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(_dummyCardCollectionWithCardTwo.Cards.First().ID, _game.CardsOnTable.Peek().ID);
+            Assert.AreEqual(_dummyCardCollectionWithCardTwo.Cards.First().ID, _sut.CardsOnTable.Peek().ID);
         }
 
         [TestMethod]
@@ -186,14 +182,14 @@ namespace FlippinTenTests
 
             //Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(_player.Identifier, _game.PlayerTurnIdentifier);
+            //Assert.AreEqual(_player.Identifier, _sut.PlayerTurnIdentifier);
         }
 
         [TestMethod]
         public void PlayCard_CardNrTen_ShouldRemovesCardsFromTable()
         {
             //Arrange
-            _game.CardsOnTable.Push(_dummyCard2);
+            _sut.CardsOnTable.Push(_dummyCard2);
             _player.CardsOnHand.Add(_dummyCardCollectionWithCardTen);
 
             //Act
@@ -201,7 +197,7 @@ namespace FlippinTenTests
 
             //Assert
             Assert.IsTrue(result);
-            Assert.AreEqual(0, _game.CardsOnTable.Count);
+            Assert.AreEqual(0, _sut.CardsOnTable.Count);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FlippinTen.Core.Interfaces;
+﻿using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using Microsoft.AspNetCore.SignalR.Client;
 using Models;
 using System;
@@ -27,7 +28,7 @@ namespace FlippinTen.ViewModels
             //CreateGameCommand = new Command(async () => await OnCreateGameClicked());
         }
 
-        public async Task<GamePlay> CreateGame(string gameName, string opponent) 
+        public async Task<CardGame> CreateGame(string gameName, string opponent) 
         {
             try
             {

@@ -10,6 +10,6 @@ namespace FlippinTenWeb.Services
         GamePlay CreateGame(GamePlay game);
         bool JoinGame(string gameName, string playerName);
         void PlayerDisconnected(string playerName);
-        bool UpdateGame(GamePlay game);
+        void UpdateGame(GamePlay game);
     }
 }

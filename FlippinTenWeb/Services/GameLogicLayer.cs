@@ -1,6 +1,7 @@
 ﻿using FlippinTen.Utilities;
 using FlippinTenWeb.DataAccess;
 using Models;
+using Models.Entities;
 using Models.Extensions;
 using System;
 using System.Collections.Generic;
@@ -11,27 +12,27 @@ namespace FlippinTenWeb.Services
     public class GameLogicLayer : IGameLogicLayer
     {
         private readonly IGameRepository _gameRepository;
-        private readonly ICardGameUtilities _gameService;
+        private readonly IGameCardUtilities _gameService;
 
-        public GameLogicLayer(IGameRepository gameRepository, ICardGameUtilities gameService)
+        public GameLogicLayer(IGameRepository gameRepository, IGameCardUtilities gameService)
         {
             _gameRepository = gameRepository;
             _gameService = gameService;
         }
 
-        public GamePlay GetGame(string identifier)
+        public CardGame GetGame(string identifier)
         {
             return _gameRepository.Get(identifier);
         }
 
-        public IEnumerable<GamePlay> GetGames(string playerName)
+        public IEnumerable<CardGame> GetGames(string playerName)
         {
             return playerName is null ?
                 _gameRepository.Get() :
                 _gameRepository.GetFromPlayer(playerName);
         }
 
-        public GamePlay CreateGame(GamePlay game)
+        public CardGame CreateGame(CardGame game)
         {
             if (game.DeckOfCards is null)
             {
@@ -61,9 +62,9 @@ namespace FlippinTenWeb.Services
             return game;
         }
 
-        public bool UpdateGame(GamePlay game)
+        public void UpdateGame(CardGame game)
         {
-            return _gameRepository.Update(game);
+            _gameRepository.Update(game);
         }
 
         public bool JoinGame(string gameIdentifier, string playerName)

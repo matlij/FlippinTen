@@ -1,13 +1,12 @@
 ﻿using FlippinTen.Core;
+using FlippinTen.Core.Entities;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
 using FlippinTen.Utilities;
 using Microsoft.AspNetCore.SignalR.Client;
-using Models;
 using Models.Constants;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlippinTen.ConsoleApp
@@ -29,17 +28,19 @@ namespace FlippinTen.ConsoleApp
             StartGameConsole(playerName, game).Wait();
         }
 
-        private static async Task<GamePlay> StartGameMenu(string playerName)
+        private static async Task<CardGame> StartGameMenu(string playerName)
         {
             var genericRepository = new GenericRepository();
-            var gameMenu = new GameMenuConsole(new GameMenuService(genericRepository));
+            var cardGameService = new CardGameService(genericRepository);
+            var gameMenu = new GameMenuConsole(cardGameService, new CardGameUtilities(new CardUtilities()));
             return await gameMenu.PickGame(playerName);
         }
 
-        private static async Task StartGameConsole(string playerName, GamePlay game)
+        private static async Task StartGameConsole(string playerName, CardGame game)
         {
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var gameConsole = new GamePlayConsole(new GamePlayService(hubConnection, new CardGameEngine(game, playerName)));
+            var onlineGameService = new OnlineGameService(hubConnection);
+            var gameConsole = new GamePlayConsole(game, onlineGameService, playerName);
 
             await gameConsole.StartGame();
         }

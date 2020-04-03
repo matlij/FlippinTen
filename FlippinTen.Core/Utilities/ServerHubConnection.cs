@@ -12,7 +12,14 @@ namespace FlippinTen.Core.Utilities
 
         public ServerHubConnection(IHubConnectionBuilder hubConnectionBuilder, string url)
         {
-            _connection = hubConnectionBuilder.WithUrl(url).Build();
+            _connection = hubConnectionBuilder
+                .WithUrl(url)
+                .Build();
+        }
+
+        public void Subscribe(string methodName, Action handler)
+        {
+            _connection.On(methodName, handler);
         }
 
         public void Subscribe<T>(string methodName, Action<T> handler)
@@ -48,7 +55,7 @@ namespace FlippinTen.Core.Utilities
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                 .ExecuteAsync(async () => await _connection.StartAsync());
 
-                await _connection.StartAsync();
+                //await _connection.StartAsync();
 
                 return true;
             }

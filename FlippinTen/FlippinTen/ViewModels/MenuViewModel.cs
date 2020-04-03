@@ -1,8 +1,10 @@
-﻿using FlippinTen.Core.Interfaces;
+﻿using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Services;
 using Models;
 using Models.Constants;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -15,11 +17,11 @@ namespace FlippinTen.ViewModels
         private readonly IGameMenuService _gameMenuService;
 
         public Command LoadGamesCommand { get; private set; }
-        public ObservableCollection<GamePlay> OnGoingGames { get; set; } = new ObservableCollection<GamePlay>();
+        public ObservableCollection<CardGame> OnGoingGames { get; set; } = new ObservableCollection<CardGame>();
 
         public MenuViewModel()
         {
-            OnGoingGames.Add(new GamePlay(new System.Collections.Generic.List<Player>()) { Name = "TestName" });
+            OnGoingGames.Add(new CardGame(null, "TestName", new List<Player>(), null, null, null));
 
             Title = "Spelmeny";
         }

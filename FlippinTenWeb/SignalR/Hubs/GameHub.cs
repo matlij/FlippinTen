@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using FlippinTenWeb.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Models;
 using Models.Events;
+using Newtonsoft.Json;
 
 namespace FlippinTenWeb.SignalR.Hubs
 {
@@ -12,24 +14,33 @@ namespace FlippinTenWeb.SignalR.Hubs
     {
         const string _playerNameKey = "PlayerName";
         private readonly IGameLogicLayer _gameLogic;
+        private readonly ILogger<GameHub> _log;
 
-        public GameHub(IGameLogicLayer gameLogic)
+        public GameHub(IGameLogicLayer gameLogic, ILogger<GameHub> log)
         {
             _gameLogic = gameLogic;
+            _log = log;
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            if (Context.Items.TryGetValue(_playerNameKey, out var playerName))
-                _gameLogic.PlayerDisconnected(playerName.ToString());
+            _log.LogInformation($"Player disconnected: {exception.Message}");
+
+            try
+            {
+                if (Context.Items.TryGetValue(_playerNameKey, out var playerName))
+                    _gameLogic.PlayerDisconnected(playerName.ToString());
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Disconnect player failed.", exception);
+            }
 
             return base.OnDisconnectedAsync(exception);
         }
 
         public async Task<bool> JoinGame(string gameIdentifier, string playerName)
         {
-            Console.WriteLine($"{playerName} called join game. Game: {gameIdentifier}");
-
             if (string.IsNullOrEmpty(gameIdentifier)) return false;
             if (string.IsNullOrEmpty(playerName)) return false;
 
@@ -45,24 +56,30 @@ namespace FlippinTenWeb.SignalR.Hubs
                 await Clients.GroupExcept(gameIdentifier, Context.ConnectionId)
                     .SendAsync("PlayerJoined", new PlayerJoinedEventArgs() { GameName = gameIdentifier, PlayerName = playerName });
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine("Join game failed: " + e);
+                _log.LogError(ex, "Join game failed", gameIdentifier, playerName);
                 return false;
             }
 
-            Console.WriteLine("JoinGame finsihed");
+
             return true;
         }
 
         public async Task<bool> PlayTurn(GamePlay game)
         {
-            Console.WriteLine($"PlayTurn called. Game {game.Name}");
+            try
+            {
+                _gameLogic.UpdateGame(game);
 
-            if (!_gameLogic.UpdateGame(game))
+                await Clients.GroupExcept(game.Identifier, Context.ConnectionId).SendAsync("TurnedPlayed", game);
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Update game failed: " + JsonConvert.SerializeObject(game));
+
                 return false;
-
-            await Clients.GroupExcept(game.Identifier, Context.ConnectionId).SendAsync("TurnedPlayed", game);
+            }
 
             return true;
         }

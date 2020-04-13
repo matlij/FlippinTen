@@ -48,10 +48,10 @@ namespace FlippinTen.Views
 
         private async void OnListViewItemTapped(object sender, ItemTappedEventArgs e)
         {
-            var tappedItem = e.Item as CardGame;
+            var tappedGame = e.Item as CardGame;
 
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var onlineGameService = new OnlineGameService(AppContainer.Resolve<ICardGameService>(), hubConnection, tappedItem);
+            var onlineGameService = new OnlineGameService(AppContainer.Resolve<ICardGameService>(), hubConnection, tappedGame);
             var gameView = new GameViewModel(onlineGameService);
 
             await Navigation.PushAsync(new GamePage(gameView));

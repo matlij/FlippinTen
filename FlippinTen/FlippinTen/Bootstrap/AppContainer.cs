@@ -4,6 +4,7 @@ using Autofac;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
+using FlippinTen.Utilities;
 
 namespace FlippinTen.Bootstrap
 {
@@ -24,7 +25,9 @@ namespace FlippinTen.Bootstrap
             //Repositories
             builder.RegisterType<GenericRepository>().As<IGenericRepository>();
 
-            //builder.RegisterType<GamePlayService>().As<ICardGameEngine>();
+            //Utilities
+            builder.RegisterType<CardGameUtilities>().As<ICardGameUtilities>();
+            builder.RegisterType<CardUtilities>().As<ICardUtilities>();
 
             _container = builder.Build();
         }

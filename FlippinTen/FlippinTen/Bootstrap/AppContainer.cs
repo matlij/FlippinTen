@@ -19,7 +19,6 @@ namespace FlippinTen.Bootstrap
             //builder.RegisterType<MenuViewModel>();
 
             //Services
-            builder.RegisterType<GameMenuService>().As<IGameMenuService>();
             builder.RegisterType<CardGameService>().As<ICardGameService>();
 
             //Repositories

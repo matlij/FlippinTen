@@ -39,7 +39,7 @@ namespace FlippinTen.ConsoleApp
 
         private static async Task<CardGame> StartGameMenu(string playerName, ICardGameService cardGameService)
         {
-            var gameMenu = new GameMenuConsole(cardGameService, new CardGameUtilities(new CardUtilities()));
+            var gameMenu = new GameMenuConsole(cardGameService);
             return await gameMenu.PickGame(playerName);
         }
 

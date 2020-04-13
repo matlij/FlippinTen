@@ -9,13 +9,10 @@ namespace FlippinTen.ConsoleApp
     class GameMenuConsole
     {
         private readonly ICardGameService _gameService;
-        private readonly ICardGameUtilities _gameUtilities;
 
-        public GameMenuConsole(ICardGameService gameService, ICardGameUtilities gameUtilities)
+        public GameMenuConsole(ICardGameService gameService)
         {
-            //_hubConnection = new ServerHubConnection(new HubConnectionBuilder(), $"{UriConstants.BaseUri}{UriConstants.GameHub}");
             _gameService = gameService;
-            _gameUtilities = gameUtilities;
         }
 
         public async Task<CardGame> PickGame(string playerName)

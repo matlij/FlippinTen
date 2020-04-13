@@ -31,7 +31,7 @@ namespace FlippinTen.Views
             }
             else
             {
-                BindingContext = _viewModel = new MenuViewModel(AppContainer.Resolve<IGameMenuService>());
+                BindingContext = _viewModel = new MenuViewModel(AppContainer.Resolve<ICardGameService>());
             }
         }
 

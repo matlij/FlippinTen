@@ -27,7 +27,7 @@ namespace FlippinTen.Views
         public CreateGamePage()
         {
             InitializeComponent();
-            BindingContext = _viewModel = new CreateGameViewModel(AppContainer.Resolve<IGameMenuService>(), DatabaseConstants.PlayerName);
+            BindingContext = _viewModel = new CreateGameViewModel(AppContainer.Resolve<ICardGameService>(), DatabaseConstants.PlayerName);
         }
 
         private async void OnCreateGameClicked(object sender, EventArgs e)

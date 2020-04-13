@@ -13,16 +13,16 @@ namespace FlippinTen.ViewModels
 {
     public class CreateGameViewModel : BaseViewModel
     {
-        private readonly IGameMenuService _gameMenuService;
+        private readonly ICardGameService _cardGameService;
 
         //public Command CreateGameCommand { get; set; }
         //public string GameName { get; set; }
         //public string Opponent { get; set; }
         public string PlayerName { get; set; }
 
-        public CreateGameViewModel(IGameMenuService gameMenuService, string playerName)
+        public CreateGameViewModel(ICardGameService cardGameService, string playerName)
         {
-            _gameMenuService = gameMenuService;
+            _cardGameService = cardGameService;
             PlayerName = playerName;
 
             //CreateGameCommand = new Command(async () => await OnCreateGameClicked());
@@ -32,7 +32,7 @@ namespace FlippinTen.ViewModels
         {
             try
             {
-                return await _gameMenuService.CreateGame(PlayerName, gameName, opponent);
+                return await _cardGameService.Add(gameName, PlayerName, new List<string> { opponent });
             }
             catch (Exception ex)
             {

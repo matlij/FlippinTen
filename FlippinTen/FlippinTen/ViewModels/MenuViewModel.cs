@@ -14,7 +14,7 @@ namespace FlippinTen.ViewModels
 {
     public class MenuViewModel : BaseViewModel
     {
-        private readonly IGameMenuService _gameMenuService;
+        private readonly ICardGameService _cardGameService;
 
         public Command LoadGamesCommand { get; private set; }
         public ObservableCollection<CardGame> OnGoingGames { get; set; } = new ObservableCollection<CardGame>();
@@ -26,9 +26,9 @@ namespace FlippinTen.ViewModels
             Title = "Spelmeny";
         }
 
-        public MenuViewModel(IGameMenuService gameMenuService)
+        public MenuViewModel(ICardGameService cardGameService)
         {
-            _gameMenuService = gameMenuService;
+            _cardGameService = cardGameService;
 
             LoadGamesCommand = new Command(async () => await ExecuteLoadGamesCommand());
 
@@ -57,7 +57,7 @@ namespace FlippinTen.ViewModels
         {
             OnGoingGames.Clear();
 
-            var games = await _gameMenuService.GetGames(DatabaseConstants.PlayerName);
+            var games = await _cardGameService.GetByPlayer(DatabaseConstants.PlayerName);
             if (games.Count > 0)
                 games.ForEach(g => OnGoingGames.Add(g));
         }

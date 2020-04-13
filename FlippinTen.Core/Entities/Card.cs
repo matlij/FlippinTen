@@ -51,7 +51,7 @@ namespace FlippinTen.Core.Entities
         {
             get
             {
-                return $"{CardType}{Number}";
+                return $"{CardType} {Number}";
             }
         }
     }

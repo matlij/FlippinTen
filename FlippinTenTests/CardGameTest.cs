@@ -38,7 +38,10 @@ namespace FlippinTenTests
             var cardGameUtilities = new CardUtilities();
 
             var players = new List<Player> { _player, _opponent };
-            _sut = new CardGame("TestGameId", "TestGameName", players, cardGameUtilities.GetDeckOfCards(), new Stack<Card>(), players.First());
+            var playerInformation = players
+                .Select(p => new PlayerInformation(p.UserIdentifier))
+                .ToList();
+            _sut = new CardGame("TestGameId", "TestGameName", cardGameUtilities.GetDeckOfCards(), new Stack<Card>(), players.First(), playerInformation);
         }
 
         [TestMethod]
@@ -50,7 +53,7 @@ namespace FlippinTenTests
                 new Card(2, CardType.Dimonds)
             };
 
-            _sut.UpdateGame(null, newDeck, null);
+            _sut.UpdateGame(newDeck, null, null);
         }
     }
 }

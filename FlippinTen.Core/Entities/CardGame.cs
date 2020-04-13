@@ -7,6 +7,30 @@ using System.Linq;
 
 namespace FlippinTen.Core.Entities
 {
+    public class PlayerInformation : IEquatable<PlayerInformation>
+    {
+        public PlayerInformation(string identifier)
+        {
+            Identifier = identifier;
+        }
+        public string Identifier { get; }
+        public bool IsPlayersTurn { get; set; }
+
+        public bool Equals(PlayerInformation other)
+        {
+            if (other == null || string.IsNullOrEmpty(other.Identifier))
+            {
+                return false;
+            }
+
+            return other.Identifier == Identifier;
+        }
+        public override int GetHashCode()
+        {
+            return Identifier.GetHashCode();
+        }
+    }
+
     public class CardGame
     {
         private const int _cardTwo = 2;
@@ -14,45 +38,29 @@ namespace FlippinTen.Core.Entities
 
         public string Identifier { get; }
         public string Name { get; }
-        public List<Player> Players { get; }
         public Stack<Card> DeckOfCards { get; }
         public Stack<Card> CardsOnTable { get; }
-        public Player CurrentPlayer { get; private set; }
+        public Player Player { get; }
+        public List<PlayerInformation> PlayerInformation { get; }
+        public bool AllPlayersOnline { get; set; }
 
         public CardGame(
             string identifier,
             string name,
-            List<Player> players,
             Stack<Card> deckOfCards,
             Stack<Card> cardsOnTable,
-            Player currentPlayer)
+            Player currentPlayer,
+            List<PlayerInformation> playerInformation)
         {
             Identifier = identifier;
             Name = name;
-            Players = players;
             DeckOfCards = deckOfCards;
             CardsOnTable = cardsOnTable;
-            CurrentPlayer = currentPlayer;
-            CurrentPlayer.IsPlayersTurn = true;
+            Player = currentPlayer;
+            PlayerInformation = playerInformation;
         }
 
-        public Player GetPlayer(string userIdentifier)
-        {
-            var player = Players.FirstOrDefault(p => p.UserIdentifier == userIdentifier);
-            if (player == null)
-            {
-                throw new ArgumentException($"Failed to set player '{userIdentifier}' to state connected.");
-            }
-
-            return player;
-        }
-
-        public bool AllPlayersOnline()
-        {
-            return Players.All(p => p.IsConnected);
-        }
-
-        public void UpdateGame(Player currentPlayer, List<Card> deckOfCards, List<Card> cardsOnTable)
+        public void UpdateGame(IEnumerable<Card> deckOfCards, IEnumerable<Card> cardsOnTable, List<PlayerInformation> playerInformation)
         {
             DeckOfCards.Clear();
             foreach (var card in deckOfCards)
@@ -66,8 +74,15 @@ namespace FlippinTen.Core.Entities
                 CardsOnTable.Push(card);
             }
 
-            var playerToUpdate = Players.FirstOrDefault(p => p.UserIdentifier == currentPlayer.UserIdentifier);
-            playerToUpdate = currentPlayer;
+            PlayerInformation.Clear();
+            PlayerInformation.AddRange(playerInformation);
+        }
+
+        public bool IsPlayersTurn()
+        {
+            var playerInfo = PlayerInformation.First(p => p.Identifier == Player.UserIdentifier);
+
+            return playerInfo.IsPlayersTurn;
         }
 
         public bool PlayCard(int cardNr)
@@ -77,9 +92,9 @@ namespace FlippinTen.Core.Entities
                 return false;
             }
 
-            if (!CurrentPlayer.PlayCardOnHand(cardNr, out var cardCollection))
+            if (!Player.PlayCardOnHand(cardNr, out var cardCollection))
             {
-                throw new ArgumentException($"Cand find card nr {cardNr} in Player {CurrentPlayer.UserIdentifier}");
+                throw new ArgumentException($"Cand find card nr {cardNr} in Player {Player.UserIdentifier}");
             }
 
             cardCollection.Cards.ForEach(c => CardsOnTable.Push(c));
@@ -104,7 +119,7 @@ namespace FlippinTen.Core.Entities
         public bool PickUpCards()
         {
             var cardsOnTable = CardsOnTable.Select(c => c);
-            CurrentPlayer.AddCardsToHand(cardsOnTable);
+            Player.AddCardsToHand(cardsOnTable);
 
             CardsOnTable.Clear();
 
@@ -119,7 +134,7 @@ namespace FlippinTen.Core.Entities
                 return GamePlayResult.InvalidPlay;
 
             var chanceCard = DeckOfCards.Peek();
-            CurrentPlayer.AddCardsToHand(new List<Card> { chanceCard });
+            Player.AddCardsToHand(new List<Card> { chanceCard });
 
             if (!PlayCard(chanceCard.Number))
             {
@@ -133,20 +148,22 @@ namespace FlippinTen.Core.Entities
 
         private void ChangeCurrentPlayer()
         {
-            var currentTurnIndex = Players.FindIndex(p => p.UserIdentifier == CurrentPlayer.UserIdentifier);
-            if (currentTurnIndex < 0)
+            var currentPlayer = PlayerInformation.FirstOrDefault(p => p.IsPlayersTurn);
+            if (currentPlayer == null)
             {
-                throw new InvalidOperationException($"Failed to update player turn. Cant find player with identifier: {CurrentPlayer.UserIdentifier}");
+                throw new InvalidOperationException($"Failed to update player turn. Cant find player with identifier: {Player.UserIdentifier}");
             }
-            Players.ForEach(p => p.IsConnected = false);
-            CurrentPlayer = Players[++currentTurnIndex % Players.Count];
-            CurrentPlayer.IsPlayersTurn = true;
+            currentPlayer.IsPlayersTurn = false;
+
+            var currentPlayerIndex = PlayerInformation.IndexOf(currentPlayer);
+            var newPlayersTurn = PlayerInformation[++currentPlayerIndex % PlayerInformation.Count];
+            newPlayersTurn.IsPlayersTurn = true;
         }
 
         private void PickUpCards(int minimumCardOnHands)
         {
-            var numberOfCardsToPickUp = CurrentPlayer.CardsOnHand.Count < minimumCardOnHands
-                ? minimumCardOnHands - CurrentPlayer.CardsOnHand.Count
+            var numberOfCardsToPickUp = Player.CardsOnHand.Count < minimumCardOnHands
+                ? minimumCardOnHands - Player.CardsOnHand.Count
                 : 0;
             var cardsToPickup = new List<Card>();
             for (var i = 0; i < numberOfCardsToPickUp; i++)
@@ -157,11 +174,14 @@ namespace FlippinTen.Core.Entities
                 cardsToPickup.Add(DeckOfCards.Pop());
             }
 
-            CurrentPlayer.AddCardsToHand(cardsToPickup);
+            Player.AddCardsToHand(cardsToPickup);
         }
 
         private bool CanPlayCard(int cardNr)
         {
+            if (!IsPlayersTurn())
+                return false;
+
             if (CardsOnTable.Count == 0 ||
                 cardNr == _cardTwo ||
                 cardNr == _cardTen)
@@ -174,135 +194,4 @@ namespace FlippinTen.Core.Entities
                 cardOnTable.Number == 2;
         }
     }
-
-    //public class CardGame
-    //{
-    //    private const int _cardTwo = 2;
-    //    private const int _cardTen = 10;
-
-    //    public string Identifier { get; }
-    //    public string Name { get; }
-    //    public List<Player> Players { get; }
-    //    public Stack<Card> DeckOfCards { get; }
-    //    public Stack<Card> CardsOnTable { get; }
-    //    public Player CurrentPlayer { get; private set; }
-
-    //    public CardGame(
-    //        string identifier,
-    //        string name,
-    //        List<Player> players,
-    //        Stack<Card> deckOfCards,
-    //        Stack<Card> cardsOnTable,
-    //        Player currentPlayer)
-    //    {
-    //        Identifier = identifier;
-    //        Name = name;
-    //        Players = players;
-    //        DeckOfCards = deckOfCards;
-    //        CardsOnTable = cardsOnTable;
-    //        CurrentPlayer = currentPlayer;
-    //    }
-
-    //    public bool PlayCard(int cardNr)
-    //    {
-    //        if (!CanPlayCard(cardNr))
-    //        {
-    //            return false;
-    //        }
-
-    //        if (!CurrentPlayer.PlayCardOnHand(cardNr, out var cardCollection))
-    //        {
-    //            throw new ArgumentException($"Cand find card nr {cardNr} in Player {CurrentPlayer.UserIdentifier}");
-    //        }
-
-    //        cardCollection.Cards.ForEach(c => CardsOnTable.Push(c));
-
-    //        //CurrentPlayer.CardsOnHand.Remove(cardCollection);
-
-    //        PickUpCards(minimumCardOnHands: 3);
-
-    //        if (cardNr == 10)
-    //        {
-    //            CardsOnTable.Clear();
-    //        }
-
-    //        if (cardNr != _cardTwo && cardNr != _cardTen)
-    //        {
-    //            ChangeCurrentPlayer();
-    //        }
-
-    //        return true;
-    //    }
-
-    //    public bool PickUpCardsFromTable()
-    //    {
-    //        var cardsOnTable = CardsOnTable.Select(c => c);
-    //        CurrentPlayer.AddCardsToHand(cardsOnTable);
-
-    //        CardsOnTable.Clear();
-
-    //        ChangeCurrentPlayer();
-
-    //        return true;
-    //    }
-
-    //    public GamePlayResult PlayChanceCard()
-    //    {
-    //        if (DeckOfCards.Count < 1)
-    //            return GamePlayResult.InvalidPlay;
-
-    //        var chanceCard = DeckOfCards.Peek();
-    //        CurrentPlayer.AddCardsToHand(new List<Card> { chanceCard });
-
-    //        if (!PlayCard(chanceCard.Number))
-    //        {
-    //            PickUpCardsFromTable();
-    //            return GamePlayResult.ChanceFailed;
-    //        }
-
-    //        return GamePlayResult.ChanceSucceded;
-    //    }
-
-    //    private void PickUpCards(int minimumCardOnHands)
-    //    {
-    //        var numberOfCardsToPickUp = CurrentPlayer.CardsOnHand.Count < minimumCardOnHands
-    //            ? minimumCardOnHands - CurrentPlayer.CardsOnHand.Count
-    //            : 0;
-    //        var cardsToPickup = new List<Card>();
-    //        for (var i = 0; i < numberOfCardsToPickUp; i++)
-    //        {
-    //            if (DeckOfCards.Count == 0)
-    //                break;
-
-    //            cardsToPickup.Add(DeckOfCards.Pop());
-    //        }
-
-    //        CurrentPlayer.AddCardsToHand(cardsToPickup);
-    //    }
-
-    //    private bool CanPlayCard(int cardNr)
-    //    {
-    //        if (CardsOnTable.Count == 0 ||
-    //            cardNr == _cardTwo ||
-    //            cardNr == _cardTen)
-    //        {
-    //            return true;
-    //        }
-
-    //        var cardOnTable = CardsOnTable.Peek();
-    //        return cardNr > cardOnTable.Number ||
-    //            cardOnTable.Number == 2;
-    //    }
-
-    //    private void ChangeCurrentPlayer()
-    //    {
-    //        var currentTurnIndex = Players.FindIndex(p => p.UserIdentifier == CurrentPlayer.UserIdentifier);
-    //        if (currentTurnIndex < 0)
-    //        {
-    //            throw new InvalidOperationException($"Failed to update player turn. Cant find player with identifier: {CurrentPlayer.UserIdentifier}");
-    //        }
-
-    //        CurrentPlayer = Players[++currentTurnIndex % Players.Count];
-    //    }
-    //}
 }

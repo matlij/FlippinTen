@@ -50,7 +50,10 @@ namespace FlippinTenTests
 
             //var cardGameUtilities = new CardGameUtilities(new CardUtilities());
             var players = new List<Player> { _player, _opponent };
-            _sut = new CardGame("GameId", "GameName", players, new Stack<Card>(), new Stack<Card>(), players.First());
+            var playerInformation = players
+                .Select(p => new PlayerInformation(p.UserIdentifier))
+                .ToList();
+            _sut = new CardGame("GameId", "GameName", new Stack<Card>(), new Stack<Card>(), players.First(), playerInformation);
         }
 
         [TestMethod]
@@ -82,7 +85,7 @@ namespace FlippinTenTests
             _sut.PlayCard(_dummyCardCollection1.CardNr);
 
             //Assert
-            Assert.AreEqual(_opponent.UserIdentifier, _sut.CurrentPlayer.UserIdentifier);
+            Assert.AreEqual(_opponent.UserIdentifier, _sut.Player.UserIdentifier);
         }
 
         [TestMethod]

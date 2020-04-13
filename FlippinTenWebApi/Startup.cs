@@ -24,7 +24,7 @@ namespace FlippinTenWebApi
             services.AddSingleton<IGameRepository, GameRepository>();
             services.AddTransient<IGameLogicLayer, GameLogicLayer>();
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddSignalR();
         }

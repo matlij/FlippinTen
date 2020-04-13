@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Models.Entities
 {
@@ -9,17 +6,8 @@ namespace Models.Entities
     {
         public string Identifier { get; set; }
         public string Name { get; set; }
-        public List<Player> Players { get; set; }
-        public List<Card> DeckOfCards { get; set; }
-        public List<Card> CardsOnTable { get; set; }
-        public string CurrentPlayer { get; set; }
-    }
-
-    public class CardGameMove
-    {
-        public string GameIdentifier { get; set; }
-        public Player Player { get; set; }
-        public List<Card> DeckOfCards { get; set; }
-        public List<Card> CardsOnTable { get; set; }
+        public List<Player> Players { get; set; } = new List<Player>();
+        public Stack<Card> DeckOfCards { get; set; }
+        public Stack<Card> CardsOnTable { get; set; }
     }
 }

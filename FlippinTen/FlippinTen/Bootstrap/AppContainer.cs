@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Autofac;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
-using FlippinTen.ViewModels;
 
 namespace FlippinTen.Bootstrap
 {

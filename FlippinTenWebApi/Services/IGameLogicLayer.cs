@@ -7,7 +7,7 @@ namespace FlippinTenWeb.Services
     public interface IGameLogicLayer
     {
         IEnumerable<CardGame> GetGames(string playerName);
-        bool JoinGame(string gameName, string userIdentifier);
+        CardGame JoinGame(string gameName, string userIdentifier);
         void PlayerDisconnected(string playerName);
         bool UpdateGame(CardGame game);
     }

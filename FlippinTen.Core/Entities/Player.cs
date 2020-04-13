@@ -17,7 +17,6 @@ namespace FlippinTen.Core.Entities
         public IList<CardCollection> CardsOnHand { get; private set; } = new List<CardCollection>();
         public IList<Card> CardsHidden { get; private set; } = new List<Card>();
         public IList<Card> CardsVisible { get; private set; } = new List<Card>();
-        public bool IsPlayersTurn { get; set; }
 
         public void UpdatePlayer(IList<CardCollection> cardsOnHand, IList<Card> cardsHidden, IList<Card> cardsVisible)
         {
@@ -28,12 +27,6 @@ namespace FlippinTen.Core.Entities
 
         public bool PlayCardOnHand(int cardNr, out CardCollection cardCollection)
         {
-            if (!IsPlayersTurn)
-            {
-                cardCollection = null;
-                return false;
-            }
-
             cardCollection = CardsOnHand.FirstOrDefault(c => c.CardNr == cardNr);
             if (cardCollection == null)
             {

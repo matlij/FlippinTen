@@ -31,7 +31,7 @@ namespace FlippinTen.Views
         {
             InitializeComponent();
 
-            BindingContext = _viewModel = new GameViewModel(null, null, null);
+            BindingContext = _viewModel = new GameViewModel(null);
         }
 
         protected async override void OnAppearing()

@@ -51,8 +51,8 @@ namespace FlippinTen.Views
             var tappedItem = e.Item as CardGame;
 
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var onlineGameService = new OnlineGameService(hubConnection);
-            var gameView = new GameViewModel(tappedItem, onlineGameService, DatabaseConstants.PlayerName);
+            var onlineGameService = new OnlineGameService(AppContainer.Resolve<ICardGameService>(), hubConnection, tappedItem);
+            var gameView = new GameViewModel(onlineGameService);
 
             await Navigation.PushAsync(new GamePage(gameView));
         }

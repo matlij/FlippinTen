@@ -21,7 +21,7 @@ namespace FlippinTen.ViewModels
 
         public MenuViewModel()
         {
-            OnGoingGames.Add(new CardGame(null, "TestName", new List<Player>(), null, null, null));
+            OnGoingGames.Add(new CardGame(null, "TestName", null, null, null, null));
 
             Title = "Spelmeny";
         }

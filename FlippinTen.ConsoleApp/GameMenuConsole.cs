@@ -1,24 +1,17 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using FlippinTen.Core.Repository;
-using FlippinTen.Core.Services;
-using FlippinTen.Core.Utilities;
-using Microsoft.AspNetCore.SignalR.Client;
-using Models;
-using Models.Constants;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlippinTen.ConsoleApp
 {
     class GameMenuConsole
     {
-        private readonly CardGameService _gameService;
+        private readonly ICardGameService _gameService;
         private readonly ICardGameUtilities _gameUtilities;
 
-        public GameMenuConsole(CardGameService gameService, ICardGameUtilities gameUtilities)
+        public GameMenuConsole(ICardGameService gameService, ICardGameUtilities gameUtilities)
         {
             //_hubConnection = new ServerHubConnection(new HubConnectionBuilder(), $"{UriConstants.BaseUri}{UriConstants.GameHub}");
             _gameService = gameService;
@@ -27,7 +20,7 @@ namespace FlippinTen.ConsoleApp
 
         public async Task<CardGame> PickGame(string playerName)
         {
-            var onGoingGames = await _gameService.Get(playerName);
+            var onGoingGames = await _gameService.GetByPlayer(playerName);
 
             do
             {
@@ -64,23 +57,27 @@ namespace FlippinTen.ConsoleApp
             do
             {
                 Console.WriteLine("Namn på spel: ");
-                var gameName = Console.ReadLine();
+                //var gameName = Console.ReadLine();
+                var gameName = "test";
                 if (string.IsNullOrEmpty(gameName))
                 {
                     Console.WriteLine("Ogiltigt namn på spel. Prova igen.");
+                    continue;
                 }
 
                 Console.WriteLine("Utmanare: ");
-                var opponent = Console.ReadLine();
+                //var opponent = Console.ReadLine();
+                var opponent = "kalle";
                 if (string.IsNullOrEmpty(opponent))
                 {
                     Console.WriteLine("Ogiltigt namn på utmanare. Prova igen.");
                 }
 
-                var players = new List<string> { playerName, opponent };
-                var game = _gameUtilities.CreateGame(gameName, players);
+                var opponents = new List<string> { opponent };
+                //var game = _gameUtilities.CreateGame(gameName, players);
 
-                return await _gameService.Add(game);
+                var addedGame = await _gameService.Add(gameName, playerName, opponents);
+                return addedGame;
             } while (true);
         }
     }

@@ -10,21 +10,22 @@ namespace FlippinTen.Core.Translations
 {
     public static class EntityTranslation
     {
-        public static CardGame AsCardGame(this dto.CardGame game)
+        public static CardGame AsCardGame(this dto.CardGame game, string userIdentifier)
         {
-            var players = game.Players.Select(p => p.AsPlayer()).ToList();
             var deckOfCards = game.DeckOfCards.AsCardStack();
             var cardsOnTable = game.CardsOnTable.AsCardStack();
-            var currentPlayer = game.Players.FirstOrDefault(p => p.UserIdentifier == game.CurrentPlayer);
-            return new CardGame(game.Identifier, game.Name, players, deckOfCards, cardsOnTable, currentPlayer.AsPlayer());
+            var player = game.Players.FirstOrDefault(p => p.UserIdentifier == userIdentifier);
+            var playerInformation = game.Players
+                .Select(p => new PlayerInformation(p.UserIdentifier) { IsPlayersTurn = p.IsPlayersTurn })
+                .ToList();
+            return new CardGame(game.Identifier, game.Name, deckOfCards, cardsOnTable, player.AsPlayer(), playerInformation);
         }
 
         public static Player AsPlayer(this dto.Player playerDto)
         {
             var player = new Player(playerDto.UserIdentifier)
             {
-                IsConnected = playerDto.IsConnected,
-                IsPlayersTurn = playerDto.IsPlayersTurn,
+                IsConnected = playerDto.IsConnected
             };
 
             foreach (var item in playerDto.CardsOnHand)
@@ -39,15 +40,12 @@ namespace FlippinTen.Core.Translations
             return player;
         }
 
-        public static Stack<Card> AsCardStack(this List<dto.Card> cards)
+        public static Stack<Card> AsCardStack(this Stack<dto.Card> cards)
         {
-            var cardsDto = new Stack<Card>();
-            foreach (var card in cards)
-            {
-                cardsDto.Push(card.AsCard());
-            }
-
-            return cardsDto;
+            var cardList = cards
+                .Reverse()
+                .Select(c => c.AsCard());
+            return new Stack<Card>(cardList);
         }
 
         public static Card AsCard(this dto.Card card)
@@ -68,38 +66,31 @@ namespace FlippinTen.Core.Translations
             };
         }
 
-        public static dto.CardGame AsCardGameDto(this CardGame game)
+        public static dto.Player AsPlayerDto(this Player player, List<PlayerInformation> playerInformation)
         {
-            return new dto.CardGame
+            var playerInfo = playerInformation.FirstOrDefault(p => p.Identifier == player.UserIdentifier);
+            if (playerInfo == null)
             {
-                CardsOnTable = game.CardsOnTable.AsCardListDto(),
-                CurrentPlayer = game.CurrentPlayer.UserIdentifier,
-                DeckOfCards = game.DeckOfCards.AsCardListDto(),
-                Identifier = game.Identifier,
-                Name = game.Name,
-                Players = game.Players.Select(p => p.AsPlayerDto()).ToList()
-            };
-        }
+                throw new ArgumentException("Couldnt find player information");
+            }
 
-        public static dto.Player AsPlayerDto(this Player player)
-        {
             return new dto.Player
             {
                 CardsHidden = player.CardsHidden.Select(c => c.AsCardDto()).ToList(),
                 CardsOnHand = player.CardsOnHand.Select(c => c.AsCardCollectionDto()).ToList(),
                 CardsVisible = player.CardsVisible.Select(c => c.AsCardDto()).ToList(),
                 IsConnected = player.IsConnected,
-                IsPlayersTurn = player.IsPlayersTurn,
+                IsPlayersTurn = playerInfo.IsPlayersTurn,
                 UserIdentifier = player.UserIdentifier
             };
         }
 
-        public static List<dto.Card> AsCardListDto(this Stack<Card> cards)
+        public static Stack<dto.Card> AsCardStackDto(this Stack<Card> cards)
         {
-            return cards
+            var cardList = cards
                 .Reverse()
-                .Select(c => c.AsCardDto())
-                .ToList();
+                .Select(c => c.AsCardDto());
+            return new Stack<dto.Card>(cardList);
         }
 
         public static dto.Card AsCardDto(this Card card)

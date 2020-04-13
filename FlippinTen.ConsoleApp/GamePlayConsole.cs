@@ -1,7 +1,6 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Models;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Threading;
@@ -11,39 +10,28 @@ namespace FlippinTen.ConsoleApp
 {
     public class GamePlayConsole
     {
-        private CardGame _game;
         private readonly OnlineGameService _onlineService;
-        private readonly string _userIdentifier;
         private readonly ManualResetEvent _waitForOtherPlayerEvent = new ManualResetEvent(false);
         private readonly ManualResetEvent _waitForOpponentEvent = new ManualResetEvent(false);
 
-        public GamePlayConsole(CardGame cardGame, OnlineGameService onlineService, string userIdentifier)
+        public GamePlayConsole(OnlineGameService onlineService)
         {
-            _game = cardGame;
             _onlineService = onlineService;
-            _userIdentifier = userIdentifier;
-            _onlineService.OnPlayerJoined += PlayerJoined;
+            _onlineService.OnPlayerJoined += GameStarted;
             _onlineService.OnTurnedPlayed += TurnPlayed;
         }
 
         private void TurnPlayed(object sender, CardPlayedEventArgs e)
         {
-            Console.WriteLine("Turned played: " + JsonConvert.SerializeObject(e.Game));
-
-            _game = e.Game;
-
-            if (IsPlayersTurn())
+            if (_onlineService.Game.IsPlayersTurn())
             {
                 _waitForOtherPlayerEvent.Set();
             }
         }
 
-        private void PlayerJoined(object sender, PlayerJoinedEventArgs e)
+        private void GameStarted(object sender, PlayerJoinedEventArgs e)
         {
-            SetPlayerConnectedStatus(e.UserIdentifier, isConnected: true);
-
-            if (_game.Players.All(p => p.IsConnected))
-                _waitForOpponentEvent.Set();
+            _waitForOpponentEvent.Set();
         }
 
         public async Task StartGame()
@@ -51,49 +39,24 @@ namespace FlippinTen.ConsoleApp
             if (!await ConnectToGame())
                 return;
 
-            Console.WriteLine("Spelare: ");
-            foreach (var player in _game.Players)
+            Console.WriteLine("Motståndare: ");
+            foreach (var player in _onlineService.Game.PlayerInformation)
             {
-                Console.WriteLine($"{player.UserIdentifier} {player.IsConnected}");
+                Console.WriteLine($"{player}");
             }
 
-            var allPlayersConnected = _game.Players.All(p => p.IsConnected);
-            if (!allPlayersConnected)
-            {
-                allPlayersConnected = WaitForOpponents(_game, allPlayersConnected);
-            }
-
-            if (allPlayersConnected)
-            {
-                PlayGame().Wait();
-            }
+            WaitForOpponents(_onlineService.Game);
+            PlayGame().Wait();
         }
 
-        private bool WaitForOpponents(CardGame game, bool allPlayersConnected)
+        private void WaitForOpponents(CardGame game)
         {
-            while (!allPlayersConnected)
+            while (!game.AllPlayersOnline)
             {
-                Console.WriteLine("Väntar på spelare att ansluta: " +
-                    string.Concat(game.Players.Where(p => !p.IsConnected).Select(p => $"{p.UserIdentifier}\n")));
+                Console.WriteLine("Väntar på spelare att ansluta");
 
-                if (_waitForOpponentEvent.WaitOne())
-                {
-                    allPlayersConnected = game.AllPlayersOnline();
-                }
-                else
-                {
-                    Console.WriteLine("Vill du forsätta vänta på spelare (j/n)?");
-                    var input = Console.ReadLine();
-
-                    if (input.ToUpper() != "J")
-                    {
-                        allPlayersConnected = false;
-                    }
-                }
-
+                _waitForOpponentEvent.WaitOne();
             }
-
-            return allPlayersConnected;
         }
 
         private async Task PlayGame()
@@ -108,7 +71,7 @@ namespace FlippinTen.ConsoleApp
                 PrintBoard(lastMoveStatus);
                 lastMoveStatus = string.Empty;
 
-                if (IsPlayersTurn())
+                if (_onlineService.Game.IsPlayersTurn())
                 {
                     _waitForOtherPlayerEvent.Reset();
 
@@ -118,7 +81,7 @@ namespace FlippinTen.ConsoleApp
                     {
                         if (input.ToUpper() == "P")
                         {
-                            playSucceded = await _onlineService.Play(_game, g => g.PickUpCards());
+                            playSucceded = await _onlineService.Play(g => g.PickUpCards());
                             if (!playSucceded)
                             {
                                 lastMoveStatus = invalidMoveMessage;
@@ -127,7 +90,7 @@ namespace FlippinTen.ConsoleApp
 
                         else if (input.ToUpper() == "C")
                         {
-                            var gamePlayResult = await _onlineService.Play(_game, g => g.PlayChanceCard());
+                            var gamePlayResult = await _onlineService.Play(g => g.PlayChanceCard());
 
                             lastMoveStatus = gamePlayResult == GamePlayResult.InvalidPlay ?
                                 invalidMoveMessage :
@@ -139,8 +102,8 @@ namespace FlippinTen.ConsoleApp
                         else
                         {
                             var inputIndex = int.Parse(input) - 1;
-                            var cardToPlay = _game.GetPlayer(_userIdentifier).CardsOnHand[inputIndex];
-                            playSucceded = await _onlineService.Play(_game, g => g.PlayCard(cardToPlay.CardNr));
+                            var cardToPlay = _onlineService.Game.Player.CardsOnHand[inputIndex];
+                            playSucceded = await _onlineService.Play(g => g.PlayCard(cardToPlay.CardNr));
                             lastMoveStatus = playSucceded ?
                                 okMoveMessage :
                                 invalidMoveMessage;
@@ -172,8 +135,8 @@ namespace FlippinTen.ConsoleApp
             {
                 var input = Console.ReadLine();
 
-                if (int.TryParse(input, out _) || 
-                    input.ToUpper() == "P" || 
+                if (int.TryParse(input, out _) ||
+                    input.ToUpper() == "P" ||
                     input.ToUpper() == "C")
                 {
                     return input;
@@ -183,20 +146,21 @@ namespace FlippinTen.ConsoleApp
 
         private void PrintBoard(string lastMoveStatus)
         {
-            Console.Clear();
-            Console.WriteLine($"--------- Vändtia - {_game.GetPlayer(_userIdentifier).UserIdentifier} - {_game.Name} ---------");
+            //Console.Clear();
+            Console.WriteLine("----------------------------------------------");
+            Console.WriteLine($"--------- Vändtia - {_onlineService.Game.Player.UserIdentifier} - {_onlineService.Game.Name} ---------");
 
-            Console.WriteLine($"Kort kvar i kortlek: {_game.DeckOfCards.Count}");
+            Console.WriteLine($"Kort kvar i kortlek: {_onlineService.Game.DeckOfCards.Count}");
             Console.WriteLine();
 
-            var topCardOnTable = _game.CardsOnTable.TryPeek(out var card) ?
+            var topCardOnTable = _onlineService.Game.CardsOnTable.TryPeek(out var card) ?
                 card.CardName :
                 "'table empty'";
-            Console.WriteLine($"Kort på bord: { topCardOnTable} (totalt {_game.CardsOnTable.Count})");
+            Console.WriteLine($"Kort på bord: { topCardOnTable} (totalt {_onlineService.Game.CardsOnTable.Count})");
             Console.WriteLine();
 
             Console.WriteLine("Kort på hand:");
-            var cardsOnHand = _game.GetPlayer(_userIdentifier).CardsOnHand;
+            var cardsOnHand = _onlineService.Game.Player.CardsOnHand;
             for (var i = 0; i < cardsOnHand.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {string.Join(", ", cardsOnHand[i].Cards.Select(c => c.CardName))}");
@@ -216,26 +180,7 @@ namespace FlippinTen.ConsoleApp
 
         private async Task<bool> ConnectToGame()
         {
-            var result = await _onlineService.ConnectToGame(_game.Identifier, _userIdentifier);
-            if (!result)
-            {
-                return false;
-            }
-
-            SetPlayerConnectedStatus(_userIdentifier, result);
-            return result;
-        }
-
-        private void SetPlayerConnectedStatus(string userIdentifier, bool isConnected)
-        {
-            var player = _game.GetPlayer(userIdentifier);
-            player.IsConnected = isConnected;
-        }
-
-        private bool IsPlayersTurn()
-        {
-            var isPlayersTurn = _game.CurrentPlayer.UserIdentifier == _userIdentifier;
-            return isPlayersTurn;
+            return await _onlineService.ConnectToGame();
         }
     }
 }

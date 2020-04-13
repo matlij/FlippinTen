@@ -10,15 +10,13 @@ namespace FlippinTen.ViewModels
 {
     public class GameViewModel : BaseViewModel
     {
-        private readonly CardGame _cardGame;
         private readonly OnlineGameService _onlineGameService;
-        private readonly string _userIdentifier;
         private const string _invalidMove = "Ogiltigt drag...";
 
         private bool _connected;
         public bool Connected
         {
-            get { return _cardGame. GetPlayer(_userIdentifier).IsConnected; }
+            get { return _onlineGameService.Game.Player.IsConnected; }
             set { SetProperty(ref _connected, value); }
         }
 
@@ -52,27 +50,25 @@ namespace FlippinTen.ViewModels
 
         public int CardOnTableCount
         {
-            get { return _cardGame.CardsOnTable.Count; }
+            get { return _onlineGameService.Game.CardsOnTable.Count; }
             //set { SetProperty(ref _cardOnTableCount, value); }
         }
 
         public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
 
-        public GameViewModel(CardGame cardGame, OnlineGameService onlineGameService, string userIdentifier)
+        public GameViewModel(OnlineGameService onlineGameService)
         {
             WaitingForPlayers = true;
 
-            Title = $"Spel: {cardGame.Name}";
-            _cardGame = cardGame;
+            Title = $"Spel: {_onlineGameService.Game.Name}";
             _onlineGameService = onlineGameService;
-            _userIdentifier = userIdentifier;
             _onlineGameService.OnPlayerJoined += OnPlayerJoined;
             _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
         }
 
         public async Task<bool> PlayCard(CardCollection card)
         {
-            var result = await _onlineGameService.Play(_cardGame, (c) => c.PlayCard(card.CardNr));
+            var result = await _onlineGameService.Play((c) => c.PlayCard(card.CardNr));
 
             if (result)
             {
@@ -94,7 +90,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            var result = await _onlineGameService.Play(_cardGame, g => g.PlayChanceCard());
+            var result = await _onlineGameService.Play(g => g.PlayChanceCard());
 
             IsBusy = false;
 
@@ -115,7 +111,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            var result = await _onlineGameService.Play(_cardGame, c => c.PickUpCards());
+            var result = await _onlineGameService.Play(c => c.PickUpCards());
 
             IsBusy = false;
 
@@ -134,7 +130,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            Connected = await _onlineGameService.ConnectToGame(_cardGame.Identifier, _userIdentifier);
+            Connected = await _onlineGameService.ConnectToGame();
 
             IsBusy = false;
 
@@ -151,19 +147,16 @@ namespace FlippinTen.ViewModels
 
         private void UpdatePlayerTurnStatus()
         {
-            PlayerTurnStatus = _cardGame.CurrentPlayer.UserIdentifier == _userIdentifier
-                ? "Din tur att spela!"
-                : "Väntar på moståndare.";
         }
 
         private void UpdateCardCollections()
         {
-            TopCardOnTable = _cardGame.CardsOnTable.Count > 0
-                ? _cardGame.CardsOnTable.Peek()
+            TopCardOnTable = _onlineGameService.Game.CardsOnTable.Count > 0
+                ? _onlineGameService.Game.CardsOnTable.Peek()
                 : null;
 
             CardsOnHand.Clear();
-            var player = _cardGame.GetPlayer(_userIdentifier);
+            var player = _onlineGameService.Game.Player;
             foreach (var cardOnHand in player.CardsOnHand)
                 CardsOnHand.Add(cardOnHand);
         }
@@ -175,7 +168,7 @@ namespace FlippinTen.ViewModels
 
         private void OnPlayerConnected()
         {
-            var allPlayersOnline = _cardGame.AllPlayersOnline();
+            var allPlayersOnline = _onlineGameService.Game.AllPlayersOnline;
             WaitingForPlayers = !allPlayersOnline;
 
             if (allPlayersOnline)

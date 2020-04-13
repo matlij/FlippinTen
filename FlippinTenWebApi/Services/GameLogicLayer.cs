@@ -22,23 +22,28 @@ namespace FlippinTenWeb.Services
                 _gameRepository.GetFromPlayer(playerName);
         }
 
-        public bool JoinGame(string gameIdentifier, string userIdentifier)
+        public CardGame JoinGame(string gameIdentifier, string userIdentifier)
         {
             var game = _gameRepository.Get(gameIdentifier);
             if (game == null)
             {
-                return false;
+                return null;
             }
 
             var joinedPlayer = game.Players.FirstOrDefault(p => p.UserIdentifier == userIdentifier);
             if (joinedPlayer == null)
             {
-                return false;
+                return null;
             }
 
             joinedPlayer.IsConnected = true;
 
-            return _gameRepository.Update(game);
+            if (!_gameRepository.Update(game))
+            {
+                return null;
+            }
+
+            return game;
         }
 
         public void PlayerDisconnected(string userIdentifier)

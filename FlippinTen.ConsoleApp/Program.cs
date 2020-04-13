@@ -1,5 +1,6 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
@@ -22,25 +23,31 @@ namespace FlippinTen.ConsoleApp
         {
             Console.WriteLine("Ditt namn: ");
             var playerName = Console.ReadLine();
+            if (string.IsNullOrEmpty(playerName))
+            {
+                playerName = "matte";
+            }
 
-            var game = await StartGameMenu(playerName);
+            var genericRepository = new GenericRepository();
+            var cardUtilities = new CardUtilities();
+            var cardGameUtilities = new CardGameUtilities(cardUtilities);
+            var cardGameService = new CardGameService(genericRepository, cardGameUtilities);
+            var game = await StartGameMenu(playerName, cardGameService);
 
-            StartGameConsole(playerName, game).Wait();
+            StartGameConsole(game, cardGameService).Wait();
         }
 
-        private static async Task<CardGame> StartGameMenu(string playerName)
+        private static async Task<CardGame> StartGameMenu(string playerName, ICardGameService cardGameService)
         {
-            var genericRepository = new GenericRepository();
-            var cardGameService = new CardGameService(genericRepository);
             var gameMenu = new GameMenuConsole(cardGameService, new CardGameUtilities(new CardUtilities()));
             return await gameMenu.PickGame(playerName);
         }
 
-        private static async Task StartGameConsole(string playerName, CardGame game)
+        private static async Task StartGameConsole(CardGame game, ICardGameService cardGameService)
         {
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var onlineGameService = new OnlineGameService(hubConnection);
-            var gameConsole = new GamePlayConsole(game, onlineGameService, playerName);
+            var onlineGameService = new OnlineGameService(cardGameService, hubConnection, game);
+            var gameConsole = new GamePlayConsole(onlineGameService);
 
             await gameConsole.StartGame();
         }

@@ -8,7 +8,9 @@ namespace FlippinTen.Core.Interfaces
 {
     public interface ICardGameService
     {
-        Task<CardGame> Add(CardGame game);
-        Task<List<CardGame>> Get(string playerName);
+        Task<CardGame> Get(string gameIdentifier, string userIdentifier);
+        Task<List<CardGame>> GetByPlayer(string playerName);
+        Task<CardGame> Add(string gameName, string user, List<string> opponents);
+        Task<bool> Update(CardGame game);
     }
 }

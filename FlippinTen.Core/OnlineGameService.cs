@@ -1,11 +1,11 @@
 ﻿using FlippinTen.Core.Entities;
+using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Models;
-using FlippinTen.Core.Translations;
 using FlippinTen.Core.Utilities;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using dto = Models.Entities;
+using System.Collections.Generic;
 
 namespace FlippinTen.Core
 {
@@ -14,36 +14,50 @@ namespace FlippinTen.Core
         public event EventHandler<PlayerJoinedEventArgs> OnPlayerJoined;
         public event EventHandler<CardPlayedEventArgs> OnTurnedPlayed;
 
+        private readonly ICardGameService _gameService;
         private readonly IServerHubConnection _hubConnection;
-        
-        public OnlineGameService(IServerHubConnection hubConnection)
+        public CardGame Game { get; private set; }
+
+        public OnlineGameService(ICardGameService gameService, IServerHubConnection hubConnection, CardGame game)
         {
+            _gameService = gameService;
             _hubConnection = hubConnection;
-            _hubConnection.Subscribe<string>("PlayerJoined", PlayerJoined);
-            _hubConnection.Subscribe<dto.CardGame>("TurnedPlayed", TurnedPlayed);
+            Game = game;
+
+            _hubConnection.Subscribe<string>("GameStarted", GameStarted);
+            _hubConnection.Subscribe<string>("TurnedPlayed", TurnedPlayed);
         }
 
-        public async Task<bool> Play(CardGame game, Func<CardGame, bool> play)
+        public async Task<bool> Play(Func<CardGame, bool> play)
         {
-            if (!play(game))
+            if (!play(Game))
                 return false;
 
-            return await BroadcastGame(game);
-        }
-
-        public async Task<GamePlayResult> Play(CardGame game, Func<CardGame, GamePlayResult> play)
-        {
-            var result = play(game);
-            if (result == GamePlayResult.InvalidPlay)
-                return result;
-
-            if (!await BroadcastGame(game))
-                return GamePlayResult.InvalidPlay;
+            var result = await UpdateGame(Game);
+            if (!result)
+            {
+                Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
+            }
 
             return result;
         }
 
-        public async Task<bool> ConnectToGame(string gameIdentifier, string userIdentifier)
+        public async Task<GamePlayResult> Play(Func<CardGame, GamePlayResult> play)
+        {
+            var result = play(Game);
+            if (result == GamePlayResult.InvalidPlay)
+                return result;
+
+            if (!await UpdateGame(Game))
+            {
+                Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
+                result = GamePlayResult.InvalidPlay;
+            }
+
+            return result;
+        }
+
+        public async Task<bool> ConnectToGame()
         {
             if (!await ConnectToHub())
             {
@@ -52,12 +66,12 @@ namespace FlippinTen.Core
             }
             Debug.WriteLine("Uppkopplad till server.");
 
-            if (!await JoinGame(gameIdentifier, userIdentifier))
+            if (!await JoinGame(Game.Identifier, Game.Player.UserIdentifier))
             {
-                Debug.WriteLine($"Anslutning till {gameIdentifier} misslyckades.");
+                Debug.WriteLine($"Anslutning till {Game.Identifier} misslyckades.");
                 return false;
             }
-            Debug.WriteLine($"Uppkopplad till {gameIdentifier}.");
+            Debug.WriteLine($"Uppkopplad till {Game.Identifier}.");
 
             return true;
         }
@@ -91,22 +105,49 @@ namespace FlippinTen.Core
             }
         }
 
-        private void TurnedPlayed(dto.CardGame gameDto)
+        private async void TurnedPlayed(string gameIdentifier)
         {
-            var game = gameDto.AsCardGame();
+            try
+            {
+                Console.WriteLine("Game updated. Previous top card on table: " + Game.CardsOnTable.Peek().CardName);
+            }
+            catch (Exception)
+            {
 
-            OnTurnedPlayed?.Invoke(this, new CardPlayedEventArgs { Game = game });
+            }
+
+            var game = await _gameService.Get(gameIdentifier, Game.Player.UserIdentifier);
+
+            Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation);
+
+            try
+            {
+                Console.WriteLine("Game updated. Top card on table: " + Game.CardsOnTable.Peek().CardName);
+            }
+            catch (Exception)
+            {
+            }
+
+            OnTurnedPlayed?.Invoke(this, null);
         }
 
-        private void PlayerJoined(string user)
+        private void GameStarted(string gameIdentifier)
         {
-            OnPlayerJoined?.Invoke(this, new PlayerJoinedEventArgs { UserIdentifier = user });
+            Game.AllPlayersOnline = true;
+
+            OnPlayerJoined?.Invoke(this, null);
         }
 
-        private async Task<bool> BroadcastGame(CardGame game)
+        private async Task<bool> UpdateGame(CardGame game)
         {
-            var gameDto = game.AsCardGameDto();
-            return await _hubConnection.Invoke<bool>("PlayTurn", new object[] { gameDto });
+            var result = await _gameService.Update(game);
+
+            if (!result)
+            {
+                return false;
+            }
+
+            return await _hubConnection.Invoke<bool>("PlayTurn", new object[] { game.Identifier });
         }
     }
 }

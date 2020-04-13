@@ -4,6 +4,8 @@ using FlippinTen.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using dto = Models.Entities;
+using dtoEnum = Models.Enums;
 
 namespace FlippinTen.Utilities
 {

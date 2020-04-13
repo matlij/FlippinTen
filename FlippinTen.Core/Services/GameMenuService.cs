@@ -14,6 +14,7 @@ using dto = Models.Entities;
 
 namespace FlippinTen.Core.Services
 {
+    [Obsolete("Should use CardGameService")]
     public class GameMenuService : BaseService, IGameMenuService
     {
         private readonly IGenericRepository _repository;
@@ -36,7 +37,7 @@ namespace FlippinTen.Core.Services
 
             var games = await _repository.GetAsync<List<dto.CardGame>>(uri.ToString());
 
-            return games.Select(g => g.AsCardGame()).ToList();
+            return games.Select(g => g.AsCardGame(playerName)).ToList();
         }
 
         public async Task<CardGame> CreateGame(string playerIdentifier, string opponentIdentifier, string gameName)
@@ -46,20 +47,20 @@ namespace FlippinTen.Core.Services
             if (string.IsNullOrEmpty(gameName)) throw new ArgumentNullException(nameof(gameName));
 
             var players = new List<string> { playerIdentifier, opponentIdentifier };
-            var newGame = _gameUtilities.CreateGame(gameName, players);
+            var newGame = _gameUtilities.CreateGameDto(gameName, players);
 
             var uri = new UriBuilder(UriConstants.BaseUri)
             {
                 Path = UriConstants.GamePlayUri
             };
 
-            var response = await _repository.PostAsync(uri.ToString(), newGame.AsCardGameDto());
+            var response = await _repository.PostAsync(uri.ToString(), newGame);
             if (response == null)
             {
                 return null;
             }
 
-            return newGame;
+            return response.AsCardGame(playerIdentifier);
         }
     }
 }

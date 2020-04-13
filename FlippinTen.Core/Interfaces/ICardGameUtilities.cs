@@ -5,6 +5,7 @@ namespace FlippinTen.Core.Interfaces
 {
     public interface ICardGameUtilities
     {
-        CardGame CreateGame(string gameName, List<string> users);
+        Entities.CardGame CreateGame(string gameName, List<string> users);
+        global::Models.Entities.CardGame CreateGameDto(string gameName, List<string> users);
     }
 }

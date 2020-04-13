@@ -37,14 +37,20 @@ namespace FlippinTenWebApi.SignalR.Hubs
 
             try
             {
-                if (!_gameLogic.JoinGame(gameIdentifier, userIdentifier))
+                var game = _gameLogic.JoinGame(gameIdentifier, userIdentifier);
+                if (game == null)
+                {
                     return false;
+                }
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, gameIdentifier);
 
-                await Clients
-                    .GroupExcept(gameIdentifier, Context.ConnectionId)
-                    .SendAsync("PlayerJoined", userIdentifier);
+                if (game.Players.TrueForAll(p => p.IsConnected))
+                {
+                    await Clients
+                        .Group(gameIdentifier)
+                        .SendAsync("GameStarted", userIdentifier);
+                }
             }
             catch (Exception e)
             {
@@ -56,12 +62,9 @@ namespace FlippinTenWebApi.SignalR.Hubs
             return true;
         }
 
-        public async Task<bool> PlayTurn(CardGame game)
+        public async Task<bool> PlayTurn(string gameIdentifier)
         {
-            if (!_gameLogic.UpdateGame(game))
-                return false;
-
-            await Clients.GroupExcept(game.Identifier, Context.ConnectionId).SendAsync("TurnedPlayed", game);
+            await Clients.GroupExcept(gameIdentifier, Context.ConnectionId).SendAsync("TurnedPlayed", gameIdentifier);
 
             return true;
         }

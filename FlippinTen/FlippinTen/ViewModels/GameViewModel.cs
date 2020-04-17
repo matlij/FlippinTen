@@ -48,10 +48,11 @@ namespace FlippinTen.ViewModels
             set { SetProperty(ref _playerTurnStatus, value); }
         }
 
+        private int _cardOnTableCount;
         public int CardOnTableCount
         {
-            get { return _onlineGameService.Game.CardsOnTable.Count; }
-            //set { SetProperty(ref _cardOnTableCount, value); }
+            get { return _cardOnTableCount; }
+            set { SetProperty(ref _cardOnTableCount, value); }
         }
 
         public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
@@ -65,24 +66,11 @@ namespace FlippinTen.ViewModels
             _onlineGameService = onlineGameService;
             _onlineGameService.OnPlayerJoined += OnPlayerJoined;
             _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
+
+            ItemTappedCommand = new Command((data) => OnCardOnHandTapped(data));
         }
 
-        public Command ItemTappedCommand
-        {
-            get
-            {
-                return new Command((data) => OnCardOnHandTapped(data));
-            }
-        }
-
-
-        private async void OnCardOnHandTapped(object data)
-        {
-            if (!(data is CardCollection cardCollection))
-                return;
-
-            await PlayCard(cardCollection);
-        }
+        public Command ItemTappedCommand { get; }
 
         public async Task<bool> PlayCard(CardCollection card)
         {
@@ -177,11 +165,21 @@ namespace FlippinTen.ViewModels
             var player = _onlineGameService.Game.Player;
             foreach (var cardOnHand in player.CardsOnHand)
                 CardsOnHand.Add(cardOnHand);
+
+            CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
         }
 
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
         {
             OnPlayerConnected();
+        }
+
+        private async void OnCardOnHandTapped(object card)
+        {
+            if (!(card is CardCollection cardCollection))
+                return;
+
+            await PlayCard(cardCollection);
         }
 
         private void OnPlayerConnected()

@@ -60,10 +60,10 @@ namespace FlippinTen.Core.Translations
 
         public static CardCollection AsCardCollection(this dto.CardCollection card)
         {
-            return new CardCollection
-            {
-                Cards = card.Cards.Select(c => c.AsCard()).ToList()
-            };
+            var cards = card.Cards
+                .Select(c => c.AsCard())
+                .ToList();
+            return new CardCollection(cards);
         }
 
         public static dto.Player AsPlayerDto(this Player player, List<PlayerInformation> playerInformation)

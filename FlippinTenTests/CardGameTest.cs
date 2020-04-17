@@ -26,11 +26,10 @@ namespace FlippinTenTests
         {
             _dummyCard1 = new Card(3, CardType.Clubs);
             _dummyCard2 = new Card(4, CardType.Dimonds);
-
-            _dummyCardCollection1 = new CardCollection { Cards = new List<Card> { _dummyCard1 } };
-            _dummyCardCollection2 = new CardCollection { Cards = new List<Card> { _dummyCard2 } };
-            _dummyCardCollectionWithCardTwo = new CardCollection { Cards = new List<Card> { new Card(2, CardType.Clubs) } };
-            _dummyCardCollectionWithCardTen = new CardCollection { Cards = new List<Card> { new Card(10, CardType.Clubs) } };
+            _dummyCardCollection1 = new CardCollection(_dummyCard1);
+            _dummyCardCollection2 = new CardCollection(_dummyCard2);
+            _dummyCardCollectionWithCardTwo = new CardCollection(new Card(2, CardType.Clubs));
+            _dummyCardCollectionWithCardTen = new CardCollection(new Card(10, CardType.Clubs));
 
             _player = new Player("TestPlayer");
             _opponent = new Player("TestOpponent");

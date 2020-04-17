@@ -1,10 +1,7 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using FlippinTen.Core.Services;
-using Models;
 using Models.Constants;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -18,13 +15,6 @@ namespace FlippinTen.ViewModels
 
         public Command LoadGamesCommand { get; private set; }
         public ObservableCollection<CardGame> OnGoingGames { get; set; } = new ObservableCollection<CardGame>();
-
-        public MenuViewModel()
-        {
-            OnGoingGames.Add(new CardGame(null, "TestName", null, null, null, null));
-
-            Title = "Spelmeny";
-        }
 
         public MenuViewModel(ICardGameService cardGameService)
         {

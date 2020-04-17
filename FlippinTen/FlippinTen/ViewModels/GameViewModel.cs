@@ -1,10 +1,10 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
-using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace FlippinTen.ViewModels
 {
@@ -60,10 +60,28 @@ namespace FlippinTen.ViewModels
         {
             WaitingForPlayers = true;
 
-            Title = $"Spel: {_onlineGameService.Game.Name}";
+            var gameName = onlineGameService.Game.Name;
+            Title = $"Spel: {gameName}";
             _onlineGameService = onlineGameService;
             _onlineGameService.OnPlayerJoined += OnPlayerJoined;
             _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
+        }
+
+        public Command ItemTappedCommand
+        {
+            get
+            {
+                return new Command((data) => OnCardOnHandTapped(data));
+            }
+        }
+
+
+        private async void OnCardOnHandTapped(object data)
+        {
+            if (!(data is CardCollection cardCollection))
+                return;
+
+            await PlayCard(cardCollection);
         }
 
         public async Task<bool> PlayCard(CardCollection card)

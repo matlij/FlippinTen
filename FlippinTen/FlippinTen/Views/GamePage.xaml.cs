@@ -1,15 +1,6 @@
-﻿using FlippinTen.Core;
-using FlippinTen.Core.Entities;
-using FlippinTen.Core.Interfaces;
-using FlippinTen.Core.Services;
-using FlippinTen.Core.Utilities;
+﻿using FlippinTen.Core.Entities;
 using FlippinTen.ViewModels;
-using Microsoft.AspNetCore.SignalR.Client;
-using Models;
-using Models.Constants;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
              mc:Ignorable="d"
              x:Class="FlippinTen.Views.GamePage"
              xmlns:Helpers="clr-namespace:FlippinTen.Helpers"
@@ -12,66 +13,45 @@
         <StackLayout Margin="20,20,20,20">
             <StackLayout>
                 <Label Text="Väntar på andra spelare..."
-                       IsVisible="{Binding WaitingForPlayers}"
-                       d:IsVisible="False"/>
+                       FontSize="Large"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding WaitingForPlayers}"/>
                 <ActivityIndicator IsRunning="{Binding WaitingForPlayers}"
                                    IsVisible="{Binding WaitingForPlayers}"
-                                   d:IsVisible="False"
                                    HeightRequest="40"
                                    VerticalOptions="CenterAndExpand"
                                    HorizontalOptions="CenterAndExpand"/>
 
             </StackLayout>
 
-            <StackLayout IsVisible="{Binding WaitingForPlayers, Converter={Helpers:InverseBoolConverter}}">
+            <StackLayout Spacing="15" IsVisible="{Binding WaitingForPlayers, Converter={Helpers:InverseBoolConverter}}">
+
+                <Label Text="{Binding CardOnTableCount, StringFormat='Kort på bord ({0})'}"
+                       HorizontalTextAlignment="Center"
+                       FontSize="Large"/>
+                <Image HeightRequest="150"
+                       Source="{Binding TopCardOnTable.ImageUrl}"/>
 
                 <Label Text="Kort på hand"
                        HorizontalTextAlignment="Center" 
                        FontSize="Large"/>
-                <ListView ItemsSource="{Binding CardsOnHand}"
-                              ItemTapped="OnCardOnHandTapped">
-                    <d:ListView.ItemsSource>
-                        <x:Array Type="{x:Type x:String}">
-                            <x:String>Item One</x:String>
-                            <x:String>Item Two</x:String>
-                            <x:String>Item Three</x:String>
-                        </x:Array>
-                    </d:ListView.ItemsSource>
-
-                    <ListView.ItemTemplate>
+                <flv:FlowListView FlowColumnCount="4"
+                                  SeparatorVisibility="Default"   
+                                  HasUnevenRows="True"  
+                                  FlowItemTappedCommand="{Binding ItemTappedCommand}"
+                                  FlowItemsSource="{Binding CardsOnHand}">
+                    <!--FlowItemTappedCommand="{Binding ItemTappedCommand}"-->
+                    <flv:FlowListView.FlowColumnTemplate>
                         <DataTemplate>
-                            <ViewCell>
-                                <Grid Padding="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Image Grid.Column="0" 
-                                           HeightRequest="60"
-                                           WidthRequest="60"
-                                           d:Source="acespades.png"
-                                           Source="{Binding ImageUrl}"/>
-                                    <Label Grid.Column="1"
-                                           VerticalOptions="Center"
-                                           Text="{Binding CardNames}"
-                                           d:Text="{Binding .}"/>
-                                </Grid>
-                            </ViewCell>
+                            <Image HeightRequest="90"
+                                       Source="{Binding ImageUrl}"/>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </flv:FlowListView.FlowColumnTemplate>
+                </flv:FlowListView>
 
-                <Label Text="{Binding TopCardOnTable.CardName, StringFormat='Kort på bord: {0}'}"
-                       d:Text="Kort på bord: Ace"
-                       HorizontalTextAlignment="Center"/>
-                <Image d:Source="acespades.png"
-                       HeightRequest="130"
-                       Source="{Binding TopCardOnTable.ImageUrl}"/>
-
-                <Grid Padding="0,0,0,30" HorizontalOptions="Center">
+                <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -80,49 +60,29 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <!--<Label Grid.Row="0"
-                           Text="Kort på bord: "/>
-                    <Label Grid.Row="0"
-                           Grid.Column="1" 
-                           FontAttributes="Bold"
-                           Text="{Binding TopCardOnTable.CardName}"
-                           d:Text="Hjärter 9"/>-->
+                    <Label Grid.Row="0" 
+                        Text="Senaste drag: "/>
+                    <Label  Grid.Row="0"
+                            Grid.Column="1" 
+                            FontAttributes="Bold"
+                            Text="{Binding GameStatus}"/>
                     <Label Grid.Row="1" 
-                        Text="Totalt antal på bord: "/>
+                        Text="Spelares tur: "/>
                     <Label  Grid.Row="1"
                             Grid.Column="1" 
                             FontAttributes="Bold"
-                            Text="{Binding CardOnTableCount}"
-                            d:Text="5"/>
-
-                    <Label Grid.Row="2" 
-                        Text="Senaste drag: "/>
-                    <Label  Grid.Row="2"
-                            Grid.Column="1" 
-                            FontAttributes="Bold"
-                            Text="{Binding GameStatus}"
-                            d:Text="Du la hjärter 5!"/>
-                    <Label Grid.Row="3" 
-                        Text="Spelares tur: "/>
-                    <Label  Grid.Row="3"
-                            Grid.Column="1" 
-                            FontAttributes="Bold"
-                            Text="{Binding PlayerTurnStatus}"
-                            d:Text="Din tur!"/>
-                    <Button Grid.Row="4"
+                            Text="{Binding PlayerTurnStatus}"/>
+                    <Button Grid.Row="2"
                         Text="Plocka upp kort"
                         Style="{StaticResource buttonStyle}"
                         Clicked="OnPickUpCardClicked"/>
-                    <Button Grid.Row="4"
+                    <Button Grid.Row="2"
                             Grid.Column="1"
                             Text="Chanskort"
                             Style="{StaticResource buttonStyle}"
                             Clicked="OnChanceCardClicked"/>
-
                 </Grid>
-
             </StackLayout>
-
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

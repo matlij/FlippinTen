@@ -24,20 +24,12 @@
                   IsPullToRefreshEnabled="True"
                   IsRefreshing="{Binding IsBusy, Mode=OneWay}"
                   RefreshCommand="{Binding LoadGamesCommand}">
-            <d:ListView.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>Item One</x:String>
-                    <x:String>Item Two</x:String>
-                    <x:String>Item Three</x:String>
-                </x:Array>
-            </d:ListView.ItemsSource>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
                         <Label VerticalOptions="Center"
                                FontSize="Medium" 
-                               Text="{Binding Name, StringFormat='Spelnamn: {0}'}"
-                               d:Text="{Binding ., StringFormat='Spelnamn: {0}'}"/>
+                               Text="{Binding Name, StringFormat='Spelnamn: {0}'}"/>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>

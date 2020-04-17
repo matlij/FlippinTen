@@ -52,8 +52,7 @@ namespace FlippinTen.Core.Entities
                 }
                 else
                 {
-                    var newCardCollection = new CardCollection();
-                    newCardCollection.Cards.Add(card);
+                    var newCardCollection = new CardCollection(card);
                     CardsOnHand.Add(newCardCollection);
 
                     newCardAdded = true;

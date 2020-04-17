@@ -18,8 +18,7 @@ namespace FlippinTen.Core.Entities
 
             SetCardID(cardType, number);
 
-            //ImageUrl = $"{CardName}.jpg";
-            ImageUrl = "hearts1.png";
+            ImageUrl = $"spades{number}.png";
         }
 
         private void SetCardID(CardType cardType, int number)

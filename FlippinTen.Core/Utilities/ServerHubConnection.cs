@@ -48,14 +48,15 @@ namespace FlippinTen.Core.Utilities
             {
                 await Policy.Handle<Exception>(e =>
                 {
-                    Type type = e.GetType();
                     Debug.WriteLine("Connection to hub failed. " + e.Message);
                     return true;
                 })
-                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .WaitAndRetryAsync(5, retryAttempt =>
+                {
+                    Console.WriteLine($"Failed to connect to Hub. Trying again - Attempt '{retryAttempt}'");
+                    return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+                })
                 .ExecuteAsync(async () => await _connection.StartAsync());
-
-                //await _connection.StartAsync();
 
                 return true;
             }

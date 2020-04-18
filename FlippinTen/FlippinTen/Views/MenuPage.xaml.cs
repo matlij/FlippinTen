@@ -21,24 +21,13 @@ namespace FlippinTen.Views
         {
             InitializeComponent();
 
-            if (DesignMode.IsDesignModeEnabled)
-            {
-                // Previewer only code  
-                BindingContext = _viewModel = new MenuViewModel();
-            }
-            else
-            {
-                BindingContext = _viewModel = new MenuViewModel(AppContainer.Resolve<ICardGameService>());
-            }
+            BindingContext = _viewModel = new MenuViewModel(AppContainer.Resolve<ICardGameService>());
         }
 
         protected override void OnAppearing()
         {
-            if (!DesignMode.IsDesignModeEnabled)
-            {
-                if (_viewModel.OnGoingGames.Count == 0)
-                    _viewModel.LoadGamesCommand.Execute(null);
-            }
+            if (_viewModel.OnGoingGames.Count == 0)
+                _viewModel.LoadGamesCommand.Execute(null);
 
             base.OnAppearing();
         }

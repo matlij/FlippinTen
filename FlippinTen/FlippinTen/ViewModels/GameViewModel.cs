@@ -57,6 +57,8 @@ namespace FlippinTen.ViewModels
 
         public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
 
+        public Command ItemTappedCommand { get; }
+
         public GameViewModel(OnlineGameService onlineGameService)
         {
             WaitingForPlayers = true;
@@ -70,15 +72,13 @@ namespace FlippinTen.ViewModels
             ItemTappedCommand = new Command((data) => OnCardOnHandTapped(data));
         }
 
-        public Command ItemTappedCommand { get; }
-
         public async Task<bool> PlayCard(CardCollection card)
         {
             var result = await _onlineGameService.Play((c) => c.PlayCard(card.CardNr));
 
             if (result)
             {
-                UpdateCardCollections();
+                UpdateGameBoard();
 
                 GameStatus = $"Du la {string.Join(", ", card.Cards.Select(c => c.CardName))}";
             }
@@ -86,8 +86,6 @@ namespace FlippinTen.ViewModels
             {
                 GameStatus = "Ogiltigt drag :/";
             }
-
-            UpdatePlayerTurnStatus();
 
             return result;
         }
@@ -109,8 +107,7 @@ namespace FlippinTen.ViewModels
                     break;
             }
 
-            UpdatePlayerTurnStatus();
-            UpdateCardCollections();
+            UpdateGameBoard();
         }
 
         public async void PickUpCards()
@@ -128,8 +125,7 @@ namespace FlippinTen.ViewModels
             }
 
             GameStatus = "Du plockade upp kort från bord";
-            UpdatePlayerTurnStatus();
-            UpdateCardCollections();
+            UpdateGameBoard();
         }
 
         public async Task<bool> ConnectToGame()
@@ -146,16 +142,11 @@ namespace FlippinTen.ViewModels
             }
 
             OnPlayerConnected();
-            UpdatePlayerTurnStatus();
 
             return Connected;
         }
 
-        private void UpdatePlayerTurnStatus()
-        {
-        }
-
-        private void UpdateCardCollections()
+        private void UpdateGameBoard()
         {
             TopCardOnTable = _onlineGameService.Game.CardsOnTable.Count > 0
                 ? _onlineGameService.Game.CardsOnTable.Peek()
@@ -167,6 +158,10 @@ namespace FlippinTen.ViewModels
                 CardsOnHand.Add(cardOnHand);
 
             CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
+
+            PlayerTurnStatus = _onlineGameService.Game.IsPlayersTurn()
+                ? "Din tur!"
+                : "Väntar på motståndare...";
         }
 
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
@@ -189,14 +184,13 @@ namespace FlippinTen.ViewModels
 
             if (allPlayersOnline)
             {
-                UpdateCardCollections();
+                UpdateGameBoard();
             }
         }
 
         private void OnTurnedPlayed(object sender, CardPlayedEventArgs e)
         {
-            UpdatePlayerTurnStatus();
-            UpdateCardCollections();
+            UpdateGameBoard();
         }
     }
 }

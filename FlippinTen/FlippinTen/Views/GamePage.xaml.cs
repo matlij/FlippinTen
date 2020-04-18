@@ -36,22 +36,29 @@ namespace FlippinTen.Views
             base.OnAppearing();
         }
 
-        //private async void OnCardOnHandTapped(object sender, ItemTappedEventArgs e)
-        //{
-        //    if (!(e.Item is CardCollection cardCollection))
-        //        return;
-
-        //    await _viewModel.PlayCard(cardCollection);
-        //}
-
-        private void OnChanceCardClicked(object sender, EventArgs e)
+        private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
-            _viewModel.PlayChanceCard();
-        }
+            const string PickUp = "Plocka upp";
+            const string ChanceCard = "Chansa";
+            const string Cancel = "Avbryt";
 
-        private void OnPickUpCardClicked(object sender, EventArgs e)
-        {
-            //_viewModel.PlayChanceCard();
+            var action = await DisplayActionSheet("Vilket drag vill du göra?", Cancel, null, ChanceCard, PickUp);
+            if (action == Cancel || string.IsNullOrEmpty(action))
+            {
+                return;
+            }
+            else if (action == ChanceCard)
+            {
+                _viewModel.PlayChanceCard();
+            }
+            else if (action == PickUp)
+            {
+                _viewModel.PickUpCards();
+            }
+            else
+            {
+                await DisplayAlert($"Fel: {action}", "Nånting gick fel :(", "Stäng");
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Models;
+using FlippinTen.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,6 +54,20 @@ namespace FlippinTen.ViewModels
         {
             get { return _cardOnTableCount; }
             set { SetProperty(ref _cardOnTableCount, value); }
+        }
+
+        private int _cardDeckCount;
+        public int CardDeckCount
+        {
+            get { return _cardDeckCount; }
+            set { SetProperty(ref _cardDeckCount, value); }
+        }
+
+        private string _cardBack;
+        public string CardBack
+        {
+            get { return _cardBack; }
+            set { SetProperty(ref _cardBack, value); }
         }
 
         public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
@@ -158,10 +173,15 @@ namespace FlippinTen.ViewModels
                 CardsOnHand.Add(cardOnHand);
 
             CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
+            CardDeckCount = _onlineGameService.Game.DeckOfCards.Count;
 
             PlayerTurnStatus = _onlineGameService.Game.IsPlayersTurn()
                 ? "Din tur!"
                 : "Väntar på motståndare...";
+
+            CardBack = _onlineGameService.Game.CardsOnTable.Count > 1
+                ? ImageConstants.CardBackMultiple
+                : ImageConstants.CardBack;
         }
 
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)

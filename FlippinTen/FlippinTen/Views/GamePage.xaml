@@ -28,11 +28,28 @@
             <StackLayout Spacing="15" 
                          IsVisible="{Binding WaitingForPlayers, Converter={Helpers:InverseBoolConverter}}">
 
-                <Label Text="{Binding CardOnTableCount, StringFormat='Kort på bord ({0})'}"
-                       HorizontalTextAlignment="Center"
-                       FontSize="Medium"/>
-                <Image HeightRequest="150"
-                       Source="{Binding TopCardOnTable.ImageUrl}"/>
+                <Grid Padding="0,0,0,10" HorizontalOptions="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Text="{Binding CardOnTableCount, StringFormat='Kort på bord: {0} st'}"
+                           HorizontalTextAlignment="Center"/>
+                    <Image Grid.Row="1"
+                           HeightRequest="150"
+                           Source="{Binding TopCardOnTable.ImageUrl}"/>
+                    <Label Grid.Column="1"
+                           Text="{Binding CardOnTableCount, StringFormat='Kort kvar: {0} st'}"
+                           HorizontalTextAlignment="Center"/>
+                    <Image Grid.Row="1"
+                           Grid.Column="1"
+                           HeightRequest="160"
+                           Source="CardBackMultiple.png"/>
+                </Grid>
 
                 <Grid Padding="10,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>

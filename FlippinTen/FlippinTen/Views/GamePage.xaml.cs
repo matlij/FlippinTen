@@ -36,13 +36,13 @@ namespace FlippinTen.Views
             base.OnAppearing();
         }
 
-        private async void OnCardOnHandTapped(object sender, ItemTappedEventArgs e)
-        {
-            if (!(e.Item is CardCollection cardCollection))
-                return;
+        //private async void OnCardOnHandTapped(object sender, ItemTappedEventArgs e)
+        //{
+        //    if (!(e.Item is CardCollection cardCollection))
+        //        return;
 
-            await _viewModel.PlayCard(cardCollection);
-        }
+        //    await _viewModel.PlayCard(cardCollection);
+        //}
 
         private void OnChanceCardClicked(object sender, EventArgs e)
         {

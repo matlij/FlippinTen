@@ -6,7 +6,7 @@
              mc:Ignorable="d"
              x:Class="FlippinTen.App">
     <Application.Resources>
-        <!-- Colors -->
+        <!-- Colors --> 
         <Color x:Key="AppBackgroundColor">#AAD7A8</Color> <!--#55AA55-->
         <Color x:Key="iOSNavigationBarColor">WhiteSmoke</Color>
         <Color x:Key="AndroidNavigationBarColor">#2196F3</Color>
@@ -22,6 +22,15 @@
                     Value="{OnPlatform iOS={StaticResource iOSNavigationBarTextColor},
                                        Android={StaticResource AndroidNavigationBarTextColor}}" />
         </Style>-->
+
+        <ResourceDictionary>
+            <!-- Styles -->
+            <Style TargetType="NavigationPage">
+                <Setter Property="BarBackgroundColor" Value="#78C6B5"/>
+                <Setter Property="BarTextColor" Value="White"/>
+            </Style>
+            <!-- Styles -->
+        </ResourceDictionary>
 
         <Style x:Key="buttonStyle" TargetType="Button">
             <Setter Property="HorizontalOptions" Value="Center" />

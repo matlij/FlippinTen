@@ -79,7 +79,7 @@ namespace FlippinTen.ViewModels
             WaitingForPlayers = true;
 
             var gameName = onlineGameService.Game.Name;
-            Title = $"Spel: {gameName}";
+            Title = $"Vändtia - {gameName}";
             _onlineGameService = onlineGameService;
             _onlineGameService.OnPlayerJoined += OnPlayerJoined;
             _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;

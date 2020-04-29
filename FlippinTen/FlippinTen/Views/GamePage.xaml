@@ -65,8 +65,10 @@
                                   FlowItemsSource="{Binding CardsOnHand}">
                     <flv:FlowListView.FlowColumnTemplate>
                         <DataTemplate>
-                            <Image HeightRequest="90"
-                                   Source="{Binding ImageUrl}"/>
+                            <Frame BackgroundColor="{Binding BackroundColor}">
+                                <Image HeightRequest="90"
+                                       Source="{Binding ImageUrl}"/>
+                            </Frame>
                         </DataTemplate>
                     </flv:FlowListView.FlowColumnTemplate>
                 </flv:FlowListView>

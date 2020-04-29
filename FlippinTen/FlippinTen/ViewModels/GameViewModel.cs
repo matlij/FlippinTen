@@ -2,6 +2,7 @@
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Models;
 using FlippinTen.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,10 +10,26 @@ using Xamarin.Forms;
 
 namespace FlippinTen.ViewModels
 {
+    public class CardView
+    {
+        public int ID { get; set; }
+        public int Number { get; set; }
+        public string ImageUrl { get; set; }
+        public bool Selected { get; set; }
+        public string BackroundColor
+        {
+            get
+            {
+                return Selected
+                    ? "#00FF00"
+                    : "Transparent";
+            }
+        }
+    }
+
     public class GameViewModel : BaseViewModel
     {
         private readonly OnlineGameService _onlineGameService;
-        private const string _invalidMove = "Ogiltigt drag...";
 
         private bool _connected;
         public bool Connected
@@ -70,7 +87,7 @@ namespace FlippinTen.ViewModels
             set { SetProperty(ref _cardBack, value); }
         }
 
-        public ObservableCollection<CardCollection> CardsOnHand { get; set; } = new ObservableCollection<CardCollection>();
+        public ObservableCollection<CardView> CardsOnHand { get; set; } = new ObservableCollection<CardView>();
 
         public Command ItemTappedCommand { get; }
 
@@ -87,60 +104,14 @@ namespace FlippinTen.ViewModels
             ItemTappedCommand = new Command((data) => OnCardOnHandTapped(data));
         }
 
-        public async Task<bool> PlayCard(CardCollection card)
-        {
-            var result = await _onlineGameService.Play((c) => c.PlayCard(card.CardNr));
-
-            if (result)
-            {
-                UpdateGameBoard();
-
-                GameStatus = $"Du la {string.Join(", ", card.Cards.Select(c => c.CardName))}";
-            }
-            else
-            {
-                GameStatus = "Ogiltigt drag :/";
-            }
-
-            return result;
-        }
-
         public async void PlayChanceCard()
         {
-            IsBusy = true;
-
-            var result = await _onlineGameService.Play(g => g.PlayChanceCard());
-
-            IsBusy = false;
-
-            switch (result)
-            {
-                case GamePlayResult.ChanceFailed: GameStatus = "Chansning misslyckades :("; break;
-                case GamePlayResult.InvalidPlay: GameStatus = _invalidMove; break;
-                case GamePlayResult.ChanceSucceded: GameStatus = "Chansning lyckades!"; break;
-                default:
-                    break;
-            }
-
-            UpdateGameBoard();
+            await Play(g => g.PlayChanceCard());
         }
 
         public async void PickUpCards()
         {
-            IsBusy = true;
-
-            var result = await _onlineGameService.Play(c => c.PickUpCards());
-
-            IsBusy = false;
-
-            if (!result)
-            {
-                GameStatus = _invalidMove;
-                return;
-            }
-
-            GameStatus = "Du plockade upp kort från bord";
-            UpdateGameBoard();
+            await Play(g => g.PickUpCards());
         }
 
         public async Task<bool> ConnectToGame()
@@ -161,6 +132,22 @@ namespace FlippinTen.ViewModels
             return Connected;
         }
 
+        private async Task Play(Func<CardGame, GamePlayResult> play)
+        {
+            IsBusy = true;
+
+            var result = await _onlineGameService.Play(play);
+
+            IsBusy = false;
+
+            GameStatus = result.ToString();
+
+            if (result == GamePlayResult.Succeded || result == GamePlayResult.Failed)
+            {
+                UpdateGameBoard();
+            }
+        }
+
         private void UpdateGameBoard()
         {
             TopCardOnTable = _onlineGameService.Game.CardsOnTable.Count > 0
@@ -169,8 +156,11 @@ namespace FlippinTen.ViewModels
 
             CardsOnHand.Clear();
             var player = _onlineGameService.Game.Player;
-            foreach (var cardOnHand in player.CardsOnHand)
-                CardsOnHand.Add(cardOnHand);
+            foreach (var card in player.CardsOnHand)
+            {
+                var cardView = card.AsCardView();
+                CardsOnHand.Add(cardView);
+            }
 
             CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
             CardDeckCount = _onlineGameService.Game.DeckOfCards.Count;
@@ -188,12 +178,12 @@ namespace FlippinTen.ViewModels
             OnPlayerConnected();
         }
 
-        private async void OnCardOnHandTapped(object card)
+        private async void OnCardOnHandTapped(object data)
         {
-            if (!(card is CardCollection cardCollection))
+            if (!(data is CardView card))
                 return;
 
-            await PlayCard(cardCollection);
+            await Play(g => g.PlayOrSelectCard(card.ID));
         }
 
         private void OnPlayerConnected()

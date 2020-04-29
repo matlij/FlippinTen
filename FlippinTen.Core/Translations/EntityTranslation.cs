@@ -29,7 +29,7 @@ namespace FlippinTen.Core.Translations
             };
 
             foreach (var item in playerDto.CardsOnHand)
-                player.CardsOnHand.Add(item.AsCardCollection());
+                player.CardsOnHand.Add(item.AsCard());
 
             foreach (var item in playerDto.CardsHidden)
                 player.CardsHidden.Add(item.AsCard());
@@ -55,15 +55,7 @@ namespace FlippinTen.Core.Translations
 
         public static CardType AsCardTypeDto(this dtoEnum.CardType cardType)
         {
-            return (CardType)Enum.Parse(typeof(CardType), cardType.ToString(), true);
-        }
-
-        public static CardCollection AsCardCollection(this dto.CardCollection card)
-        {
-            var cards = card.Cards
-                .Select(c => c.AsCard())
-                .ToList();
-            return new CardCollection(cards);
+            return CardType.FromValue((int)cardType);
         }
 
         public static dto.Player AsPlayerDto(this Player player, List<PlayerInformation> playerInformation)
@@ -77,7 +69,7 @@ namespace FlippinTen.Core.Translations
             return new dto.Player
             {
                 CardsHidden = player.CardsHidden.Select(c => c.AsCardDto()).ToList(),
-                CardsOnHand = player.CardsOnHand.Select(c => c.AsCardCollectionDto()).ToList(),
+                CardsOnHand = player.CardsOnHand.Select(c => c.AsCardDto()).ToList(),
                 CardsVisible = player.CardsVisible.Select(c => c.AsCardDto()).ToList(),
                 IsConnected = player.IsConnected,
                 IsPlayersTurn = playerInfo.IsPlayersTurn,
@@ -106,16 +98,7 @@ namespace FlippinTen.Core.Translations
 
         public static dtoEnum.CardType AsCardTypeDto(this CardType cardType)
         {
-            return (dtoEnum.CardType)Enum.Parse(typeof(dtoEnum.CardType), cardType.ToString(), true);
-        }
-
-        public static dto.CardCollection AsCardCollectionDto(this CardCollection card)
-        {
-            return new dto.CardCollection
-            {
-                ImageUrl = card.ImageUrl,
-                Cards = card.Cards.Select(c => c.AsCardDto()).ToList()
-            };
+                return (dtoEnum.CardType)Enum.Parse(typeof(dtoEnum.CardType), cardType.Name, true);
         }
     }
 }

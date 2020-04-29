@@ -61,9 +61,6 @@ namespace FlippinTen.ConsoleApp
 
         private async Task PlayGame()
         {
-            const string invalidMoveMessage = "Ogiltigt drag. Prova igen.";
-            const string okMoveMessage = "Bra drag!";
-
             var lastMoveStatus = string.Empty;
 
             do
@@ -76,48 +73,31 @@ namespace FlippinTen.ConsoleApp
                     _waitForOtherPlayerEvent.Reset();
 
                     var input = GetPlayerInput();
-                    var playSucceded = false;
+                    var gamePlayResult = GamePlayResult.Unknown;
                     try
                     {
                         if (input.ToUpper() == "P")
                         {
-                            playSucceded = await _onlineService.Play(g => g.PickUpCards());
-                            if (!playSucceded)
-                            {
-                                lastMoveStatus = invalidMoveMessage;
-                            }
+                            gamePlayResult = await _onlineService.Play(g => g.PickUpCards());
                         }
 
                         else if (input.ToUpper() == "C")
                         {
-                            var gamePlayResult = await _onlineService.Play(g => g.PlayChanceCard());
-
-                            lastMoveStatus = gamePlayResult == GamePlayResult.InvalidPlay ?
-                                invalidMoveMessage :
-                                gamePlayResult == GamePlayResult.ChanceSucceded ?
-                                    "Chansningen lyckades! :D" :
-                                    "Chansningen misslyckades... :(";
+                            gamePlayResult = await _onlineService.Play(g => g.PlayChanceCard());
                         }
-
                         else
                         {
                             var inputIndex = int.Parse(input) - 1;
                             var cardToPlay = _onlineService.Game.Player.CardsOnHand[inputIndex];
-                            playSucceded = await _onlineService.Play(g => g.PlayCard(cardToPlay.CardNr));
-                            lastMoveStatus = playSucceded ?
-                                okMoveMessage :
-                                invalidMoveMessage;
+                            gamePlayResult = await _onlineService.Play(g => g.PlayOrSelectCard(cardToPlay.ID));
                         }
                     }
-                    catch (ArgumentException)
+                    catch (ArgumentException e)
                     {
-                        lastMoveStatus = invalidMoveMessage;
+                        Console.WriteLine(e);
                     }
 
-                    if (playSucceded)
-                    {
-                        lastMoveStatus = "Bra drag!";
-                    }
+                    lastMoveStatus = gamePlayResult.ToString();
                 }
                 else
                 {
@@ -154,7 +134,7 @@ namespace FlippinTen.ConsoleApp
             Console.WriteLine();
 
             var topCardOnTable = _onlineService.Game.CardsOnTable.TryPeek(out var card) ?
-                card.CardName :
+                card.ToString() :
                 "'table empty'";
             Console.WriteLine($"Kort på bord: { topCardOnTable} (totalt {_onlineService.Game.CardsOnTable.Count})");
             Console.WriteLine();
@@ -163,7 +143,7 @@ namespace FlippinTen.ConsoleApp
             var cardsOnHand = _onlineService.Game.Player.CardsOnHand;
             for (var i = 0; i < cardsOnHand.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {string.Join(", ", cardsOnHand[i].Cards.Select(c => c.CardName))}");
+                Console.WriteLine($"{i + 1}. {cardsOnHand[i].ToString()}");
             }
 
             Console.WriteLine();

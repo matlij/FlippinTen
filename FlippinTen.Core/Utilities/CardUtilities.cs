@@ -17,7 +17,7 @@ namespace FlippinTen.Utilities
 
             var cardsSorted = new List<Card>();
 
-            foreach (var cardType in Enum.GetValues(typeof(CardType)).Cast<CardType>())
+            foreach (var cardType in CardType.GetList())
             {
                 for (var i = 1; i < cardsPerColor + 1; i++)
                 {

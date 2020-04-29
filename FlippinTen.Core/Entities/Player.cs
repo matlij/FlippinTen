@@ -14,59 +14,28 @@ namespace FlippinTen.Core.Entities
         }
         public string UserIdentifier { get; }
         public bool IsConnected { get; set; }
-        public IList<CardCollection> CardsOnHand { get; private set; } = new List<CardCollection>();
+        public IList<Card> CardsOnHand { get; private set; } = new List<Card>();
         public IList<Card> CardsHidden { get; private set; } = new List<Card>();
         public IList<Card> CardsVisible { get; private set; } = new List<Card>();
 
-        public void UpdatePlayer(IList<CardCollection> cardsOnHand, IList<Card> cardsHidden, IList<Card> cardsVisible)
+        public void UpdatePlayer(IList<Card> cardsOnHand, IList<Card> cardsHidden, IList<Card> cardsVisible)
         {
             CardsOnHand = cardsOnHand;
             CardsHidden = cardsHidden;
             CardsVisible = cardsVisible;
         }
 
-        public bool PlayCardOnHand(int cardNr, out CardCollection cardCollection)
-        {
-            cardCollection = CardsOnHand.FirstOrDefault(c => c.CardNr == cardNr);
-            if (cardCollection == null)
-            {
-                return false;
-            }
-
-            CardsOnHand.Remove(cardCollection);
-
-            return true;
-        }
-
         public void AddCardsToHand(IEnumerable<Card> cards)
         {
-            var newCardAdded = false;
-
             foreach (var card in cards)
             {
-                var cardsCollection = CardsOnHand.FirstOrDefault(c => c.CardNr == card.Number);
-
-                if (cardsCollection != null)
-                {
-                    cardsCollection.Cards.Add(card);
-                }
-                else
-                {
-                    var newCardCollection = new CardCollection(card);
-                    CardsOnHand.Add(newCardCollection);
-
-                    newCardAdded = true;
-                }
+                CardsOnHand.Add(card);
             }
 
-            if (newCardAdded)
-            {
-                var cardsSorted = CardsOnHand
-                    .OrderBy(c => c.CardNr)
-                    .ToList();
-
-                CardsOnHand = cardsSorted;
-            }
+            var cardsSorted = CardsOnHand
+                .OrderBy(c => c.Number)
+                .ToList();
+            CardsOnHand = cardsSorted;
         }
     }
 }

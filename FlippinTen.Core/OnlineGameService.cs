@@ -28,30 +28,20 @@ namespace FlippinTen.Core
             _hubConnection.Subscribe<string>("TurnedPlayed", TurnedPlayed);
         }
 
-        public async Task<bool> Play(Func<CardGame, bool> play)
-        {
-            if (!play(Game))
-                return false;
-
-            var result = await UpdateGame(Game);
-            if (!result)
-            {
-                Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
-            }
-
-            return result;
-        }
-
         public async Task<GamePlayResult> Play(Func<CardGame, GamePlayResult> play)
         {
             var result = play(Game);
-            if (result == GamePlayResult.InvalidPlay)
+            Debug.WriteLine($"Play result: {result}");
+
+            if (result != GamePlayResult.Succeded)
                 return result;
 
             if (!await UpdateGame(Game))
             {
+                Debug.WriteLine($"Update game failed.");
+
                 Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
-                result = GamePlayResult.InvalidPlay;
+                result = GamePlayResult.Invalid;
             }
 
             return result;
@@ -107,26 +97,19 @@ namespace FlippinTen.Core
 
         private async void TurnedPlayed(string gameIdentifier)
         {
-            try
-            {
-                Console.WriteLine("Game updated. Previous top card on table: " + Game.CardsOnTable.Peek().CardName);
-            }
-            catch (Exception)
-            {
-
-            }
-
-            var game = await _gameService.Get(gameIdentifier, Game.Player.UserIdentifier);
-
-            Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation);
+            Debug.WriteLine($"Turned played {gameIdentifier}");
 
             try
             {
-                Console.WriteLine("Game updated. Top card on table: " + Game.CardsOnTable.Peek().CardName);
+                var game = await _gameService.Get(gameIdentifier, Game.Player.UserIdentifier);
+                Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.WriteLine($"Get or update game failed: " + e);
+                throw;
             }
+
 
             OnTurnedPlayed?.Invoke(this, null);
         }
@@ -140,14 +123,23 @@ namespace FlippinTen.Core
 
         private async Task<bool> UpdateGame(CardGame game)
         {
-            var result = await _gameService.Update(game);
-
-            if (!result)
+            try
             {
+                var result = await _gameService.Update(game);
+
+                if (!result)
+                {
+                    return false;
+                }
+
+                return await _hubConnection.Invoke<bool>("PlayTurn", new object[] { game.Identifier });
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Update game {game.Identifier} failed: " + e);
+
                 return false;
             }
-
-            return await _hubConnection.Invoke<bool>("PlayTurn", new object[] { game.Identifier });
         }
     }
 }

@@ -13,9 +13,9 @@ namespace FlippinTen.Utilities
     {
         private readonly ICardUtilities _cardUtilities;
 
-        public CardGameUtilities(ICardUtilities gameCardUtilities)
+        public CardGameUtilities(ICardUtilities cardUtilities)
         {
-            _cardUtilities = gameCardUtilities;
+            _cardUtilities = cardUtilities;
         }
 
         public dto.CardGame CreateGameDto(string gameName, List<string> users)

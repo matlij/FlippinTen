@@ -1,14 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace FlippinTen.Core.Entities.Enums
 {
-    public enum CardType
+    public class CardType
     {
-        Hearts = 1,
-        Dimonds = 2,
-        Clubs = 3,
-        Spades = 4
+        public static CardType Hearts { get; } = new CardType(1, "Hearts");
+        public static CardType Dimonds { get; } = new CardType(2, "Dimonds");
+        public static CardType Clubs { get; } = new CardType(3, "Clubs");
+        public static CardType Spades { get; } = new CardType(4, "Spades");
+
+        public string Name { get; private set; }
+        public int Value { get; private set; }
+
+        private CardType(int val, string name)
+        {
+            Value = val;
+            Name = name;
+        }
+
+        public static List<CardType> GetList()
+        {
+            var cardTypes = new CardType[] { Hearts, Dimonds, Clubs, Spades };
+            return new List<CardType>(cardTypes);
+        }
+
+        public static CardType FromValue(int value)
+        {
+            try
+            {
+                return GetList().Single(c => c.Value == value);
+            }
+            catch (System.Exception e)
+            {
+
+                throw;
+            }
+        }
     }
 }

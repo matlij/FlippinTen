@@ -12,26 +12,34 @@ namespace FlippinTenTests
     [TestClass]
     public class EntityTranslationsTest
     {
-        //[TestMethod]
-        //public void EntityTranslation_CardGame_As_CardGameDto()
-        //{
-        //    var players = new List<Player>
-        //    {
-        //        new Player("TestPlayer1"),
-        //        new Player("TestPlayer2")
-        //    };
-        //    var deck = CreateCardStack();
-        //    var cardOnTable = CreateCardStack();
-        //    var playerInfo = players.Select(p => new PlayerInformation(p.UserIdentifier)).ToList();
-        //    var game = new CardGame("Id", "Name", deck, cardOnTable, players.First(), playerInfo);
+        [TestMethod]
+        public void EntityTranslation_CardGame_As_CardGameDto()
+        {
+            const string playerIdentifier = "TestPlayer1";
+            var players = new List<dto.Player>
+            {
+                new dto.Player { UserIdentifier = playerIdentifier },
+                new dto.Player { UserIdentifier = "TestOpponent" },
+            };
 
-        //    var gameDto = game.(playerInfo);
+            var gameDto = new dto.CardGame
+            {
+                Identifier = "Id",
+                CardsOnTable = CreateCardDtoStack(),
+                DeckOfCards = CreateCardDtoStack(),
+                Name = "TestGame",
+                Players = players
+            };
 
-        //    Assert.IsNotNull(gameDto);
-        //    Assert.AreEqual(game.Player.UserIdentifier, gameDto.CurrentPlayer);
-        //    AssertCards(gameDto.CardsOnTable, game.CardsOnTable);
-        //    AssertCards(gameDto.DeckOfCards, game.DeckOfCards);
-        //}
+            var game = gameDto.AsCardGame("TestPlayer1");
+
+            Assert.IsNotNull(gameDto);
+            Assert.AreEqual(gameDto.Players.First(p => p.UserIdentifier == playerIdentifier).UserIdentifier, game.Player.UserIdentifier);
+            Assert.AreEqual(gameDto.Identifier, game.Identifier);
+            Assert.AreEqual(gameDto.Name, game.Name);
+            AssertCards(gameDto.CardsOnTable, game.CardsOnTable);
+            AssertCards(gameDto.DeckOfCards, game.DeckOfCards);
+        }
 
         [TestMethod]
         public void EntityTranslation_CardGameDto_As_CardGame()
@@ -70,6 +78,18 @@ namespace FlippinTenTests
             var stackDto = stack.AsCardStackDto();
 
             AssertCards(stackDto, stack);
+        }
+
+        [TestMethod]
+        public void EntityTranslation_CardType_As_CardTypeDto()
+        {
+            foreach (var cardType in CardType.GetList())
+            {
+                var cardTypeDto = cardType.AsCardTypeDto();
+                Assert.IsNotNull(cardTypeDto);
+                Assert.AreEqual((int)cardTypeDto, cardType.Value);
+                Assert.AreEqual(cardTypeDto.ToString(), cardType.Name);
+            }
         }
 
         private static Stack<Card> CreateCardStack()

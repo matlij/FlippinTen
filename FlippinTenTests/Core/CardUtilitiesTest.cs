@@ -1,8 +1,6 @@
-﻿using FlippinTen.Utilities;
+﻿using FlippinTen.Core.Entities;
+using FlippinTen.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlippinTenTests
 {
@@ -10,6 +8,7 @@ namespace FlippinTenTests
     public class CardUtilitiesTest
     {
         private CardUtilities _sut;
+        private const int CardsCount = 52;
 
         [TestInitialize]
         public void Initialize()
@@ -18,12 +17,24 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
-        public void CardUtilities_GetDeckOfCards()
+        public void CardUtilities_GetDeckOfCards_ShouldBeCorrectCount()
         {
             var cards = _sut.GetDeckOfCards();
 
             Assert.IsNotNull(cards);
-            Assert.AreEqual(cards.Count, 52);
+            Assert.AreEqual(cards.Count, CardsCount);
+        }
+
+        [TestMethod]
+        public void CardUtilities_GetDeckOfCards_ShouldIncludeAllCards()
+        {
+            var cards = _sut.GetDeckOfCards();
+
+            for (var i = 1; i <= CardsCount; i++)
+            {
+                var card = new Card(i);
+                cards.Contains(card);
+            }
         }
     }
 }

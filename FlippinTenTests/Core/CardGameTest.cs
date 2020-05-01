@@ -1,6 +1,5 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
-using FlippinTen.Core.Models;
 using FlippinTen.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;

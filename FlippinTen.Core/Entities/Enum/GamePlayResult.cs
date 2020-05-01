@@ -1,4 +1,4 @@
-﻿namespace FlippinTen.Core.Models
+﻿namespace FlippinTen.Core.Entities.Enums
 {
     public enum GamePlayResult
     {

@@ -1,4 +1,4 @@
-﻿using FlippinTen.Core.Models;
+﻿using FlippinTen.Core.Entities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

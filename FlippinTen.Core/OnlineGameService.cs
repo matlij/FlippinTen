@@ -1,11 +1,10 @@
 ﻿using FlippinTen.Core.Entities;
+using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Interfaces;
-using FlippinTen.Core.Models;
 using FlippinTen.Core.Utilities;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace FlippinTen.Core
 {

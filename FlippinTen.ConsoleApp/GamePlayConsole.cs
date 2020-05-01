@@ -1,8 +1,7 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
-using FlippinTen.Core.Models;
+using FlippinTen.Core.Entities.Enums;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

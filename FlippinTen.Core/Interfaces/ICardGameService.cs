@@ -1,5 +1,4 @@
 ﻿using FlippinTen.Core.Entities;
-using FlippinTen.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

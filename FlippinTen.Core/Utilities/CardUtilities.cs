@@ -3,9 +3,6 @@ using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using dto = FlippinTen.Models.Entities;
-using dtoEnum = FlippinTen.Models.Enums;
 
 namespace FlippinTen.Utilities
 {
@@ -13,22 +10,20 @@ namespace FlippinTen.Utilities
     {
         public Stack<Card> GetDeckOfCards()
         {
-            const int cardsPerColor = 13;
+            const int cardsInDeck = 52;
 
             var cardsSorted = new List<Card>();
 
-            foreach (var cardType in CardType.GetList())
+            for (var i = 1; i <= cardsInDeck; i++)
             {
-                for (var i = 1; i < cardsPerColor + 1; i++)
-                {
-                    cardsSorted.Add(new Card(i, cardType));
-                }
+                var card = new Card(i);
+                cardsSorted.Add(card);
             }
 
             return Shuffle(cardsSorted);
         }
 
-        public Stack<Card> Shuffle(List<Card> cards)
+        private Stack<Card> Shuffle(List<Card> cards)
         {
             var cardsShuffled = new Stack<Card>();
             var rnd = new Random();

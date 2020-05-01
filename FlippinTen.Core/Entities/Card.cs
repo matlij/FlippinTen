@@ -12,7 +12,7 @@ namespace FlippinTen.Core.Entities
             var maxCardId = _cardsPerType * CardType.GetList().Count;
             if (cardId < 1 || cardId > maxCardId)
             {
-                throw new ArgumentException($"Card number must be between 1 - {maxCardId}");
+                throw new ArgumentException($"Card ID must be between 1 - {maxCardId}");
             }
 
             foreach (var cardType in CardType.GetList())
@@ -22,7 +22,7 @@ namespace FlippinTen.Core.Entities
                 if (cardId > cardTypeFirstId && cardId <= cardTypeLastId)
                 {
                     CardType = cardType;
-                    Number = cardId - cardTypeFirstId;
+                    Number = cardId + 1 - cardTypeFirstId;
                     break;
                 }
             }
@@ -30,16 +30,18 @@ namespace FlippinTen.Core.Entities
             ID = cardId;
             ImageUrl = $"spades{Number}.png";
         }
+
         public Card(int number, CardType cardType)
         {
-            if (number < 1 || number > _cardsPerType)
+            var maxNumber = _cardsPerType + 1;
+            if (number < 1 || number > maxNumber)
             {
-                throw new ArgumentException($"Card number must be between 1 - {_cardsPerType}");
+                throw new ArgumentException($"Card number must be between 1 - {maxNumber}");
             }
 
             Number = number;
             CardType = cardType;
-            ID = number + (cardType.Value - 1) * _cardsPerType;
+            ID = number + (cardType.Value - 1) * maxNumber;
             ImageUrl = $"spades{number}.png";
         }
 

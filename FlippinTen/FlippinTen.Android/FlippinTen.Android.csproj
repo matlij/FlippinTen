@@ -135,7 +135,7 @@
     <AndroidResource Include="Resources\drawable\spades9.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\spades1.png" />
+    <AndroidResource Include="Resources\drawable\spades14.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\spades2.png" />

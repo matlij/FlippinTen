@@ -13,12 +13,6 @@ namespace FlippinTenTests
     public class CardGameUtilitiesTests
     {
         private ICardGameUtilities _sut;
-        private CardGame _game;
-        private Player _player1;
-        private Player _player2;
-        private Card _dummyCard1;
-        private Card _dummyCard2;
-        private Card _dummyCard3;
 
         [TestInitialize]
         public void Initialize()

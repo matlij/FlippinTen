@@ -40,58 +40,56 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
+        public void SelectCard_NoOtherCardsSelected_ShouldSelect()
+        {
+            var cardHeartOne = new Card(1, CardType.Hearts);
+            _player.CardsOnHand.Add(cardHeartOne);
+
+            var result = _sut.SelectCard(cardHeartOne.ID);
+
+            Assert.AreEqual(GamePlayResult.CardSelected, result);
+            Assert.IsTrue(cardHeartOne.Selected);
+        }
+
+        [TestMethod]
         public void SelectCard_HasMoreCardsWithSameNumber_ShouldSelect()
         {
             var cardHeartOne = new Card(1, CardType.Hearts);
+            var cardSpadesOne = new Card(1, CardType.Spades) { Selected = true };
             _player.CardsOnHand.Add(cardHeartOne);
-            _player.CardsOnHand.Add(new Card(1, CardType.Spades));
-            _player.CardsOnHand.Add(new Card(1, CardType.Clubs));
-            _player.CardsOnHand.Add(new Card(1, CardType.Dimonds));
+            _player.CardsOnHand.Add(cardSpadesOne);
 
-            var result = _sut.PlayOrSelectCard(cardHeartOne.ID);
+            var result = _sut.SelectCard(cardHeartOne.ID);
 
             Assert.AreEqual(GamePlayResult.CardSelected, result);
+            Assert.IsTrue(cardHeartOne.Selected);
         }
 
         [TestMethod]
-        public void PlayOrSelectCard_HasMoreCardsWithSameNumber_ShouldSelect()
+        public void SelectCard_TriesTpSelectedCardWithDifferentNumber_ShouldReturnInvalid()
         {
             var cardHeartOne = new Card(1, CardType.Hearts);
+            var cardHeartsTwo = new Card(2, CardType.Hearts) { Selected = true };
             _player.CardsOnHand.Add(cardHeartOne);
-            _player.CardsOnHand.Add(new Card(1, CardType.Spades));
-            _player.CardsOnHand.Add(new Card(1, CardType.Clubs));
-            _player.CardsOnHand.Add(new Card(1, CardType.Dimonds));
+            _player.CardsOnHand.Add(cardHeartsTwo);
 
-            var result = _sut.PlayOrSelectCard(cardHeartOne.ID);
+            var result = _sut.SelectCard(cardHeartOne.ID);
 
-            Assert.AreEqual(GamePlayResult.CardSelected, result);
+            Assert.AreEqual(GamePlayResult.Invalid, result);
+            Assert.IsFalse(cardHeartOne.Selected);
         }
 
         [TestMethod]
-        public void PlayOrSelectCard_HasNoMoreCardsWithSameNumber_ShouldPlay()
+        public void SelectCard_CardSelectedTwice_ShouldUnSelect()
         {
             var cardHeartOne = new Card(1, CardType.Hearts);
             _player.CardsOnHand.Add(cardHeartOne);
-            _player.CardsOnHand.Add(new Card(2, CardType.Spades));
 
-            var result = _sut.PlayOrSelectCard(cardHeartOne.ID);
+            _sut.SelectCard(cardHeartOne.ID);
+            Assert.IsTrue(cardHeartOne.Selected);
 
-            Assert.AreEqual(GamePlayResult.Succeded, result);
-            Assert.AreEqual(cardHeartOne.ID, _sut.CardsOnTable.Peek().ID);
-        }
-
-        [TestMethod]
-        public void PlayOrSelectCard_CardSelectedTwice_ShouldPlay()
-        {
-            var cardHeartOne = new Card(1, CardType.Hearts);
-            _player.CardsOnHand.Add(cardHeartOne);
-            _player.CardsOnHand.Add(new Card(1, CardType.Spades));
-
-            _sut.PlayOrSelectCard(cardHeartOne.ID);
-            Assert.AreEqual(0, _sut.CardsOnTable.Count);
-
-            _sut.PlayOrSelectCard(cardHeartOne.ID);
-            Assert.AreEqual(1, _sut.CardsOnTable.Count);
+            _sut.SelectCard(cardHeartOne.ID);
+            Assert.IsFalse(cardHeartOne.Selected);
         }
 
         [TestMethod]
@@ -120,7 +118,8 @@ namespace FlippinTenTests
             _player.CardsOnHand.Add(_dummyCard1);
 
             //Act
-            _sut.PlayOrSelectCard(_dummyCard1.ID);
+            _sut.SelectCard(_dummyCard1.ID);
+            _sut.PlaySelectedCards();
 
             //Assert
             var currentPlayer = _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
@@ -135,7 +134,8 @@ namespace FlippinTenTests
             _sut.CardsOnTable.Push(_dummyCard1);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCard2.ID);
+            _sut.SelectCard(_dummyCard2.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             Assert.AreEqual(GamePlayResult.Succeded, result);
@@ -150,7 +150,8 @@ namespace FlippinTenTests
             _sut.CardsOnTable.Push(_dummyCard2);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCard1.ID);
+            _sut.SelectCard(_dummyCard1.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             Assert.AreEqual(GamePlayResult.Invalid, result);
@@ -192,7 +193,8 @@ namespace FlippinTenTests
             _player.CardsOnHand.Add(_dummyCardNoTwo);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCardNoTwo.ID);
+            _sut.SelectCard(_dummyCardNoTwo.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             var currentPlayer = _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
@@ -208,7 +210,8 @@ namespace FlippinTenTests
             _player.CardsOnHand.Add(_dummyCardNoTwo);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCardNoTwo.ID);
+            _sut.SelectCard(_dummyCardNoTwo.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             Assert.AreEqual(GamePlayResult.Succeded, result);
@@ -222,7 +225,8 @@ namespace FlippinTenTests
             _player.CardsOnHand.Add(_dummyCardNoTen);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCardNoTen.ID);
+            _sut.SelectCard(_dummyCardNoTen.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             var currentPlayer = _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
@@ -238,7 +242,8 @@ namespace FlippinTenTests
             _player.CardsOnHand.Add(_dummyCardNoTen);
 
             //Act
-            var result = _sut.PlayOrSelectCard(_dummyCardNoTen.ID);
+            _sut.SelectCard(_dummyCardNoTen.ID);
+            var result = _sut.PlaySelectedCards();
 
             //Assert
             Assert.AreEqual(GamePlayResult.Succeded, result);

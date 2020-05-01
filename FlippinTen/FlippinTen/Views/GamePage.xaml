@@ -41,7 +41,11 @@
                            HorizontalTextAlignment="Center"/>
                     <Image Grid.Row="1"
                            HeightRequest="150"
-                           Source="{Binding TopCardOnTable.ImageUrl}"/>
+                           Source="{Binding TopCardOnTable.ImageUrl}">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CardOnTableTappedCommand}"/>
+                        </Image.GestureRecognizers>
+                    </Image>
                     <Label Grid.Column="1"
                            Text="{Binding CardDeckCount, StringFormat='Kortlek: {0} st'}"
                            HorizontalTextAlignment="Center"/>
@@ -61,11 +65,11 @@
                 <flv:FlowListView FlowColumnCount="4"
                                   SeparatorVisibility="Default"   
                                   HasUnevenRows="True"  
-                                  FlowItemTappedCommand="{Binding ItemTappedCommand}"
+                                  FlowItemTappedCommand="{Binding CardOnHandTappedCommand}"
                                   FlowItemsSource="{Binding CardsOnHand}">
                     <flv:FlowListView.FlowColumnTemplate>
                         <DataTemplate>
-                            <Frame BackgroundColor="{Binding BackroundColor}">
+                            <Frame Padding="8" BackgroundColor="{Binding BackroundColor}">
                                 <Image HeightRequest="90"
                                        Source="{Binding ImageUrl}"/>
                             </Frame>

@@ -21,8 +21,8 @@ namespace FlippinTen.ViewModels
             get
             {
                 return Selected
-                    ? "#00FF00"
-                    : "Transparent";
+                    ? ColorPallet.Secondary
+                    : ColorPallet.Transparent;
             }
         }
     }
@@ -89,7 +89,8 @@ namespace FlippinTen.ViewModels
 
         public ObservableCollection<CardView> CardsOnHand { get; set; } = new ObservableCollection<CardView>();
 
-        public Command ItemTappedCommand { get; }
+        public Command CardOnHandTappedCommand { get; }
+        public Command CardOnTableTappedCommand { get; }
 
         public GameViewModel(OnlineGameService onlineGameService)
         {
@@ -101,7 +102,21 @@ namespace FlippinTen.ViewModels
             _onlineGameService.OnPlayerJoined += OnPlayerJoined;
             _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
 
-            ItemTappedCommand = new Command((data) => OnCardOnHandTapped(data));
+            CardOnHandTappedCommand = new Command((data) => OnCardOnHandTapped(data));
+            CardOnTableTappedCommand = new Command(() => OnCardOnTableTapped());
+        }
+
+        private async void OnCardOnHandTapped(object data)
+        {
+            if (!(data is CardView card))
+                return;
+
+            await Play(g => g.SelectCard(card.ID));
+        }
+
+        private async void OnCardOnTableTapped()
+        {
+            await Play(g => g.PlaySelectedCards());
         }
 
         public async void PlayChanceCard()
@@ -142,7 +157,7 @@ namespace FlippinTen.ViewModels
 
             GameStatus = result.ToString();
 
-            if (result == GamePlayResult.Succeded || result == GamePlayResult.Failed)
+            if (result != GamePlayResult.Invalid && result != GamePlayResult.Unknown)
             {
                 UpdateGameBoard();
             }
@@ -176,14 +191,6 @@ namespace FlippinTen.ViewModels
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
         {
             OnPlayerConnected();
-        }
-
-        private async void OnCardOnHandTapped(object data)
-        {
-            if (!(data is CardView card))
-                return;
-
-            await Play(g => g.PlayOrSelectCard(card.ID));
         }
 
         private void OnPlayerConnected()

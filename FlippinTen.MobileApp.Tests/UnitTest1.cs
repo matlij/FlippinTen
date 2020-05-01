@@ -41,7 +41,7 @@ namespace FlippinTen.MobileApp.Tests
                 ID = cardFirst.ID,
                 Number = cardFirst.Number
             };
-            _sut.ItemTappedCommand.Execute(cardView);
+            _sut.CardOnHandTappedCommand.Execute(cardView);
         }
     }
 }

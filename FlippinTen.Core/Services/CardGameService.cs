@@ -88,6 +88,12 @@ namespace FlippinTen.Core.Services
             patch.Replace(g => g.DeckOfCards, game.DeckOfCards.AsCardStackDto());
             patch.Replace(g => g.CardsOnTable, game.CardsOnTable.AsCardStackDto());
 
+            if (game.GameOver)
+            {
+                patch.Replace(g => g.GameOver, game.GameOver);
+                patch.Replace(g => g.Winner, game.Winner);
+            }
+
             var result = await _repository.PatchAsync(uri.ToString(), patch);
             return result;
         }

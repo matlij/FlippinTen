@@ -87,9 +87,8 @@ namespace FlippinTen.ConsoleApp
                         }
                         else
                         {
-                            var inputIndex = int.Parse(input) - 1;
-                            var cardToPlay = _onlineService.Game.Player.CardsOnHand[inputIndex];
-                            gamePlayResult = await _onlineService.Play(g => g.PlayOrSelectCard(cardToPlay.ID));
+                            var cardIndex = int.Parse(input) - 1;
+                            gamePlayResult = await PlayCard(cardIndex);
                         }
                     }
                     catch (ArgumentException e)
@@ -105,6 +104,19 @@ namespace FlippinTen.ConsoleApp
                     _waitForOtherPlayerEvent.WaitOne();
                 }
             } while (true);
+        }
+
+        private async Task<GamePlayResult> PlayCard(int cardIndex)
+        {
+            var cardToPlay = _onlineService.Game.Player.CardsOnHand[cardIndex];
+            var selectResult = await _onlineService.Play(c => c.SelectCard(cardToPlay.ID));
+            if (selectResult != GamePlayResult.CardSelected)
+            {
+                return selectResult;
+            }
+
+            var result = await _onlineService.Play(c => c.PlaySelectedCards());
+            return result;
         }
 
         private static string GetPlayerInput()

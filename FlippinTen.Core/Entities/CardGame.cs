@@ -1,8 +1,7 @@
 ﻿using FlippinTen.Core.Models;
-using FlippinTen.Utilities;
-//using Models.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace FlippinTen.Core.Entities
@@ -19,6 +18,8 @@ namespace FlippinTen.Core.Entities
         public Player Player { get; }
         public List<PlayerInformation> PlayerInformation { get; }
         public bool AllPlayersOnline { get; set; }
+        public bool GameOver { get; set; }
+        public string Winner { get; set; }
 
         public CardGame(
             string identifier,
@@ -54,60 +55,88 @@ namespace FlippinTen.Core.Entities
 
         public GamePlayResult SelectCard(int cardId)
         {
-            var card = Player.CardsOnHand.FirstOrDefault(c => c.ID == cardId);
-            if (card == null)
-                throw new ArgumentException($"{cardId} not found in player {Player.UserIdentifier}");
+            return Play(() =>
+            {
+                var card = Player.CardsOnHand.FirstOrDefault(c => c.ID == cardId);
+                if (card == null)
+                    throw new ArgumentException($"{cardId} not found in player {Player.UserIdentifier}");
 
-            var selectedCards = GetSelectedCards();
-            var hasSelectedCardWithDifferentNumber = selectedCards.Count > 0 && selectedCards.First().Number != card.Number;
-            if (hasSelectedCardWithDifferentNumber)
-                return GamePlayResult.Invalid;
+                var selectedCards = GetSelectedCards();
+                var hasSelectedCardWithDifferentNumber = selectedCards.Count > 0 && selectedCards.First().Number != card.Number;
+                if (hasSelectedCardWithDifferentNumber)
+                    return GamePlayResult.Invalid;
 
-            card.Selected = !card.Selected;
-            return GamePlayResult.CardSelected;
+                card.Selected = !card.Selected;
+                return GamePlayResult.CardSelected;
+            });
         }
 
         public GamePlayResult PlayChanceCard()
         {
-            if (DeckOfCards.Count < 1)
-                return GamePlayResult.Invalid;
-
-            var chanceCard = DeckOfCards.Peek();
-            var chanceCardList = new List<Card> { chanceCard };
-            Player.AddCardsToHand(chanceCardList);
-
-            if (!PlayCards(chanceCardList))
+            return Play(() =>
             {
-                PickUpCards();
-                ChangeCurrentPlayer();
-                return GamePlayResult.Failed;
-            }
+                if (DeckOfCards.Count == 0)
+                    return GamePlayResult.Invalid;
 
-            return GamePlayResult.Succeded;
+                var chanceCard = DeckOfCards.Peek();
+                var chanceCardList = new List<Card> { chanceCard };
+                Player.AddCardsToHand(chanceCardList);
+
+                if (!PlayCards(chanceCardList))
+                {
+                    PickUpCards();
+                    ChangeCurrentPlayer();
+                    return GamePlayResult.Failed;
+                }
+
+                return GamePlayResult.Succeded;
+            });
         }
 
         public GamePlayResult PickUpCards()
         {
-            if (CardsOnTable.Count == 0)
-                return GamePlayResult.Invalid;
+            return Play(() =>
+            {
+                if (CardsOnTable.Count == 0)
+                    return GamePlayResult.Invalid;
 
-            Player.AddCardsToHand(CardsOnTable.ToList());
-            CardsOnTable.Clear();
-            ChangeCurrentPlayer();
+                Player.AddCardsToHand(CardsOnTable.ToList());
+                CardsOnTable.Clear();
+                ChangeCurrentPlayer();
 
-            return GamePlayResult.Succeded;
+                return GamePlayResult.Succeded;
+            });
         }
 
         public GamePlayResult PlaySelectedCards()
         {
-            var cards = GetSelectedCards();
-            if (cards.Count == 0)
+            return Play(() =>
+            {
+                var cards = GetSelectedCards();
+                if (cards.Count == 0)
+                    return GamePlayResult.Invalid;
+
+                var result = PlayCards(cards);
+                return result
+                    ? GamePlayResult.Succeded
+                    : GamePlayResult.Invalid;
+            });
+        }
+
+        private GamePlayResult Play(Func<GamePlayResult> play)
+        {
+            if (GameOver || !IsPlayersTurn())
                 return GamePlayResult.Invalid;
 
-            var result = PlayCards(cards);
-            return result
-                ? GamePlayResult.Succeded
-                : GamePlayResult.Invalid;
+            try
+            {
+                return play();
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Play failed: " + e);
+                throw;
+            }
         }
 
         private bool PlayCards(List<Card> cards)
@@ -135,7 +164,18 @@ namespace FlippinTen.Core.Entities
                 ChangeCurrentPlayer();
             }
 
+            CheckIfGameOver();
+
             return true;
+        }
+
+        private void CheckIfGameOver()
+        {
+            if (Player.CardsOnHand.Count == 0)
+            {
+                GameOver = true;
+                Winner = Player.UserIdentifier;
+            }
         }
 
         private List<Card> GetSelectedCards()
@@ -178,9 +218,6 @@ namespace FlippinTen.Core.Entities
 
         private bool CanPlayCard(Card card)
         {
-            if (!IsPlayersTurn())
-                return false;
-
             if (CardsOnTable.Count == 0 ||
                 card.Number == _cardTwoNumber ||
                 card.Number == _cardTenNumber)

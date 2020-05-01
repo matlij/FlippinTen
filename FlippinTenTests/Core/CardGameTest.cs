@@ -251,6 +251,22 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
+        public void PlayCard_LastCardOnHand_ShouldWinGame()
+        {
+            //Arrange
+            _player.CardsOnHand.Add(_dummyCard1);
+            _sut.DeckOfCards.Clear();
+
+            //Act
+            _sut.SelectCard(_dummyCard1.ID);
+            _sut.PlaySelectedCards();
+
+            //Assert
+            Assert.IsTrue(_sut.GameOver);
+            Assert.AreEqual(_sut.Winner, _player.UserIdentifier);
+        }
+
+        [TestMethod]
         public void UpdateGame()
         {
             var updatedCardsOnTable = new Stack<Card>();

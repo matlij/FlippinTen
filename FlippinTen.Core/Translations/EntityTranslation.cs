@@ -18,7 +18,11 @@ namespace FlippinTen.Core.Translations
             var playerInformation = game.Players
                 .Select(p => new PlayerInformation(p.UserIdentifier) { IsPlayersTurn = p.IsPlayersTurn })
                 .ToList();
-            return new CardGame(game.Identifier, game.Name, deckOfCards, cardsOnTable, player.AsPlayer(), playerInformation);
+            return new CardGame(game.Identifier, game.Name, deckOfCards, cardsOnTable, player.AsPlayer(), playerInformation)
+            {
+                Winner = game.Winner,
+                GameOver = game.GameOver
+            };
         }
 
         public static Player AsPlayer(this dto.Player playerDto)

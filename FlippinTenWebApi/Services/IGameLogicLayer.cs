@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Models;
-using Models.Entities;
+using FlippinTen.Models;
+using FlippinTen.Models.Entities;
 
 namespace FlippinTenWeb.Services
 {

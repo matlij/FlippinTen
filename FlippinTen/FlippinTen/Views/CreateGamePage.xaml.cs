@@ -1,7 +1,7 @@
 ﻿using FlippinTen.Bootstrap;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.ViewModels;
-using Models.Constants;
+using FlippinTen.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;

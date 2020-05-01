@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Models.Constants
+namespace FlippinTen.Models.Constants
 {
     public static class DatabaseConstants
     {

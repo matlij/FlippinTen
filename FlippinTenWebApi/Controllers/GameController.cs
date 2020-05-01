@@ -3,7 +3,7 @@ using FlippinTenWebApi.DataAccess;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Models.Entities;
+using FlippinTen.Models.Entities;
 using Newtonsoft.Json;
 
 namespace FlippinTenWebApi.Controllers

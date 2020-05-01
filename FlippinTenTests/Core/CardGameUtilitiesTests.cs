@@ -1,10 +1,6 @@
-﻿using FlippinTen.Core.Entities;
-using FlippinTen.Core.Interfaces;
+﻿using FlippinTen.Core.Interfaces;
 using FlippinTen.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Models;
-using Models.Enums;
-using System;
 using System.Collections.Generic;
 
 namespace FlippinTenTests

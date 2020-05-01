@@ -1,7 +1,7 @@
-﻿using Models.Enums;
+﻿using FlippinTen.Models.Enums;
 using System;
 
-namespace Models.Entities
+namespace FlippinTen.Models.Entities
 {
     public class Card
     {

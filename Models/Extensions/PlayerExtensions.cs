@@ -1,8 +1,8 @@
-﻿using Models.Entities;
+﻿using FlippinTen.Models.Entities;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Models.Extensions
+namespace FlippinTen.Models.Extensions
 {
     public static class PlayerExtensions
     {

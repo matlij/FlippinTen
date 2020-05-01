@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using FlippinTen.Core.Entities;
 using System.Linq;
-using dto = Models.Entities;
-using dtoEnum = Models.Enums;
+using dto = FlippinTen.Models.Entities;
+using dtoEnum = FlippinTen.Models.Enums;
 using FlippinTen.Core.Entities.Enums;
 
 namespace FlippinTen.Core.Translations

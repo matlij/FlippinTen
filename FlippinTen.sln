@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{26FDD2C9-40C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlippinTenWeb", "FlippinTenWeb\FlippinTenWeb.csproj", "{3BDA34DB-C4B6-4468-8892-9109D8F238A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{5A9CD2FC-566D-4A93-BB94-A8A677DED5C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlippinTen.Models", "Models\FlippinTen.Models.csproj", "{5A9CD2FC-566D-4A93-BB94-A8A677DED5C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlippinTenTests", "FlippinTenTests\FlippinTenTests.csproj", "{2161C0AB-9121-47FF-BA61-F46AD8B04F58}"
 EndProject
@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{EB1646
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{620357E8-86D9-4D27-A409-CC3534A0241B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlippinTen.MobileApp.Tests", "FlippinTen.MobileApp.Tests\FlippinTen.MobileApp.Tests.csproj", "{008A6E8E-51DB-4834-AD89-F70D9BE65ED9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlippinTen.MobileApp.Tests", "FlippinTen.MobileApp.Tests\FlippinTen.MobileApp.Tests.csproj", "{008A6E8E-51DB-4834-AD89-F70D9BE65ED9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

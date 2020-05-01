@@ -1,4 +1,4 @@
-﻿namespace Models.Constants
+﻿namespace FlippinTen.Models.Constants
 {
     public static class UriConstants
     {

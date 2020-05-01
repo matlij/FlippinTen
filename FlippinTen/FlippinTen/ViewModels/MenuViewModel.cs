@@ -1,6 +1,6 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using Models.Constants;
+using FlippinTen.Models.Constants;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

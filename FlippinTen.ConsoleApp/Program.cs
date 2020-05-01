@@ -6,7 +6,7 @@ using FlippinTen.Core.Services;
 using FlippinTen.Core.Utilities;
 using FlippinTen.Utilities;
 using Microsoft.AspNetCore.SignalR.Client;
-using Models.Constants;
+using FlippinTen.Models.Constants;
 using System;
 using System.Threading.Tasks;
 

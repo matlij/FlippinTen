@@ -5,7 +5,7 @@ using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Utilities;
 using FlippinTen.ViewModels;
 using Microsoft.AspNetCore.SignalR.Client;
-using Models.Constants;
+using FlippinTen.Models.Constants;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;

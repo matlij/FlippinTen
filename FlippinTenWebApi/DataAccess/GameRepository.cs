@@ -1,5 +1,5 @@
-﻿using Models;
-using Models.Entities;
+﻿using FlippinTen.Models;
+using FlippinTen.Models.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

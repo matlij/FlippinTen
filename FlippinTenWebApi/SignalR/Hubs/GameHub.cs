@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using FlippinTenWeb.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Models.Entities;
+using FlippinTen.Models.Entities;
 
 namespace FlippinTenWebApi.SignalR.Hubs
 {

@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlippinTenWebApi\FlippinTenWebApi.csproj" />
-    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\Models\FlippinTen.Models.csproj" />
   </ItemGroup>
 
 </Project>

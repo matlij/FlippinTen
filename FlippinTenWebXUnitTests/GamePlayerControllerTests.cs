@@ -2,7 +2,7 @@
 using FlippinTenWebApi.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Models.Entities;
+using FlippinTen.Models.Entities;
 using Moq;
 using System.Collections.Generic;
 using Xunit;

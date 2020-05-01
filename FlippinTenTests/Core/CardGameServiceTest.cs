@@ -7,7 +7,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using dto = Models.Entities;
+using dto = FlippinTen.Models.Entities;
 
 namespace FlippinTenTests.Core
 {

@@ -5,7 +5,7 @@ using FlippinTen.Core.Translations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using dto = Models.Entities;
+using dto = FlippinTen.Models.Entities;
 
 namespace FlippinTen.Utilities
 {

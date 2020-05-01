@@ -1,5 +1,5 @@
 ﻿using FlippinTenWebApi.DataAccess;
-using Models.Entities;
+using FlippinTen.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Models.Enums
+namespace FlippinTen.Models.Enums
 {
     public enum CardType
     {

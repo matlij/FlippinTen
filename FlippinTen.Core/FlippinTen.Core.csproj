@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\Models\FlippinTen.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FlippinTen.Core\FlippinTen.Core.csproj" />
     <ProjectReference Include="..\FlippinTenWeb\FlippinTenWeb.csproj" />
-    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\Models\FlippinTen.Models.csproj" />
   </ItemGroup>
 
 </Project>

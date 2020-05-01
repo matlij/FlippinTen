@@ -1,7 +1,7 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
 using Microsoft.AspNetCore.SignalR.Client;
-using Models;
+using FlippinTen.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

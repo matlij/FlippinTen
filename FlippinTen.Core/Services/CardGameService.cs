@@ -2,12 +2,12 @@
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Translations;
 using Microsoft.AspNetCore.JsonPatch;
-using Models.Constants;
+using FlippinTen.Models.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using dto = Models.Entities;
+using dto = FlippinTen.Models.Entities;
 
 namespace FlippinTen.Core.Services
 {

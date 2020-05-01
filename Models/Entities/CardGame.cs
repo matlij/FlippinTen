@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Models.Entities
+namespace FlippinTen.Models.Entities
 {
     public class CardGame
     {

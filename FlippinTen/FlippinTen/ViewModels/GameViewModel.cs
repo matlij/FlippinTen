@@ -179,13 +179,28 @@ namespace FlippinTen.ViewModels
 
             CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
             CardDeckCount = _onlineGameService.Game.DeckOfCards.Count;
-            CardBack = _onlineGameService.Game.DeckOfCards.Count > 1
-                ? ImageConstants.CardBackMultiple
-                : ImageConstants.CardBack;
+            CardBack = GetCardBack(_onlineGameService.Game);
 
             PlayerTurnStatus = _onlineGameService.Game.IsPlayersTurn()
                 ? "Din tur!"
                 : "Väntar på motståndare...";
+        }
+
+        private static string GetCardBack(CardGame game)
+        {
+            var deckOfCardsCount = game.DeckOfCards.Count;
+            if (deckOfCardsCount == 0)
+            {
+                return null;
+            }
+            else if (deckOfCardsCount == 1)
+            {
+                return ImageConstants.CardBack;
+            }
+            else
+            {
+                return ImageConstants.CardBackMultiple;
+            }
         }
 
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)

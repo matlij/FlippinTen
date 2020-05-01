@@ -27,15 +27,7 @@ namespace FlippinTen.Core.Entities.Enums
 
         public static CardType FromValue(int value)
         {
-            try
-            {
-                return GetList().Single(c => c.Value == value);
-            }
-            catch (System.Exception e)
-            {
-
-                throw;
-            }
+            return GetList().Single(c => c.Value == value);
         }
     }
 }

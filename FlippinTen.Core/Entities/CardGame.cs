@@ -141,6 +141,7 @@ namespace FlippinTen.Core.Entities
 
         private bool PlayCards(List<Card> cards)
         {
+            var cardFirst = cards.First();
             if (!CanPlayCard(cards.First()))
                 return false;
 
@@ -154,12 +155,12 @@ namespace FlippinTen.Core.Entities
 
             PickUpCards(minimumCardOnHands: 3);
 
-            var number = cards.First().Number;
-            if (number == _cardTenNumber)
+            var shouldFlip = ShouldFlipCardsOnTable(cardFirst.Number);
+            if (shouldFlip)
             {
                 CardsOnTable.Clear();
             }
-            if (number != _cardTwoNumber && number != _cardTenNumber)
+            if (cardFirst.Number != _cardTwoNumber && !shouldFlip)
             {
                 ChangeCurrentPlayer();
             }
@@ -168,6 +169,22 @@ namespace FlippinTen.Core.Entities
 
             return true;
         }
+
+        private bool ShouldFlipCardsOnTable(int number)
+        {
+            var count = 0;
+            foreach (var card in CardsOnTable)
+            {
+                if (card.Number != number || count == 4)
+                    break;
+
+                count++;
+            }
+
+            return number == _cardTenNumber || count == 4
+                ? true
+                : false;
+                }
 
         private void CheckIfGameOver()
         {

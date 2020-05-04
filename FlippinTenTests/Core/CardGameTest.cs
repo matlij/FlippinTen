@@ -92,7 +92,7 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
-        public void PickUpCards_CardsAddedToPlayerAndRemovedFromTabel()
+        public void PickUpCards_CardsAddedToPlayerAndRemovedFromTable()
         {
             //Arrange
             _sut.CardsOnTable.Push(_dummyCard1);
@@ -228,7 +228,7 @@ namespace FlippinTenTests
             var result = _sut.PlaySelectedCards();
 
             //Assert
-            var currentPlayer = _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
+            var currentPlayer = GetCurrentPlayer();
             Assert.AreEqual(GamePlayResult.Succeded, result);
             Assert.AreEqual(currentPlayer.Identifier, _player.UserIdentifier);
         }
@@ -266,6 +266,51 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
+        public void PlayCard_FourCardsOfSameTypeOnTop_ShouldFlipCardsOnTable()
+        {
+            //Arrange
+            var cardTenClubs = new Card(3, CardType.Clubs);
+            _player.CardsOnHand.Add(cardTenClubs);
+            _sut.CardsOnTable.Clear();
+            _sut.CardsOnTable.Push(new Card(4, CardType.Dimonds));
+            _sut.CardsOnTable.Push(new Card(5, CardType.Dimonds));
+            _sut.CardsOnTable.Push(new Card(3, CardType.Dimonds));
+            _sut.CardsOnTable.Push(new Card(3, CardType.Hearts));
+            _sut.CardsOnTable.Push(new Card(3, CardType.Spades));
+
+            //Act
+            _sut.SelectCard(cardTenClubs.ID);
+            _sut.PlaySelectedCards();
+
+            //Assert
+            var currentPlayer = GetCurrentPlayer();
+            Assert.AreEqual(currentPlayer.Identifier, _player.UserIdentifier);
+            Assert.AreEqual(_sut.CardsOnTable.Count, 0);
+        }
+
+        [TestMethod]
+        public void PlayCard_ThreeCardsOfSameTypeOnTop_ShouldNotFlipCardsOnTable()
+        {
+            //Arrange
+            var cardTenClubs = new Card(3, CardType.Clubs);
+            _player.CardsOnHand.Add(cardTenClubs);
+            _sut.CardsOnTable.Clear();
+            _sut.CardsOnTable.Push(new Card(4, CardType.Dimonds));
+            _sut.CardsOnTable.Push(new Card(5, CardType.Dimonds));
+            _sut.CardsOnTable.Push(new Card(3, CardType.Hearts));
+            _sut.CardsOnTable.Push(new Card(3, CardType.Spades));
+
+            //Act
+            _sut.SelectCard(cardTenClubs.ID);
+            _sut.PlaySelectedCards();
+
+            //Assert
+            var currentPlayer = GetCurrentPlayer();
+            Assert.AreEqual(currentPlayer.Identifier, _opponent.UserIdentifier);
+            Assert.IsTrue(_sut.CardsOnTable.Count > 0);
+        }
+
+        [TestMethod]
         public void UpdateGame()
         {
             var updatedCardsOnTable = new Stack<Card>();
@@ -280,6 +325,11 @@ namespace FlippinTenTests
 
             AssertCards(updatedCardsOnTable, _sut.CardsOnTable);
             AssertCards(updatedDeck, _sut.DeckOfCards);
+        }
+
+        private PlayerInformation GetCurrentPlayer()
+        {
+            return _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
         }
 
         private static void AssertCards(Stack<Card> expected, Stack<Card> actual)

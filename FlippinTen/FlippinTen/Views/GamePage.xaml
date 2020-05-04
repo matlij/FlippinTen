@@ -4,7 +4,6 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
-             mc:Ignorable="d"
              x:Class="FlippinTen.Views.GamePage"
              xmlns:Helpers="clr-namespace:FlippinTen.Helpers"
              Title="{Binding Title}"

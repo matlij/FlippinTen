@@ -37,13 +37,16 @@ namespace FlippinTen.Core.Entities
             PlayerInformation = playerInformation;
         }
 
-        public void UpdateGame(IEnumerable<Card> deckOfCards, IEnumerable<Card> cardsOnTable, List<PlayerInformation> playerInformation)
+        public void UpdateGame(IEnumerable<Card> deckOfCards, IEnumerable<Card> cardsOnTable, List<PlayerInformation> playerInformation, bool gameOver, string winner)
         {
             DeckOfCards = new Stack<Card>(new Stack<Card>(deckOfCards));
             CardsOnTable = new Stack<Card>(new Stack<Card>(cardsOnTable));
 
             PlayerInformation.Clear();
             PlayerInformation.AddRange(playerInformation);
+
+            GameOver = gameOver;
+            Winner = winner;
         }
 
         public bool IsPlayersTurn()

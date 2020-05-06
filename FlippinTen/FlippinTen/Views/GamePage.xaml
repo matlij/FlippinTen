@@ -10,23 +10,33 @@
              BackgroundColor="{StaticResource AppBackgroundColor}">
     <ContentPage.Content>
         <StackLayout Margin="20,20,20,20">
-            <StackLayout>
-                <Label Text="Väntar på andra spelare..."
-                       FontSize="Large"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center"
-                       IsVisible="{Binding WaitingForPlayers}"/>
-                <ActivityIndicator IsRunning="{Binding WaitingForPlayers}"
-                                   IsVisible="{Binding WaitingForPlayers}"
+
+            <AbsoluteLayout IsVisible="{Binding WaitingForPlayers}" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                <StackLayout Spacing="25" AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1" AbsoluteLayout.LayoutFlags="PositionProportional">
+                    <Label Text="Väntar på andra spelare..."
+                       FontSize="Medium"
+                       VerticalOptions="CenterAndExpand"
+                       HorizontalOptions="CenterAndExpand"/>
+                    <ActivityIndicator IsRunning="{Binding WaitingForPlayers}"
                                    HeightRequest="40"
                                    VerticalOptions="CenterAndExpand"
                                    HorizontalOptions="CenterAndExpand"/>
+                </StackLayout>
+            </AbsoluteLayout>
 
-            </StackLayout>
+            <AbsoluteLayout IsVisible="{Binding GameOver}" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                <StackLayout Spacing="50" AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1" AbsoluteLayout.LayoutFlags="PositionProportional">
+                    <Label
+                        Text="{Binding GameStatus}"
+                        FontSize="35"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="CenterAndExpand"/>
+                    <Button Text="Returmatch" Style="{StaticResource buttonStyle}" VerticalOptions="Center"/>
+                </StackLayout>
+            </AbsoluteLayout>
 
             <StackLayout Spacing="15" 
-                         IsVisible="{Binding WaitingForPlayers, Converter={Helpers:InverseBoolConverter}}">
-
+                         IsVisible="{Binding ShowGame}">
                 <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

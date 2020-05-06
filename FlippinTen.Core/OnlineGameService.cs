@@ -65,6 +65,11 @@ namespace FlippinTen.Core
             return true;
         }
 
+        public async Task Disconnect()
+        {
+            await _hubConnection.Disconnect();
+        }
+
         private async Task<bool> ConnectToHub()
         {
             try
@@ -101,7 +106,7 @@ namespace FlippinTen.Core
             try
             {
                 var game = await _gameService.Get(gameIdentifier, Game.Player.UserIdentifier);
-                Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation);
+                Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation, game.GameOver, game.Winner);
             }
             catch (Exception e)
             {

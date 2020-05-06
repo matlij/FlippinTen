@@ -321,7 +321,7 @@ namespace FlippinTenTests
             updatedDeck.Push(new Card(3, CardType.Dimonds));
             updatedDeck.Push(new Card(4, CardType.Dimonds));
 
-            _sut.UpdateGame(updatedDeck, updatedCardsOnTable, new List<PlayerInformation>());
+            _sut.UpdateGame(updatedDeck, updatedCardsOnTable, new List<PlayerInformation>(), false, string.Empty);
 
             AssertCards(updatedCardsOnTable, _sut.CardsOnTable);
             AssertCards(updatedDeck, _sut.DeckOfCards);

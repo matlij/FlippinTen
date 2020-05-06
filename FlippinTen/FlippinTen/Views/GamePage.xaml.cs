@@ -27,13 +27,17 @@ namespace FlippinTen.Views
 
         protected async override void OnAppearing()
         {
-            if (!DesignMode.IsDesignModeEnabled)
-            {
-                if (!_viewModel.Connected)
-                    await _viewModel.ConnectToGame();
-            }
+            if (!_viewModel.Connected)
+                await _viewModel.ConnectToGame();
 
             base.OnAppearing();
+        }
+
+        protected async override void OnDisappearing()
+        {
+            await _viewModel.Disconnect();
+
+            base.OnDisappearing();
         }
 
         private async void DeckOfCardsTapped(object sender, EventArgs e)

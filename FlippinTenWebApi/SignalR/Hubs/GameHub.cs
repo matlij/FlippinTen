@@ -22,7 +22,10 @@ namespace FlippinTenWebApi.SignalR.Hubs
         public override Task OnDisconnectedAsync(Exception exception)
         {
             if (Context.Items.TryGetValue(_playerNameKey, out var playerName))
+            { 
                 _gameLogic.PlayerDisconnected(playerName.ToString());
+                Context.Items.Remove(_playerNameKey);
+            }
 
             return base.OnDisconnectedAsync(exception);
         }
@@ -33,7 +36,9 @@ namespace FlippinTenWebApi.SignalR.Hubs
             if (string.IsNullOrEmpty(userIdentifier)) return false;
 
             _log.LogDebug($"JoinGame called. Parameters - {nameof(gameIdentifier)}: {gameIdentifier}, {nameof(userIdentifier)}: {userIdentifier}");
-            Context.Items.Add(_playerNameKey, userIdentifier);
+    
+            if(!Context.Items.ContainsKey(_playerNameKey))
+                Context.Items.Add(_playerNameKey, userIdentifier);
 
             try
             {

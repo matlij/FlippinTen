@@ -86,14 +86,27 @@ namespace FlippinTen.ViewModels
             set { SetProperty(ref _cardBack, value); }
         }
 
-        public ObservableCollection<CardView> CardsOnHand { get; set; } = new ObservableCollection<CardView>();
+        private bool _gameOver;
+        public bool GameOver
+        {
+            get { return _gameOver; }
+            set { SetProperty(ref _gameOver, value); }
+        }
 
+        private bool _showGame;
+        public bool ShowGame
+        {
+            get { return _showGame; }
+            set { SetProperty(ref _showGame, value); }
+        }
+
+        public ObservableCollection<CardView> CardsOnHand { get; set; } = new ObservableCollection<CardView>();
         public Command CardOnHandTappedCommand { get; }
         public Command CardOnTableTappedCommand { get; }
 
         public GameViewModel(OnlineGameService onlineGameService)
         {
-            WaitingForPlayers = true;
+            WaitingForPlayers = IsWaitingForPlayers(onlineGameService.Game);
 
             var gameName = onlineGameService.Game.Name;
             Title = $"Vändtia - {gameName}";
@@ -146,6 +159,13 @@ namespace FlippinTen.ViewModels
             return Connected;
         }
 
+        public async Task Disconnect()
+        {
+            await _onlineGameService.Disconnect();
+
+            Connected = false;
+        }
+
         private async Task Play(Func<CardGame, GamePlayResult> play)
         {
             IsBusy = true;
@@ -179,10 +199,46 @@ namespace FlippinTen.ViewModels
             CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
             CardDeckCount = _onlineGameService.Game.DeckOfCards.Count;
             CardBack = GetCardBack(_onlineGameService.Game);
+            GameOver = _onlineGameService.Game.GameOver;
+            if (GameOver)
+            {
+                GameStatus = _onlineGameService.Game.Winner == _onlineGameService.Game.Player.UserIdentifier
+                    ? "Grattis du vann! :D"
+                    : $"Du förlorade :(";
+            }
 
             PlayerTurnStatus = _onlineGameService.Game.IsPlayersTurn()
                 ? "Din tur!"
                 : "Väntar på motståndare...";
+
+            ShowGame = _onlineGameService.Game.GameOver || WaitingForPlayers
+                ? false
+                : true;
+        }
+
+        private void OnTurnedPlayed(object sender, CardPlayedEventArgs e)
+        {
+            UpdateGameBoard();
+        }
+
+        private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
+        {
+            OnPlayerConnected();
+        }
+
+        private void OnPlayerConnected()
+        {
+            WaitingForPlayers = IsWaitingForPlayers(_onlineGameService.Game);
+
+            UpdateGameBoard();
+        }
+
+        private static bool IsWaitingForPlayers(CardGame game)
+        {
+            var isWaitingForPlayers = game.GameOver || game.AllPlayersOnline
+                ? false
+                : true;
+            return isWaitingForPlayers;
         }
 
         private static string GetCardBack(CardGame game)
@@ -200,27 +256,6 @@ namespace FlippinTen.ViewModels
             {
                 return ImageConstants.CardBackMultiple;
             }
-        }
-
-        private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
-        {
-            OnPlayerConnected();
-        }
-
-        private void OnPlayerConnected()
-        {
-            var allPlayersOnline = _onlineGameService.Game.AllPlayersOnline;
-            WaitingForPlayers = !allPlayersOnline;
-
-            if (allPlayersOnline)
-            {
-                UpdateGameBoard();
-            }
-        }
-
-        private void OnTurnedPlayed(object sender, CardPlayedEventArgs e)
-        {
-            UpdateGameBoard();
         }
     }
 }

@@ -66,5 +66,11 @@ namespace FlippinTen.Core.Utilities
                 return false;
             }
         }
+
+        public async Task Disconnect()
+        {
+            await _connection.StopAsync();
+            await _connection.DisposeAsync();
+        }
     }
 }

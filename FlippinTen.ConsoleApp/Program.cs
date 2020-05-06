@@ -14,6 +14,8 @@ namespace FlippinTen.ConsoleApp
 {
     class Program
     {
+        private static GamePlayConsole _gameConsole;
+
         static void Main(string[] args)
         {
             RunGame().Wait();
@@ -34,7 +36,10 @@ namespace FlippinTen.ConsoleApp
             var cardGameService = new CardGameService(genericRepository, cardGameUtilities);
             var game = await StartGameMenu(playerName, cardGameService);
 
-            StartGameConsole(game, cardGameService).Wait();
+            await StartGameConsole(game, cardGameService);
+
+            Console.WriteLine("Closing connection");
+            await _gameConsole.EndGame();
         }
 
         private static async Task<CardGame> StartGameMenu(string playerName, ICardGameService cardGameService)
@@ -47,9 +52,9 @@ namespace FlippinTen.ConsoleApp
         {
             var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
             var onlineGameService = new OnlineGameService(cardGameService, hubConnection, game);
-            var gameConsole = new GamePlayConsole(onlineGameService);
+            _gameConsole = new GamePlayConsole(onlineGameService);
 
-            await gameConsole.StartGame();
+            await _gameConsole.StartGame();
         }
     }
 }

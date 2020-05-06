@@ -48,6 +48,11 @@ namespace FlippinTen.ConsoleApp
             PlayGame().Wait();
         }
 
+        public async Task EndGame()
+        {
+            await _onlineService.Disconnect();
+        }
+    
         private void WaitForOpponents(CardGame game)
         {
             while (!game.AllPlayersOnline)
@@ -64,6 +69,12 @@ namespace FlippinTen.ConsoleApp
 
             do
             {
+                if (_onlineService.Game.GameOver)
+                {
+                    Console.WriteLine($"Game Over! Winner is {_onlineService.Game.Winner}");
+                    break;
+                }
+
                 PrintBoard(lastMoveStatus);
                 lastMoveStatus = string.Empty;
 

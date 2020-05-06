@@ -5,6 +5,7 @@ namespace FlippinTen.Core.Utilities
 {
     public interface IServerHubConnection
     {
+        Task Disconnect();
         Task<T> Invoke<T>(string methodName, object[] parameters);
         Task SendAsync(string methodName, object[] parameters);
         Task<bool> StartConnection();

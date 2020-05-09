@@ -1,6 +1,7 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
+using FlippinTen.Core.Models.Information;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,8 +21,11 @@ namespace FlippinTen.ConsoleApp
             _onlineService.OnTurnedPlayed += TurnPlayed;
         }
 
-        private void TurnPlayed(object sender, CardPlayedEventArgs e)
+        private void TurnPlayed(object sender, CardGameEventArgs e)
         {
+            var lastMoveStatus = e.GameResult.GetResultInfo(_onlineService.Game.Player.UserIdentifier);
+            PrintBoard(lastMoveStatus);
+
             if (_onlineService.Game.IsPlayersTurn())
             {
                 _waitForOtherPlayerEvent.Set();
@@ -52,7 +56,7 @@ namespace FlippinTen.ConsoleApp
         {
             await _onlineService.Disconnect();
         }
-    
+
         private void WaitForOpponents(CardGame game)
         {
             while (!game.AllPlayersOnline)
@@ -76,29 +80,28 @@ namespace FlippinTen.ConsoleApp
                 }
 
                 PrintBoard(lastMoveStatus);
-                lastMoveStatus = string.Empty;
 
                 if (_onlineService.Game.IsPlayersTurn())
                 {
                     _waitForOtherPlayerEvent.Reset();
 
                     var input = GetPlayerInput();
-                    var gamePlayResult = GamePlayResult.Unknown;
+                    GameResult gameResult = null;
                     try
                     {
                         if (input.ToUpper() == "P")
                         {
-                            gamePlayResult = await _onlineService.Play(g => g.PickUpCards());
+                            gameResult = await _onlineService.Play(g => g.PickUpCards());
                         }
 
                         else if (input.ToUpper() == "C")
                         {
-                            gamePlayResult = await _onlineService.Play(g => g.PlayChanceCard());
+                            gameResult = await _onlineService.Play(g => g.PlayChanceCard());
                         }
                         else
                         {
                             var cardIndex = int.Parse(input) - 1;
-                            gamePlayResult = await PlayCard(cardIndex);
+                            gameResult = await PlayCard(cardIndex);
                         }
                     }
                     catch (ArgumentException e)
@@ -106,7 +109,9 @@ namespace FlippinTen.ConsoleApp
                         Console.WriteLine(e);
                     }
 
-                    lastMoveStatus = gamePlayResult.ToString();
+                    lastMoveStatus = gameResult != null
+                        ? gameResult.GetResultInfo(_onlineService.Game.Player.UserIdentifier)
+                        : string.Empty;
                 }
                 else
                 {
@@ -116,16 +121,21 @@ namespace FlippinTen.ConsoleApp
             } while (true);
         }
 
-        private async Task<GamePlayResult> PlayCard(int cardIndex)
+        private async Task<GameResult> PlayCard(int cardIndex)
         {
             var cardToPlay = _onlineService.Game.Player.CardsOnHand[cardIndex];
             var selectResult = await _onlineService.Play(c => c.SelectCard(cardToPlay.ID));
-            if (selectResult != GamePlayResult.CardSelected)
+            if (selectResult.Result != CardPlayResult.CardSelected)
             {
                 return selectResult;
             }
 
             var result = await _onlineService.Play(c => c.PlaySelectedCards());
+            if (result.Invalid())
+            {
+                foreach (var card in _onlineService.Game.Player.CardsOnHand)
+                    card.Selected = false;
+            }
             return result;
         }
 
@@ -148,7 +158,7 @@ namespace FlippinTen.ConsoleApp
 
         private void PrintBoard(string lastMoveStatus)
         {
-            //Console.Clear();
+            Console.Clear();
             Console.WriteLine("----------------------------------------------");
             Console.WriteLine($"--------- Vändtia - {_onlineService.Game.Player.UserIdentifier} - {_onlineService.Game.Name} ---------");
 

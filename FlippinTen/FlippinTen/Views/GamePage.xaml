@@ -36,7 +36,34 @@
             </AbsoluteLayout>
 
             <StackLayout Spacing="15" 
-                         IsVisible="{Binding ShowGame}">
+                         IsVisible="{Binding ShowGame}"
+                         IsEnabled="{Binding IsPlayersTurn}">
+                <StackLayout Padding="10,0,10,20">
+                        <Label Text="Spelinfo"
+                               FontSize="Medium"
+                               FontAttributes="Bold"/>
+                        <BoxView Color="White"
+                                 HeightRequest="1"
+                                 HorizontalOptions="Fill" />
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Text="Spelares tur: "/>
+                            <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Start" Text="{Binding PlayerTurnStatus}"/>
+                            <Label Grid.Row="1" Grid.Column="0" Text="Senaste drag: "/>
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding GameStatus}"/>
+                        </Grid>
+                    <BoxView Color="White"
+                                 HeightRequest="1"
+                                 HorizontalOptions="Fill" />
+                </StackLayout>
+
                 <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -78,37 +105,13 @@
                                   FlowItemsSource="{Binding CardsOnHand}">
                     <flv:FlowListView.FlowColumnTemplate>
                         <DataTemplate>
-                            <Frame Padding="8" BackgroundColor="{Binding BackroundColor}">
+                            <Frame CornerRadius="3"  Padding="10" BackgroundColor="{Binding BackroundColor}">
                                 <Image HeightRequest="90"
                                        Source="{Binding ImageUrl}"/>
                             </Frame>
                         </DataTemplate>
                     </flv:FlowListView.FlowColumnTemplate>
                 </flv:FlowListView>
-
-                <Grid Padding="10,0,0,10" HorizontalOptions="Center">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Row="0" 
-                        Text="Senaste drag: "/>
-                    <Label  Grid.Row="0"
-                            Grid.Column="1" 
-                            FontAttributes="Bold"
-                            Text="{Binding GameStatus}"/>
-                    <Label Grid.Row="1" 
-                        Text="Spelares tur: "/>
-                    <Label  Grid.Row="1"
-                            Grid.Column="1" 
-                            FontAttributes="Bold"
-                            HorizontalOptions="Start"
-                            Text="{Binding PlayerTurnStatus}"/>
-                </Grid>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>

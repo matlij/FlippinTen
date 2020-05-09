@@ -54,8 +54,8 @@ namespace FlippinTen.ConsoleApp
             do
             {
                 Console.WriteLine("Namn på spel: ");
-                //var gameName = Console.ReadLine();
-                var gameName = "test";
+                var gameName = Console.ReadLine();
+                //var gameName = "test";
                 if (string.IsNullOrEmpty(gameName))
                 {
                     Console.WriteLine("Ogiltigt namn på spel. Prova igen.");
@@ -63,8 +63,8 @@ namespace FlippinTen.ConsoleApp
                 }
 
                 Console.WriteLine("Utmanare: ");
-                //var opponent = Console.ReadLine();
-                var opponent = "kalle";
+                var opponent = Console.ReadLine();
+                //var opponent = "kalle";
                 if (string.IsNullOrEmpty(opponent))
                 {
                     Console.WriteLine("Ogiltigt namn på utmanare. Prova igen.");

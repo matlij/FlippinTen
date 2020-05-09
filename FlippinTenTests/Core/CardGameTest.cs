@@ -46,7 +46,7 @@ namespace FlippinTenTests
 
             var result = _sut.SelectCard(cardHeartOne.ID);
 
-            Assert.AreEqual(GamePlayResult.CardSelected, result);
+            Assert.AreEqual(CardPlayResult.CardSelected, result.Result);
             Assert.IsTrue(cardHeartOne.Selected);
         }
 
@@ -60,12 +60,12 @@ namespace FlippinTenTests
 
             var result = _sut.SelectCard(cardHeartOne.ID);
 
-            Assert.AreEqual(GamePlayResult.CardSelected, result);
+            Assert.AreEqual(CardPlayResult.CardSelected, result.Result);
             Assert.IsTrue(cardHeartOne.Selected);
         }
 
         [TestMethod]
-        public void SelectCard_TriesTpSelectedCardWithDifferentNumber_ShouldReturnInvalid()
+        public void SelectCard_TriesToSelectedCardWithDifferentNumber_ShouldReturnInvalid()
         {
             var cardHeartOne = new Card(1, CardType.Hearts);
             var cardHeartsTwo = new Card(2, CardType.Hearts) { Selected = true };
@@ -74,7 +74,7 @@ namespace FlippinTenTests
 
             var result = _sut.SelectCard(cardHeartOne.ID);
 
-            Assert.AreEqual(GamePlayResult.Invalid, result);
+            Assert.AreEqual(CardPlayResult.Invalid, result.Result);
             Assert.IsFalse(cardHeartOne.Selected);
         }
 
@@ -137,7 +137,7 @@ namespace FlippinTenTests
             var result = _sut.PlaySelectedCards();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.Succeded, result.Result);
             Assert.AreEqual(_dummyCard2.Number, _sut.CardsOnTable.Peek().Number);
         }
 
@@ -153,7 +153,7 @@ namespace FlippinTenTests
             var result = _sut.PlaySelectedCards();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Invalid, result);
+            Assert.AreEqual(CardPlayResult.Invalid, result.Result);
             Assert.AreEqual(_dummyCard2.Number, _sut.CardsOnTable.Peek().Number);
         }
 
@@ -168,7 +168,7 @@ namespace FlippinTenTests
             var result = _sut.PlayChanceCard();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.ChanceSucceded, result.Result);
         }
 
         [TestMethod]
@@ -182,7 +182,7 @@ namespace FlippinTenTests
             var result = _sut.PlayChanceCard();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Failed, result);
+            Assert.AreEqual(CardPlayResult.ChanceFailed, result.Result);
         }
 
         [TestMethod]
@@ -197,7 +197,7 @@ namespace FlippinTenTests
 
             //Assert
             var currentPlayer = _sut.PlayerInformation.Single(p => p.IsPlayersTurn);
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.CardTwoPlayed, result.Result);
             Assert.AreEqual(currentPlayer.Identifier, _player.UserIdentifier);
         }
 
@@ -213,7 +213,7 @@ namespace FlippinTenTests
             var result = _sut.PlaySelectedCards();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.CardTwoPlayed, result.Result);
             Assert.AreEqual(_dummyCardNoTwo.ID, _sut.CardsOnTable.Peek().ID);
         }
 
@@ -229,7 +229,7 @@ namespace FlippinTenTests
 
             //Assert
             var currentPlayer = GetCurrentPlayer();
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.CardsFlipped, result.Result);
             Assert.AreEqual(currentPlayer.Identifier, _player.UserIdentifier);
         }
 
@@ -245,7 +245,7 @@ namespace FlippinTenTests
             var result = _sut.PlaySelectedCards();
 
             //Assert
-            Assert.AreEqual(GamePlayResult.Succeded, result);
+            Assert.AreEqual(CardPlayResult.CardsFlipped, result.Result);
             Assert.AreEqual(0, _sut.CardsOnTable.Count);
         }
 

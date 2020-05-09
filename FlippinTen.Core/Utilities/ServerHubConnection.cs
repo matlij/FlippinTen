@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using Polly;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Polly;
+using Microsoft.AspNetCore.SignalR.Client;
+using FlippinTen.Core.Models.Information;
+using FlippinTen.Core.Translations;
+using dtoInfo = FlippinTen.Models.Information;
 
 namespace FlippinTen.Core.Utilities
 {
@@ -15,31 +18,6 @@ namespace FlippinTen.Core.Utilities
             _connection = hubConnectionBuilder
                 .WithUrl(url)
                 .Build();
-        }
-
-        public void Subscribe(string methodName, Action handler)
-        {
-            _connection.On(methodName, handler);
-        }
-
-        public void Subscribe<T>(string methodName, Action<T> handler)
-        {
-            _connection.On(methodName, handler);
-        }
-
-        public void Subscribe<T1, T2>(string methodName, Action<T1, T2> handler)
-        {
-            _connection.On(methodName, handler);
-        }
-
-        public async Task<T> Invoke<T>(string methodName, object[] parameters)
-        {
-            return await _connection.InvokeCoreAsync<T>(methodName, parameters);
-        }
-
-        public async Task SendAsync(string methodName, object[] parameters)
-        {
-            await _connection.SendAsync(methodName, parameters);
         }
 
         public async Task<bool> StartConnection()
@@ -71,6 +49,29 @@ namespace FlippinTen.Core.Utilities
         {
             await _connection.StopAsync();
             await _connection.DisposeAsync();
+        }
+
+        public void Subscribe<T>(string methodName, Action<T> handler)
+        {
+            _connection.On(methodName, handler);
+        }
+
+        public void SubscribeOnTurnedPlayed(Action<GameResult> action)
+        {
+            _connection.On<dtoInfo.GameResult>(
+                "TurnedPlayed", 
+                g => action(g.AsGameResult()));
+        }
+
+        public async Task<T> Invoke<T>(string methodName, object[] parameters)
+        {
+            return await _connection.InvokeCoreAsync<T>(methodName, parameters);
+        }
+
+        public async Task<bool> InvokePlayTurn(GameResult gameResult)
+        {
+            var resultDto = gameResult.AsGameResultDto();
+            return await _connection.InvokeCoreAsync<bool>("PlayTurn", new object[] { resultDto });
         }
     }
 }

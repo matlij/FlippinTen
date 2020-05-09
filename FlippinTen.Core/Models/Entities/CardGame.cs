@@ -1,4 +1,5 @@
 ﻿using FlippinTen.Core.Entities.Enums;
+using FlippinTen.Core.Models.Information;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,7 +57,7 @@ namespace FlippinTen.Core.Entities
             return playerInfo.IsPlayersTurn;
         }
 
-        public GamePlayResult SelectCard(int cardId)
+        public GameResult SelectCard(int cardId)
         {
             return Play(() =>
             {
@@ -67,69 +68,82 @@ namespace FlippinTen.Core.Entities
                 var selectedCards = GetSelectedCards();
                 var hasSelectedCardWithDifferentNumber = selectedCards.Count > 0 && selectedCards.First().Number != card.Number;
                 if (hasSelectedCardWithDifferentNumber)
-                    return GamePlayResult.Invalid;
+                    return new GameResult("Måste välja kort av samma typ som redan är markerat");
 
                 card.Selected = !card.Selected;
-                return GamePlayResult.CardSelected;
+                if (card.Selected)
+                {
+                    selectedCards.Add(card);
+                }
+                else
+                {
+                    selectedCards.Remove(card);
+                }
+
+                return new GameResult(Identifier, Player.UserIdentifier, CardPlayResult.CardSelected, selectedCards);
             });
         }
 
-        public GamePlayResult PlayChanceCard()
+        public GameResult PlayChanceCard()
         {
             return Play(() =>
             {
                 if (DeckOfCards.Count == 0)
-                    return GamePlayResult.Invalid;
+                    return new GameResult("Kortlek tom!");
 
                 var chanceCard = DeckOfCards.Peek();
                 var chanceCardList = new List<Card> { chanceCard };
                 Player.AddCardsToHand(chanceCardList);
 
-                if (!PlayCards(chanceCardList))
-                {
-                    PickUpCards();
-                    ChangeCurrentPlayer();
-                    return GamePlayResult.Failed;
-                }
+                var result = PlayCards(chanceCardList);
+                result = result == CardPlayResult.Invalid
+                    ? CardPlayResult.ChanceFailed
+                    : CardPlayResult.ChanceSucceded;
 
-                return GamePlayResult.Succeded;
+                if (result == CardPlayResult.ChanceFailed)
+                    PickUpCards();
+                ChangeCurrentPlayer();
+
+                return new GameResult(Identifier, Player.UserIdentifier, result, chanceCard);
             });
+
         }
 
-        public GamePlayResult PickUpCards()
+        public GameResult PickUpCards()
         {
             return Play(() =>
             {
                 if (CardsOnTable.Count == 0)
-                    return GamePlayResult.Invalid;
+                    return new GameResult("Kortlek tom!");
 
-                Player.AddCardsToHand(CardsOnTable.ToList());
+                var cardsToPickUp = CardsOnTable.ToList();
+                Player.AddCardsToHand(cardsToPickUp);
                 CardsOnTable.Clear();
                 ChangeCurrentPlayer();
 
-                return GamePlayResult.Succeded;
+                return new GameResult(Identifier, Player.UserIdentifier, CardPlayResult.CardsOnTablePickedUp, cardsToPickUp);
             });
         }
 
-        public GamePlayResult PlaySelectedCards()
+        public GameResult PlaySelectedCards()
         {
             return Play(() =>
             {
-                var cards = GetSelectedCards();
-                if (cards.Count == 0)
-                    return GamePlayResult.Invalid;
+                var selectedCards = GetSelectedCards();
+                if (selectedCards.Count == 0)
+                    return new GameResult("Inga kort markerade...");
 
-                var result = PlayCards(cards);
-                return result
-                    ? GamePlayResult.Succeded
-                    : GamePlayResult.Invalid;
+                var result = PlayCards(selectedCards);
+                return new GameResult(Identifier, Player.UserIdentifier, result, selectedCards);
             });
         }
 
-        private GamePlayResult Play(Func<GamePlayResult> play)
+        private GameResult Play(Func<GameResult> play)
         {
-            if (GameOver || !IsPlayersTurn())
-                return GamePlayResult.Invalid;
+            if (GameOver)
+                return new GameResult("Spelet är avslutat.");
+            if (!IsPlayersTurn())
+                return new GameResult($"Inte din tur. Väntar på motståndare '{PlayerInformation.Single(p => p.IsPlayersTurn).Identifier}'");
 
             try
             {
@@ -142,11 +156,11 @@ namespace FlippinTen.Core.Entities
             }
         }
 
-        private bool PlayCards(List<Card> cards)
+        private CardPlayResult PlayCards(List<Card> cards)
         {
             var cardFirst = cards.First();
             if (!CanPlayCard(cards.First()))
-                return false;
+                return CardPlayResult.Invalid;
 
             foreach (var card in cards)
             {
@@ -157,20 +171,26 @@ namespace FlippinTen.Core.Entities
             }
 
             PickUpCards(minimumCardOnHands: 3);
+            if (Player.CardsOnHand.Count == 0)
+            {
+                GameOver = true;
+                Winner = Player.UserIdentifier;
+            }
 
             var shouldFlip = ShouldFlipCardsOnTable(cardFirst.Number);
+            var hasPlayedCardTwo = cardFirst.Number == _cardTwoNumber;
+            if (!hasPlayedCardTwo && !shouldFlip)
+                ChangeCurrentPlayer();
+
             if (shouldFlip)
             {
                 CardsOnTable.Clear();
-            }
-            if (cardFirst.Number != _cardTwoNumber && !shouldFlip)
-            {
-                ChangeCurrentPlayer();
+                return CardPlayResult.CardsFlipped;
             }
 
-            CheckIfGameOver();
-
-            return true;
+            return hasPlayedCardTwo
+                ? CardPlayResult.CardTwoPlayed
+                : CardPlayResult.Succeded;
         }
 
         private bool ShouldFlipCardsOnTable(int number)
@@ -187,22 +207,15 @@ namespace FlippinTen.Core.Entities
             return number == _cardTenNumber || count == 4
                 ? true
                 : false;
-                }
-
-        private void CheckIfGameOver()
-        {
-            if (Player.CardsOnHand.Count == 0)
-            {
-                GameOver = true;
-                Winner = Player.UserIdentifier;
-            }
         }
 
         private List<Card> GetSelectedCards()
         {
-            return Player.CardsOnHand
+            var selectedCards = Player.CardsOnHand
                 .Where(s => s.Selected)
                 .ToList();
+
+            return selectedCards;
         }
 
         private void ChangeCurrentPlayer()

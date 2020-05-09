@@ -4,6 +4,7 @@ using FlippinTenWeb.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using FlippinTen.Models.Entities;
+using FlippinTen.Models.Information;
 
 namespace FlippinTenWebApi.SignalR.Hubs
 {
@@ -67,11 +68,19 @@ namespace FlippinTenWebApi.SignalR.Hubs
             return true;
         }
 
-        public async Task<bool> PlayTurn(string gameIdentifier)
+        public async Task<bool> PlayTurn(GameResult gameResult)
         {
-            await Clients.GroupExcept(gameIdentifier, Context.ConnectionId).SendAsync("TurnedPlayed", gameIdentifier);
+            try
+            {
+                await Clients.GroupExcept(gameResult.GameIdentifier, Context.ConnectionId).SendAsync("TurnedPlayed", gameResult);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, $"Broadcast {nameof(gameResult)} failed. Game: {gameResult.GameIdentifier}");
+                return false;
+            }
 
-            return true;
         }
     }
 }

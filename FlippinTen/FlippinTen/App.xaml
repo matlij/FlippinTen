@@ -8,20 +8,11 @@
     <Application.Resources>
         <!-- Colors --> 
         <Color x:Key="AppBackgroundColor">#AAD7A8</Color> <!--#55AA55-->
+        <Color x:Key="AppSecondColor">#78C6B5</Color>
         <Color x:Key="iOSNavigationBarColor">WhiteSmoke</Color>
         <Color x:Key="AndroidNavigationBarColor">#2196F3</Color>
         <Color x:Key="iOSNavigationBarTextColor">Black</Color>
         <Color x:Key="AndroidNavigationBarTextColor">White</Color>
-
-        <!-- Implicit styles --><!--
-        <Style TargetType="{x:Type NavigationPage}">
-            <Setter Property="BarBackgroundColor"
-                    Value="{OnPlatform iOS={StaticResource iOSNavigationBarColor},
-                                       Android={StaticResource AndroidNavigationBarColor}}" />
-            <Setter Property="BarTextColor"
-                    Value="{OnPlatform iOS={StaticResource iOSNavigationBarTextColor},
-                                       Android={StaticResource AndroidNavigationBarTextColor}}" />
-        </Style>-->
 
         <ResourceDictionary>
             <!-- Styles -->

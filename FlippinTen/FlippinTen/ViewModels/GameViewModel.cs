@@ -1,6 +1,7 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
+using FlippinTen.Core.Models.Information;
 using FlippinTen.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ namespace FlippinTen.ViewModels
     {
         public int ID { get; set; }
         public int Number { get; set; }
+        public CardType CardType { get; set; }
         public string ImageUrl { get; set; }
         public bool Selected { get; set; }
         public string BackroundColor
@@ -24,6 +26,10 @@ namespace FlippinTen.ViewModels
                     : ColorPallet.Transparent;
             }
         }
+        public override string ToString()
+        {
+            return $"{Number} {CardType.Name}";
+        }
     }
 
     public class GameViewModel : BaseViewModel
@@ -31,76 +37,74 @@ namespace FlippinTen.ViewModels
         private readonly OnlineGameService _onlineGameService;
 
         private bool _connected;
+        private bool _waitingForPlayers;
+        private Card _topCardOnTable;
+        private string _gameStatus;
+        private string _playerTurnStatus;
+        private int _cardOnTableCount;
+        private int _cardDeckCount;
+        private string _cardBack;
+        private bool _gameOver;
+        private bool _showGame;
+        private bool _isPlayersTurn;
+
         public bool Connected
         {
             get { return _onlineGameService.Game.Player.IsConnected; }
             set { SetProperty(ref _connected, value); }
         }
-
-        private bool _waitingForPlayers;
         public bool WaitingForPlayers
         {
             get { return _waitingForPlayers; }
             set { SetProperty(ref _waitingForPlayers, value); }
         }
-
-        private Card _topCardOnTable;
         public Card TopCardOnTable
         {
             get { return _topCardOnTable; }
             set { SetProperty(ref _topCardOnTable, value); }
         }
-
-        private string _gameStatus;
         public string GameStatus
         {
             get { return _gameStatus; }
             set { SetProperty(ref _gameStatus, value); }
         }
-
-        private string _playerTurnStatus;
         public string PlayerTurnStatus
         {
             get { return _playerTurnStatus; }
             set { SetProperty(ref _playerTurnStatus, value); }
         }
-
-        private int _cardOnTableCount;
         public int CardOnTableCount
         {
             get { return _cardOnTableCount; }
             set { SetProperty(ref _cardOnTableCount, value); }
         }
-
-        private int _cardDeckCount;
         public int CardDeckCount
         {
             get { return _cardDeckCount; }
             set { SetProperty(ref _cardDeckCount, value); }
         }
-
-        private string _cardBack;
         public string CardBack
         {
             get { return _cardBack; }
             set { SetProperty(ref _cardBack, value); }
         }
-
-        private bool _gameOver;
         public bool GameOver
         {
             get { return _gameOver; }
             set { SetProperty(ref _gameOver, value); }
         }
-
-        private bool _showGame;
         public bool ShowGame
         {
             get { return _showGame; }
             set { SetProperty(ref _showGame, value); }
         }
-
+        public bool IsPlayersTurn
+        {
+            get { return _isPlayersTurn; }
+            set { SetProperty(ref _isPlayersTurn, value); }
+        }
         public ObservableCollection<CardView> CardsOnHand { get; set; } = new ObservableCollection<CardView>();
+
         public Command CardOnHandTappedCommand { get; }
         public Command CardOnTableTappedCommand { get; }
 
@@ -166,7 +170,7 @@ namespace FlippinTen.ViewModels
             Connected = false;
         }
 
-        private async Task Play(Func<CardGame, GamePlayResult> play)
+        private async Task Play(Func<CardGame, GameResult> play)
         {
             IsBusy = true;
 
@@ -174,51 +178,67 @@ namespace FlippinTen.ViewModels
 
             IsBusy = false;
 
-            GameStatus = result.ToString();
-
-            if (result != GamePlayResult.Invalid && result != GamePlayResult.Unknown)
-            {
-                UpdateGameBoard();
-            }
+            UpdateGameBoard(result);
         }
 
-        private void UpdateGameBoard()
+        private void UpdateGameBoard(GameResult result)
         {
-            TopCardOnTable = _onlineGameService.Game.CardsOnTable.Count > 0
-                ? _onlineGameService.Game.CardsOnTable.Peek()
-                : null;
+            var user = _onlineGameService.Game.Player.UserIdentifier;
 
-            CardsOnHand.Clear();
-            var player = _onlineGameService.Game.Player;
-            foreach (var card in player.CardsOnHand)
-            {
-                var cardView = card.AsCardView();
-                CardsOnHand.Add(cardView);
+            if (result.Invalid())
+            { 
+                GameStatus = result.GetResultInfo(user);
+                return;
             }
 
-            CardOnTableCount = _onlineGameService.Game.CardsOnTable.Count;
-            CardDeckCount = _onlineGameService.Game.DeckOfCards.Count;
-            CardBack = GetCardBack(_onlineGameService.Game);
-            GameOver = _onlineGameService.Game.GameOver;
-            if (GameOver)
+            if (result.UserIdentifier == user)
+                UpdateCardsOnHand(_onlineGameService.Game);
+            if (result.Result == CardPlayResult.CardSelected)
+                return;
+
+            GameStatus = result.GetResultInfo(user);
+            UpdateGameBoardProperties(_onlineGameService.Game);
+        }
+
+        private void UpdateGameBoardProperties(CardGame game)
+        {
+            ShowGame = _onlineGameService.Game.GameOver || WaitingForPlayers ? false : true;
+            
+            TopCardOnTable = game.CardsOnTable.Count > 0
+                ? game.CardsOnTable.Peek()
+                : null;
+            CardOnTableCount = game.CardsOnTable.Count;
+            CardDeckCount = game.DeckOfCards.Count;
+            CardBack = GetCardBack(game);
+
+            if (game.GameOver)
             {
-                GameStatus = _onlineGameService.Game.Winner == _onlineGameService.Game.Player.UserIdentifier
+                GameOver = game.GameOver;
+                GameStatus = game.Winner == game.Player.UserIdentifier
                     ? "Grattis du vann! :D"
                     : $"Du förlorade :(";
             }
 
-            PlayerTurnStatus = _onlineGameService.Game.IsPlayersTurn()
+            var playersTurn = game.IsPlayersTurn();
+            IsPlayersTurn = playersTurn;
+            PlayerTurnStatus = playersTurn
                 ? "Din tur!"
                 : "Väntar på motståndare...";
-
-            ShowGame = _onlineGameService.Game.GameOver || WaitingForPlayers
-                ? false
-                : true;
         }
 
-        private void OnTurnedPlayed(object sender, CardPlayedEventArgs e)
+        private void UpdateCardsOnHand(CardGame game)
         {
-            UpdateGameBoard();
+            CardsOnHand.Clear();
+            foreach (var card in game.Player.CardsOnHand)
+            {
+                var cardView = card.AsCardView();
+                CardsOnHand.Add(cardView);
+            }
+        }
+
+        private void OnTurnedPlayed(object sender, CardGameEventArgs e)
+        {
+            UpdateGameBoard(e.GameResult);
         }
 
         private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
@@ -228,9 +248,10 @@ namespace FlippinTen.ViewModels
 
         private void OnPlayerConnected()
         {
-            WaitingForPlayers = IsWaitingForPlayers(_onlineGameService.Game);
-
-            UpdateGameBoard();
+            var game = _onlineGameService.Game;
+            WaitingForPlayers = IsWaitingForPlayers(game);
+            UpdateGameBoardProperties(game);
+            UpdateCardsOnHand(game);
         }
 
         private static bool IsWaitingForPlayers(CardGame game)

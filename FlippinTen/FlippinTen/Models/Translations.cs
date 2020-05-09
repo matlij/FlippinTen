@@ -12,7 +12,8 @@ namespace FlippinTen.Models
                 ID = card.ID,
                 Number = card.Number,
                 ImageUrl = card.ImageUrl,
-                Selected = card.Selected
+                Selected = card.Selected,
+                CardType = card.CardType
             };
         }
     }

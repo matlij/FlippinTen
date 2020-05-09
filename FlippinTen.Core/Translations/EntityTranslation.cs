@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using FlippinTen.Core.Entities;
-using System.Linq;
-using dto = FlippinTen.Models.Entities;
-using dtoEnum = FlippinTen.Models.Enums;
 using FlippinTen.Core.Entities.Enums;
+
+using dto = FlippinTen.Models.Entities;
+using dtoInfo = FlippinTen.Models.Information;
+using dtoEnum = FlippinTen.Models.Enums;
+using FlippinTen.Core.Models.Information;
+using System.ComponentModel;
 
 namespace FlippinTen.Core.Translations
 {
@@ -103,6 +107,28 @@ namespace FlippinTen.Core.Translations
         public static dtoEnum.CardType AsCardTypeDto(this CardType cardType)
         {
                 return (dtoEnum.CardType)Enum.Parse(typeof(dtoEnum.CardType), cardType.Name, true);
+        }
+
+        public static dtoInfo.GameResult AsGameResultDto(this GameResult gameResult)
+        {
+            var cards = gameResult.Cards.Select(c => c.AsCardDto());
+            return new dtoInfo.GameResult
+            {
+                Cards = cards,
+                Result = (int)gameResult.Result,
+                GameIdentifier = gameResult.GameIdentifier,
+                UserIdentifier = gameResult.UserIdentifier
+            };
+        }
+
+        public static GameResult AsGameResult(this dtoInfo.GameResult gameResult)
+        {
+            if(!Enum.IsDefined(typeof(CardPlayResult), gameResult.Result))
+                throw new InvalidEnumArgumentException(nameof(gameResult), gameResult.Result, typeof(CardPlayResult));
+
+            var result = (CardPlayResult)gameResult.Result;
+            var cards = gameResult.Cards.Select(c => c.AsCard());
+            return new GameResult(gameResult.GameIdentifier, gameResult.UserIdentifier, result, cards);
         }
     }
 }

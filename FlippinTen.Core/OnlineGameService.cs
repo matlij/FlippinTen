@@ -1,6 +1,7 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Interfaces;
+using FlippinTen.Core.Models.Information;
 using FlippinTen.Core.Utilities;
 using System;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ namespace FlippinTen.Core
     public class OnlineGameService
     {
         public event EventHandler<PlayerJoinedEventArgs> OnPlayerJoined;
-        public event EventHandler<CardPlayedEventArgs> OnTurnedPlayed;
+        public event EventHandler<CardGameEventArgs> OnTurnedPlayed;
 
         private readonly ICardGameService _gameService;
         private readonly IServerHubConnection _hubConnection;
@@ -24,23 +25,26 @@ namespace FlippinTen.Core
             Game = game;
 
             _hubConnection.Subscribe<string>("GameStarted", GameStarted);
-            _hubConnection.Subscribe<string>("TurnedPlayed", TurnedPlayed);
+            _hubConnection.SubscribeOnTurnedPlayed(TurnedPlayed);
         }
 
-        public async Task<GamePlayResult> Play(Func<CardGame, GamePlayResult> play)
+        public async Task<GameResult> Play(Func<CardGame, GameResult> play)
         {
             var result = play(Game);
             Debug.WriteLine($"Play result: {result}");
 
-            if (result != GamePlayResult.Succeded)
-                return result;
-
-            if (!await UpdateGame(Game))
+            if (result.ShouldUpdateGame())
             {
-                Debug.WriteLine($"Update game failed.");
+                var succeded = await UpdateGame(Game);
+                if (!succeded)
+                {
+                    Debug.WriteLine($"Update game '{Game.Identifier}' failed.");
 
-                Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
-                result = GamePlayResult.Invalid;
+                    Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
+                    return new GameResult(Game.Identifier, Game.Player.UserIdentifier, CardPlayResult.Invalid, new Card[0]);
+                }
+
+                await BroadcastGameResult(result);
             }
 
             return result;
@@ -99,14 +103,17 @@ namespace FlippinTen.Core
             }
         }
 
-        private async void TurnedPlayed(string gameIdentifier)
+        private async void TurnedPlayed(GameResult gameResult)
         {
-            Debug.WriteLine($"Turned played {gameIdentifier}");
+            Debug.WriteLine($"Turned played by {gameResult.UserIdentifier}. Result: {gameResult.Result}");
 
             try
             {
-                var game = await _gameService.Get(gameIdentifier, Game.Player.UserIdentifier);
-                Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation, game.GameOver, game.Winner);
+                if (gameResult.ShouldUpdateGame())
+                {
+                    var game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
+                    Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation, game.GameOver, game.Winner);
+                }
             }
             catch (Exception e)
             {
@@ -114,8 +121,7 @@ namespace FlippinTen.Core
                 throw;
             }
 
-
-            OnTurnedPlayed?.Invoke(this, null);
+            OnTurnedPlayed?.Invoke(this, new CardGameEventArgs(gameResult));
         }
 
         private void GameStarted(string gameIdentifier)
@@ -129,18 +135,25 @@ namespace FlippinTen.Core
         {
             try
             {
-                var result = await _gameService.Update(game);
-
-                if (!result)
-                {
-                    return false;
-                }
-
-                return await _hubConnection.Invoke<bool>("PlayTurn", new object[] { game.Identifier });
+                return await _gameService.Update(game);
             }
             catch (Exception e)
             {
                 Debug.WriteLine($"Update game {game.Identifier} failed: " + e);
+
+                return false;
+            }
+        }
+
+        private async Task<bool> BroadcastGameResult(GameResult gameResult)
+        {
+            try
+            {
+                return await _hubConnection.InvokePlayTurn(gameResult);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Broadcast game result failed: " + e);
 
                 return false;
             }

@@ -18,13 +18,6 @@ namespace FlippinTen.Views
             BindingContext = _viewModel = viewModel;
         }
 
-        public GamePage()
-        {
-            InitializeComponent();
-
-            BindingContext = _viewModel = new GameViewModel(null);
-        }
-
         protected async override void OnAppearing()
         {
             if (!_viewModel.Connected)

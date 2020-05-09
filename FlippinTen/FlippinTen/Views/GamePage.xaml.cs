@@ -1,5 +1,6 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.ViewModels;
+using Rg.Plugins.Popup.Extensions;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -35,27 +36,34 @@ namespace FlippinTen.Views
 
         private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
-            const string PickUp = "Plocka upp";
-            const string ChanceCard = "Chansa";
-            const string Cancel = "Avbryt";
+            var image = (Image)sender;
+            var source = image.Source as FileImageSource;
 
-            var action = await DisplayActionSheet("Vilket drag vill du göra?", Cancel, null, ChanceCard, PickUp);
-            if (action == Cancel || string.IsNullOrEmpty(action))
-            {
-                return;
-            }
-            else if (action == ChanceCard)
-            {
-                _viewModel.PlayChanceCard();
-            }
-            else if (action == PickUp)
-            {
-                _viewModel.PickUpCards();
-            }
-            else
-            {
-                await DisplayAlert($"Fel: {action}", "Nånting gick fel :(", "Stäng");
-            }
+            var viewModel = new ChanceCardViewModel(source.File);
+            var popup = new ChanceCardPage(viewModel);
+            await Navigation.PushPopupAsync(popup);
+
+            //const string PickUp = "Plocka upp";
+            //const string ChanceCard = "Chansa";
+            //const string Cancel = "Avbryt";
+
+            //var action = await DisplayActionSheet("Vilket drag vill du göra?", Cancel, null, ChanceCard, PickUp);
+            //if (action == Cancel || string.IsNullOrEmpty(action))
+            //{
+            //    return;
+            //}
+            //else if (action == ChanceCard)
+            //{
+            //    _viewModel.PlayChanceCard();
+            //}
+            //else if (action == PickUp)
+            //{
+            //    _viewModel.PickUpCards();
+            //}
+            //else
+            //{
+            //    await DisplayAlert($"Fel: {action}", "Nånting gick fel :(", "Stäng");
+            //}
         }
     }
 }

@@ -9,6 +9,8 @@ using FlippinTen.Models.Constants;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Rg.Plugins.Popup.Pages;
+using Rg.Plugins.Popup.Extensions;
 
 namespace FlippinTen.Views
 {
@@ -46,8 +48,6 @@ namespace FlippinTen.Views
         private async void OnCreateGameClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new CreateGamePage());
-
-            //_viewModel.LoadGamesCommand.Execute(null);
         }
     }
 }

@@ -3,6 +3,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
+using Rg.Plugins.Popup;
 
 namespace FlippinTen.Droid
 {
@@ -16,6 +17,8 @@ namespace FlippinTen.Droid
 
             base.OnCreate(savedInstanceState);
 
+            Popup.Init(this, savedInstanceState);
+
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
@@ -25,6 +28,14 @@ namespace FlippinTen.Droid
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        public override void OnBackPressed()
+        {
+            if (Popup.SendBackPressed(base.OnBackPressed))
+            {
+
+            }
         }
     }
 }

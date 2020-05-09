@@ -1,19 +1,31 @@
 ﻿using FlippinTen.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Xamarin.Forms;
 
 namespace FlippinTen.ViewModels
 {
     public class ChanceCardViewModel : BaseViewModel
     {
-        public string CardImageUrl { get; set; }
-        public string CardBack { get; set; }
+        private string _cardImg;
+        private readonly string _cardImageUrl;
 
-        public ChanceCardViewModel(string cardImageUrl)
+        public string CardImg
         {
-            CardBack = ImageConstants.CardBack;
-            CardImageUrl = cardImageUrl;
+            get { return _cardImg; }
+            set { SetProperty(ref _cardImg, value); }
+        }
+
+        public Command TappedCardCommand { get; }
+
+        public ChanceCardViewModel(string cardImageUrl, string cardBackUrl = ImageConstants.CardBack)
+        {
+            _cardImageUrl = cardImageUrl;
+            CardImg = cardBackUrl;
+            TappedCardCommand = new Command(OnCardTapped);
+        }
+
+        private void OnCardTapped()
+        {
+            CardImg = _cardImageUrl;
         }
     }
 }

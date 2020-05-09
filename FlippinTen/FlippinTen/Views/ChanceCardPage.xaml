@@ -20,7 +20,7 @@
     <StackLayout VerticalOptions="Center">
         <Image HorizontalOptions="Center" HeightRequest="200" WidthRequest="150" Source="{Binding CardImageUrl}">
             <Image.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding CardOnTableTappedCommand}"/>
+                <TapGestureRecognizer Command="{Binding TappedCardCommand}"/>
             </Image.GestureRecognizers>
         </Image>
         <Label Text="Ta ett chanskort?" FontSize="Medium" HorizontalOptions="Center"/>

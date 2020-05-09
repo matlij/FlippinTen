@@ -65,7 +65,7 @@ namespace FlippinTenTests
         }
 
         [TestMethod]
-        public void SelectCard_TriesToSelectedCardWithDifferentNumber_ShouldReturnInvalid()
+        public void SelectCard_TriesToSelectedCardWithDifferentNumber_ShouldReturnDeselect()
         {
             var cardHeartOne = new Card(1, CardType.Hearts);
             var cardHeartsTwo = new Card(2, CardType.Hearts) { Selected = true };
@@ -74,8 +74,9 @@ namespace FlippinTenTests
 
             var result = _sut.SelectCard(cardHeartOne.ID);
 
-            Assert.AreEqual(CardPlayResult.Invalid, result.Result);
-            Assert.IsFalse(cardHeartOne.Selected);
+            Assert.AreEqual(CardPlayResult.CardSelected, result.Result);
+            Assert.IsTrue(cardHeartOne.Selected);
+            Assert.IsFalse(cardHeartsTwo.Selected);
         }
 
         [TestMethod]

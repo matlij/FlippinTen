@@ -66,21 +66,20 @@ namespace FlippinTen.Core.Entities
                     throw new ArgumentException($"{cardId} not found in player {Player.UserIdentifier}");
 
                 var selectedCards = GetSelectedCards();
-                var hasSelectedCardWithDifferentNumber = selectedCards.Count > 0 && selectedCards.First().Number != card.Number;
+                
+                var hasSelectedCardWithDifferentNumber = 
+                    selectedCards.Count > 0 && 
+                    selectedCards.First().Number != card.Number;
                 if (hasSelectedCardWithDifferentNumber)
-                    return new GameResult("Måste välja kort av samma typ som redan är markerat");
+                {
+                    foreach (var selectedCard in selectedCards)
+                    {
+                        selectedCard.Selected = false;
+                    }
+                }
 
                 card.Selected = !card.Selected;
-                if (card.Selected)
-                {
-                    selectedCards.Add(card);
-                }
-                else
-                {
-                    selectedCards.Remove(card);
-                }
-
-                return new GameResult(Identifier, Player.UserIdentifier, CardPlayResult.CardSelected, selectedCards);
+                return new GameResult(Identifier, Player.UserIdentifier, CardPlayResult.CardSelected, GetSelectedCards());
             });
         }
 

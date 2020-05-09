@@ -128,10 +128,4 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
-  <ItemGroup>
-    <ProjectReference Include="..\FlippinTen\FlippinTen.csproj">
-      <Project>{48DCBE14-A33E-4D87-9A50-68FD6E0F46DF}</Project>
-      <Name>FlippinTen</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

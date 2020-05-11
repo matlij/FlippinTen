@@ -32,7 +32,14 @@ namespace FlippinTen.Views
 
         private async void OnCreateGameClicked(object sender, EventArgs e)
         {
-            await _viewModel.CreateGame(name.Text, opponent.Text);
+            try
+            {
+                await _viewModel.CreateGame(name.Text, opponent.Text);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Create game failed: {ex.Message}", "Ok");
+            }
 
             await Navigation.PopAsync();
         }

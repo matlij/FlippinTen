@@ -3,8 +3,10 @@ using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Models.Information;
 using FlippinTen.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -34,8 +36,6 @@ namespace FlippinTen.ViewModels
 
     public class GameViewModel : BaseViewModel
     {
-        private readonly OnlineGameService _onlineGameService;
-
         private bool _connected;
         private bool _waitingForPlayers;
         private Card _topCardOnTable;
@@ -50,7 +50,7 @@ namespace FlippinTen.ViewModels
 
         public bool Connected
         {
-            get { return _onlineGameService.Game.Player.IsConnected; }
+            get { return OnlineGameService.Game.Player.IsConnected; }
             set { SetProperty(ref _connected, value); }
         }
         public bool WaitingForPlayers
@@ -107,6 +107,7 @@ namespace FlippinTen.ViewModels
 
         public Command CardOnHandTappedCommand { get; }
         public Command CardOnTableTappedCommand { get; }
+        public OnlineGameService OnlineGameService { get; }
 
         public GameViewModel(OnlineGameService onlineGameService)
         {
@@ -114,25 +115,12 @@ namespace FlippinTen.ViewModels
 
             var gameName = onlineGameService.Game.Name;
             Title = $"Vändtia - {gameName}";
-            _onlineGameService = onlineGameService;
-            _onlineGameService.OnPlayerJoined += OnPlayerJoined;
-            _onlineGameService.OnTurnedPlayed += OnTurnedPlayed;
+            OnlineGameService = onlineGameService;
+            OnlineGameService.OnPlayerJoined += OnPlayerJoined;
+            OnlineGameService.OnTurnedPlayed += OnTurnedPlayed;
 
             CardOnHandTappedCommand = new Command((data) => OnCardOnHandTapped(data));
             CardOnTableTappedCommand = new Command(() => OnCardOnTableTapped());
-        }
-
-        private async void OnCardOnHandTapped(object data)
-        {
-            if (!(data is CardView card))
-                return;
-
-            await Play(g => g.SelectCard(card.ID));
-        }
-
-        private async void OnCardOnTableTapped()
-        {
-            await Play(g => g.PlaySelectedCards());
         }
 
         public async void PlayChanceCard()
@@ -149,7 +137,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            Connected = await _onlineGameService.ConnectToGame();
+            Connected = await OnlineGameService.ConnectToGame();
 
             IsBusy = false;
 
@@ -165,25 +153,16 @@ namespace FlippinTen.ViewModels
 
         public async Task Disconnect()
         {
-            await _onlineGameService.Disconnect();
+            await OnlineGameService.Disconnect();
 
             Connected = false;
         }
 
-        private async Task Play(Func<CardGame, GameResult> play)
+        public void UpdateGameBoard(GameResult result)
         {
-            IsBusy = true;
+            Debug.WriteLine("Updating game board. Result: " + JsonConvert.SerializeObject(result));
 
-            var result = await _onlineGameService.Play(play);
-
-            IsBusy = false;
-
-            UpdateGameBoard(result);
-        }
-
-        private void UpdateGameBoard(GameResult result)
-        {
-            var user = _onlineGameService.Game.Player.UserIdentifier;
+            var user = OnlineGameService.Game.Player.UserIdentifier;
 
             if (result.Invalid())
             { 
@@ -192,17 +171,17 @@ namespace FlippinTen.ViewModels
             }
 
             if (result.UserIdentifier == user)
-                UpdateCardsOnHand(_onlineGameService.Game);
+                UpdateCardsOnHand(OnlineGameService.Game);
             if (result.Result == CardPlayResult.CardSelected)
                 return;
 
             GameStatus = result.GetResultInfo(user);
-            UpdateGameBoardProperties(_onlineGameService.Game);
+            UpdateGameBoardProperties(OnlineGameService.Game);
         }
 
         private void UpdateGameBoardProperties(CardGame game)
         {
-            ShowGame = _onlineGameService.Game.GameOver || WaitingForPlayers ? false : true;
+            ShowGame = OnlineGameService.Game.GameOver || WaitingForPlayers ? false : true;
             
             TopCardOnTable = game.CardsOnTable.Count > 0
                 ? game.CardsOnTable.Peek()
@@ -224,6 +203,8 @@ namespace FlippinTen.ViewModels
             PlayerTurnStatus = playersTurn
                 ? "Din tur!"
                 : "Väntar på motståndare...";
+
+            Debug.WriteLine($"Game properties updated. {nameof(game.IsPlayersTurn)}: {playersTurn}");
         }
 
         private void UpdateCardsOnHand(CardGame game)
@@ -234,6 +215,30 @@ namespace FlippinTen.ViewModels
                 var cardView = card.AsCardView();
                 CardsOnHand.Add(cardView);
             }
+        }
+
+        private async Task Play(Func<CardGame, GameResult> play)
+        {
+            IsBusy = true;
+
+            var result = await OnlineGameService.Play(play);
+
+            IsBusy = false;
+
+            UpdateGameBoard(result);
+        }
+
+        private async void OnCardOnHandTapped(object data)
+        {
+            if (!(data is CardView card))
+                return;
+
+            await Play(g => g.SelectCard(card.ID));
+        }
+
+        private async void OnCardOnTableTapped()
+        {
+            await Play(g => g.PlaySelectedCards());
         }
 
         private void OnTurnedPlayed(object sender, CardGameEventArgs e)
@@ -248,7 +253,7 @@ namespace FlippinTen.ViewModels
 
         private void OnPlayerConnected()
         {
-            var game = _onlineGameService.Game;
+            var game = OnlineGameService.Game;
             WaitingForPlayers = IsWaitingForPlayers(game);
             UpdateGameBoardProperties(game);
             UpdateCardsOnHand(game);

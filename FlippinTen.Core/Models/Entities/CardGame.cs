@@ -85,7 +85,7 @@ namespace FlippinTen.Core.Entities
 
         public GameResult PlayChanceCard()
         {
-            return Play(() =>
+            var gameResult = Play(() =>
             {
                 if (DeckOfCards.Count == 0)
                     return new GameResult("Kortlek tom!");
@@ -101,11 +101,13 @@ namespace FlippinTen.Core.Entities
 
                 if (result == CardPlayResult.ChanceFailed)
                     PickUpCards();
-                ChangeCurrentPlayer();
 
+                Debug.WriteLine($"{DateTime.Now} - CardGame - Chance card played. Chance card '{chanceCard}', result '{result}', ");
                 return new GameResult(Identifier, Player.UserIdentifier, result, chanceCard);
             });
 
+
+            return gameResult;
         }
 
         public GameResult PickUpCards()
@@ -146,7 +148,9 @@ namespace FlippinTen.Core.Entities
 
             try
             {
-                return play();
+                var result = play();
+                Debug.WriteLine($"CardGame - Card played by user '{result.UserIdentifier}'. Result: {result.Result}");
+                return result;
             }
             catch (Exception e)
             {
@@ -229,6 +233,8 @@ namespace FlippinTen.Core.Entities
             var currentPlayerIndex = PlayerInformation.IndexOf(currentPlayer);
             var newPlayersTurn = PlayerInformation[++currentPlayerIndex % PlayerInformation.Count];
             newPlayersTurn.IsPlayersTurn = true;
+
+            Debug.WriteLine($"{DateTime.Now} - CardGame - Player turn updated from '{currentPlayer.Identifier}' (IsPlayersTurn: {currentPlayer.IsPlayersTurn}) to '{newPlayersTurn.Identifier}' (IsPlayersTurn: {newPlayersTurn.IsPlayersTurn})");
         }
 
         private void PickUpCards(int minimumCardOnHands)

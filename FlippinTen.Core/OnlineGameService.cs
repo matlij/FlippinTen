@@ -31,15 +31,13 @@ namespace FlippinTen.Core
         public async Task<GameResult> Play(Func<CardGame, GameResult> play)
         {
             var result = play(Game);
-            Debug.WriteLine($"Play result: {result}");
+            Debug.WriteLine($"OnlineGameService - Play result: {result.Result}");
 
             if (result.ShouldUpdateGame())
             {
                 var succeded = await UpdateGame(Game);
                 if (!succeded)
                 {
-                    Debug.WriteLine($"Update game '{Game.Identifier}' failed.");
-
                     Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
                     return new GameResult(Game.Identifier, Game.Player.UserIdentifier, CardPlayResult.Invalid, new Card[0]);
                 }
@@ -135,7 +133,9 @@ namespace FlippinTen.Core
         {
             try
             {
-                return await _gameService.Update(game);
+                var result = await _gameService.Update(game);
+                Debug.WriteLine($"Game '{game.Identifier}' updated. Succeded: {result}");
+                return result;
             }
             catch (Exception e)
             {
@@ -149,7 +149,9 @@ namespace FlippinTen.Core
         {
             try
             {
-                return await _hubConnection.InvokePlayTurn(gameResult);
+                var result = await _hubConnection.InvokePlayTurn(gameResult);
+                Debug.WriteLine($"OnlineGameService - Game result '{gameResult.Result}' broadcasted. Succeded: {result}");
+                return result;
             }
             catch (Exception e)
             {

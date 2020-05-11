@@ -3,7 +3,8 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                  xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
                  xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
-                 x:Class="FlippinTen.Views.ChanceCardPage">
+                 x:Class="FlippinTen.Views.ChanceCardPage"
+                 CloseWhenBackgroundIsClicked="True">
     <pages:PopupPage.Animation>
         <animations:ScaleAnimation 
             PositionIn="Center"
@@ -18,23 +19,33 @@
     </pages:PopupPage.Animation>
 
     <StackLayout VerticalOptions="Center">
-        <Image HorizontalOptions="Center" HeightRequest="200" WidthRequest="150" Source="{Binding CardImageUrl}">
-            <Image.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding TappedCardCommand}"/>
-            </Image.GestureRecognizers>
-        </Image>
-        <Label Text="Ta ett chanskort?" FontSize="Medium" HorizontalOptions="Center"/>
-    </StackLayout>
-    
-        <!--<StackLayout BackgroundColor="Black" Opacity="0.5" Padding="6,5,6,5">
-            <Image HeightRequest="150" WidthRequest="150" Source="{Binding CardBack}"/>
-        </StackLayout>
-        
-        <ContentView AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5, 0, 0.5, 0.5">
-                <Image HeightRequest="150" WidthRequest="150" Source="{Binding CardBack}"/>
-            </ContentView>
+        <Grid Padding="20" RowSpacing="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" 
+                   Text="Kort att slå" 
+                   TextColor="White"
+                   HorizontalOptions="CenterAndExpand"
+                   FontAttributes="Bold"/>
+            <Label Grid.Row="0" 
+                   Text="Chanskort" 
+                   TextColor="White"
+                   HorizontalOptions="CenterAndExpand"
+                   FontAttributes="Bold"
+                   Grid.Column="1"/>
+            <Image Grid.Row="1" HeightRequest="200" Source="{Binding TopCard}"/>
+            <Image Grid.Row="1" Grid.Column="1" HeightRequest="200" Source="{Binding ChanceCard}" x:Name="ChanceCardImg"/>
+        </Grid>
 
-            --><!--<ContentView AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="1, 0, -1, -1">
-                <Image HeightRequest="30" WidthRequest="30" Source="{Binding CardBack}"/>
-            </ContentView>-->
+        <Button Text="Ta Chanskort" 
+                Style="{StaticResource buttonStyle}" 
+                Clicked="OnTakeChanceCardClicked"
+                x:Name="ChanceCardButton"/>
+    </StackLayout>
 </pages:PopupPage>

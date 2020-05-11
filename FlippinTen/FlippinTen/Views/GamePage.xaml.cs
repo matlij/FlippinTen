@@ -1,6 +1,5 @@
-﻿using FlippinTen.Core.Entities;
-using FlippinTen.ViewModels;
-using Rg.Plugins.Popup.Extensions;
+﻿using FlippinTen.ViewModels;
+using Rg.Plugins.Popup.Services;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -27,43 +26,12 @@ namespace FlippinTen.Views
             base.OnAppearing();
         }
 
-        protected async override void OnDisappearing()
-        {
-            await _viewModel.Disconnect();
-
-            base.OnDisappearing();
-        }
-
         private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
-            var image = (Image)sender;
-            var source = image.Source as FileImageSource;
-
-            var viewModel = new ChanceCardViewModel(source.File);
+            var viewModel = new ChanceCardViewModel(_viewModel.OnlineGameService);
             var popup = new ChanceCardPage(viewModel);
-            await Navigation.PushPopupAsync(popup);
-
-            //const string PickUp = "Plocka upp";
-            //const string ChanceCard = "Chansa";
-            //const string Cancel = "Avbryt";
-
-            //var action = await DisplayActionSheet("Vilket drag vill du göra?", Cancel, null, ChanceCard, PickUp);
-            //if (action == Cancel || string.IsNullOrEmpty(action))
-            //{
-            //    return;
-            //}
-            //else if (action == ChanceCard)
-            //{
-            //    _viewModel.PlayChanceCard();
-            //}
-            //else if (action == PickUp)
-            //{
-            //    _viewModel.PickUpCards();
-            //}
-            //else
-            //{
-            //    await DisplayAlert($"Fel: {action}", "Nånting gick fel :(", "Stäng");
-            //}
+            popup.OnCardPlayed += (s, @event) => _viewModel.UpdateGameBoard(@event.GameResult);
+            await PopupNavigation.Instance.PushAsync(popup);
         }
     }
 }

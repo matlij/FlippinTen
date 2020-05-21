@@ -22,7 +22,7 @@
                   ItemTapped="OnListViewItemTapped"
                   HeightRequest="200"
                   IsPullToRefreshEnabled="True"
-                  IsRefreshing="{Binding IsBusy, Mode=OneWay}"
+                  IsRefreshing="{Binding IsBusy, Mode=TwoWay}"
                   RefreshCommand="{Binding LoadGamesCommand}">
             <ListView.ItemTemplate>
                 <DataTemplate>

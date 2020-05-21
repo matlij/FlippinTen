@@ -28,6 +28,7 @@ namespace FlippinTen.ViewModels
         private async Task ExecuteLoadGamesCommand()
         {
             IsBusy = true;
+            Debug.WriteLine($"{DateTime.Now} - LoadGames starting. IsBusy: {IsBusy}.");
 
             try
             {
@@ -40,6 +41,7 @@ namespace FlippinTen.ViewModels
             finally
             {
                 IsBusy = false;
+                Debug.WriteLine($"{DateTime.Now} - LoadGames complete. IsBusy: {IsBusy}.");
             }
         }
 
@@ -48,8 +50,12 @@ namespace FlippinTen.ViewModels
             OnGoingGames.Clear();
 
             var games = await _cardGameService.GetByPlayer(DatabaseConstants.PlayerName);
-            if (games.Count > 0)
-                games.ForEach(g => OnGoingGames.Add(g));
+            foreach (var game in games)
+            {
+                OnGoingGames.Add(game);
+            }
+
+            Debug.WriteLine($"{DateTime.Now} - Games refreshed, added '{games.Count}' games.");
         }
     }
 }

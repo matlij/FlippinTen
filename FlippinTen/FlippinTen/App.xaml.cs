@@ -1,9 +1,6 @@
-﻿using DLToolkit.Forms.Controls;
-using FlippinTen.Bootstrap;
+﻿using FlippinTen.Bootstrap;
 using FlippinTen.Views;
-using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace FlippinTen
 {
@@ -12,7 +9,6 @@ namespace FlippinTen
         public App()
         {
             InitializeComponent();
-            FlowListView.Init();
             AppContainer.RegisterDependencies();
 
             MainPage = new NavigationPage(new MenuPage());

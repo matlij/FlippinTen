@@ -57,29 +57,25 @@ namespace FlippinTen.Core.Entities
             return playerInfo.IsPlayersTurn;
         }
 
-        public GameResult SelectCard(int cardId)
+        public GameResult PlayCards(List<Card> cards)
         {
+            if (cards is null)
+            {
+                throw new ArgumentNullException(nameof(cards));
+            }
+
+            if (cards.Count == 0)
+            {
+                return new GameResult("No cards selected to play.");
+            }
+
             return Play(() =>
             {
-                var card = Player.CardsOnHand.FirstOrDefault(c => c.ID == cardId);
-                if (card == null)
-                    throw new ArgumentException($"{cardId} not found in player {Player.UserIdentifier}");
+                if (cards.Any(c => c.Number != cards.First().Number))
+                    return new GameResult($"Must play cards of same type. Input: {string.Join(", ", cards)}");
 
-                var selectedCards = GetSelectedCards();
-                
-                var hasSelectedCardWithDifferentNumber = 
-                    selectedCards.Count > 0 && 
-                    selectedCards.First().Number != card.Number;
-                if (hasSelectedCardWithDifferentNumber)
-                {
-                    foreach (var selectedCard in selectedCards)
-                    {
-                        selectedCard.Selected = false;
-                    }
-                }
-
-                card.Selected = !card.Selected;
-                return new GameResult(Identifier, Player.UserIdentifier, CardPlayResult.CardSelected, GetSelectedCards());
+                var result = Play(cards);
+                return new GameResult(Identifier, Player.UserIdentifier, result, cards);
             });
         }
 
@@ -94,7 +90,7 @@ namespace FlippinTen.Core.Entities
                 var chanceCardList = new List<Card> { chanceCard };
                 Player.AddCardsToHand(chanceCardList);
 
-                var result = PlayCards(chanceCardList);
+                var result = Play(chanceCardList);
                 result = result == CardPlayResult.Invalid
                     ? CardPlayResult.ChanceFailed
                     : CardPlayResult.ChanceSucceded;
@@ -126,19 +122,6 @@ namespace FlippinTen.Core.Entities
             });
         }
 
-        public GameResult PlaySelectedCards()
-        {
-            return Play(() =>
-            {
-                var selectedCards = GetSelectedCards();
-                if (selectedCards.Count == 0)
-                    return new GameResult("Inga kort markerade...");
-
-                var result = PlayCards(selectedCards);
-                return new GameResult(Identifier, Player.UserIdentifier, result, selectedCards);
-            });
-        }
-
         private GameResult Play(Func<GameResult> play)
         {
             if (GameOver)
@@ -159,10 +142,10 @@ namespace FlippinTen.Core.Entities
             }
         }
 
-        private CardPlayResult PlayCards(List<Card> cards)
+        private CardPlayResult Play(List<Card> cards)
         {
             var cardFirst = cards.First();
-            if (!CanPlayCard(cards.First()))
+            if (!CanPlayCard(cardFirst))
                 return CardPlayResult.Invalid;
 
             foreach (var card in cards)
@@ -210,15 +193,6 @@ namespace FlippinTen.Core.Entities
             return number == _cardTenNumber || count == 4
                 ? true
                 : false;
-        }
-
-        private List<Card> GetSelectedCards()
-        {
-            var selectedCards = Player.CardsOnHand
-                .Where(s => s.Selected)
-                .ToList();
-
-            return selectedCards;
         }
 
         private void ChangeCurrentPlayer()

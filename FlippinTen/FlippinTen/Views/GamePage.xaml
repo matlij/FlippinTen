@@ -8,9 +8,30 @@
              xmlns:Helpers="clr-namespace:FlippinTen.Helpers"
              Title="{Binding Title}"
              BackgroundColor="{StaticResource AppBackgroundColor}">
+    <ContentPage.Resources>
+        <Style TargetType="Frame">
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor"
+                                        Value="Transparent"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor"
+                                        Value="#78C6B5" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout Margin="20,20,20,20">
-
             <AbsoluteLayout IsVisible="{Binding WaitingForPlayers}" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                 <StackLayout Spacing="25" AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1" AbsoluteLayout.LayoutFlags="PositionProportional">
                     <Label Text="Väntar på andra spelare..."
@@ -23,7 +44,6 @@
                                    HorizontalOptions="CenterAndExpand"/>
                 </StackLayout>
             </AbsoluteLayout>
-
             <AbsoluteLayout IsVisible="{Binding GameOver}" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                 <StackLayout Spacing="50" AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1" AbsoluteLayout.LayoutFlags="PositionProportional">
                     <Label
@@ -34,7 +54,6 @@
                     <Button Text="Returmatch" Style="{StaticResource buttonStyle}" VerticalOptions="Center"/>
                 </StackLayout>
             </AbsoluteLayout>
-
             <StackLayout Spacing="15" 
                          IsVisible="{Binding ShowGame}"
                          IsEnabled="{Binding IsPlayersTurn}">
@@ -98,20 +117,24 @@
                 <Label Text="Kort på hand"
                        HorizontalTextAlignment="Center" 
                        FontSize="Medium"/>
-                <flv:FlowListView FlowColumnCount="4"
-                                  SeparatorVisibility="Default"   
-                                  HasUnevenRows="True"  
-                                  FlowItemTappedCommand="{Binding CardOnHandTappedCommand}"
-                                  FlowItemsSource="{Binding CardsOnHand}">
-                    <flv:FlowListView.FlowColumnTemplate>
+                <CollectionView ItemsSource="{Binding CardsOnHand}"
+                        SelectionMode="Multiple" 
+                        SelectedItems="{Binding SelectedCards}"
+                        SelectionChangedCommand="{Binding CardOnHandTappedCommand}">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="4" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame CornerRadius="3"  Padding="10" BackgroundColor="{Binding BackroundColor}">
+                            <Frame CornerRadius="3"  
+                                   Padding="10" 
+                                   BackgroundColor="{Binding BackroundColor}">
                                 <Image HeightRequest="90"
                                        Source="{Binding ImageUrl}"/>
                             </Frame>
                         </DataTemplate>
-                    </flv:FlowListView.FlowColumnTemplate>
-                </flv:FlowListView>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>

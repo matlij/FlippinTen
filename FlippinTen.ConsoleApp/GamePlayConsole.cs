@@ -3,6 +3,7 @@ using FlippinTen.Core.Entities;
 using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Models.Information;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -124,13 +125,7 @@ namespace FlippinTen.ConsoleApp
         private async Task<GameResult> PlayCard(int cardIndex)
         {
             var cardToPlay = _onlineService.Game.Player.CardsOnHand[cardIndex];
-            var selectResult = await _onlineService.Play(c => c.SelectCard(cardToPlay.ID));
-            if (selectResult.Result != CardPlayResult.CardSelected)
-            {
-                return selectResult;
-            }
-
-            var result = await _onlineService.Play(c => c.PlaySelectedCards());
+            var result = await _onlineService.Play(c => c.PlayCards(new List<Card> { cardToPlay }));
             if (result.Invalid())
             {
                 foreach (var card in _onlineService.Game.Player.CardsOnHand)

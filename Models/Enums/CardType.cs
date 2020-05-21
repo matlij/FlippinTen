@@ -8,7 +8,7 @@ namespace FlippinTen.Models.Enums
     {
         Hearts = 1,
         Dimonds = 2,
-        Clubs = 3,
+        Cloves = 3,
         Spades = 4
     }
 }

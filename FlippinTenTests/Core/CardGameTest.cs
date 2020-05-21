@@ -21,7 +21,7 @@ namespace FlippinTenTests
         [TestInitialize]
         public void Initialize()
         {
-            _dummyCard1 = new Card(3, CardType.Clubs);
+            _dummyCard1 = new Card(3, CardType.Cloves);
             _dummyCard2 = new Card(4, CardType.Dimonds);
             _dummyCardNoTen = new Card(10, CardType.Dimonds);
             _dummyCardNoTwo = new Card(2, CardType.Dimonds);

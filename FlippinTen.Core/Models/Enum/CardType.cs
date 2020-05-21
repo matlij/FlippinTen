@@ -7,7 +7,7 @@ namespace FlippinTen.Core.Entities.Enums
     {
         public static CardType Hearts { get; } = new CardType(1, "Hearts");
         public static CardType Dimonds { get; } = new CardType(2, "Dimonds");
-        public static CardType Clubs { get; } = new CardType(3, "Clubs");
+        public static CardType Cloves { get; } = new CardType(3, "Cloves");
         public static CardType Spades { get; } = new CardType(4, "Spades");
 
         public string Name { get; private set; }
@@ -21,7 +21,7 @@ namespace FlippinTen.Core.Entities.Enums
 
         public static List<CardType> GetList()
         {
-            var cardTypes = new CardType[] { Hearts, Dimonds, Clubs, Spades };
+            var cardTypes = new CardType[] { Hearts, Dimonds, Cloves, Spades };
             return new List<CardType>(cardTypes);
         }
 

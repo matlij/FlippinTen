@@ -28,7 +28,7 @@ namespace FlippinTen.Core.Entities
             }
 
             ID = cardId;
-            ImageUrl = $"spades{Number}.png";
+            ImageUrl = GetCardImgUrl(Number, CardType);
         }
 
         public Card(int number, CardType cardType)
@@ -42,7 +42,12 @@ namespace FlippinTen.Core.Entities
             Number = number;
             CardType = cardType;
             ID = number + (cardType.Value - 1) * maxNumber;
-            ImageUrl = $"spades{number}.png";
+            ImageUrl = GetCardImgUrl(number, cardType);
+        }
+
+        private string GetCardImgUrl(int number, CardType cardType)
+        {
+            return $"{cardType.Name.ToLower()}{number}.png";
         }
 
         public int ID { get; }

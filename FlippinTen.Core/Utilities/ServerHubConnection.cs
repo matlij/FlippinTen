@@ -45,30 +45,35 @@ namespace FlippinTen.Core.Utilities
             }
         }
 
-        public async Task Disconnect()
+        public async void Disconnect()
         {
             await _connection.StopAsync();
             await _connection.DisposeAsync();
         }
 
-        public void Subscribe<T>(string methodName, Action<T> handler)
+        public void SubscribeOnGameStarted<T>(string methodName, Action<T> handler)
         {
             _connection.On(methodName, handler);
         }
 
-        public void SubscribeOnTurnedPlayed(Action<GameResult> action)
+        public void SubscribeOnTurnedPlayed(string userIdentifier, Action<GameResult> action)
         {
             _connection.On<dtoInfo.GameResult>(
                 "TurnedPlayed", 
                 g => action(g.AsGameResult()));
         }
 
-        public async Task<T> Invoke<T>(string methodName, object[] parameters)
+        public void SubscribeOnPlayerJoined(string userIdentifier, Action<string> action)
         {
-            return await _connection.InvokeCoreAsync<T>(methodName, parameters);
+            _connection.On("PlayerJoined", action);
         }
 
-        public async Task<bool> InvokePlayTurn(GameResult gameResult)
+        public async Task<bool> JoinGame(string userIdentifier, string gameIdentifier)
+        {
+            return await _connection.InvokeCoreAsync<bool>("JoinGame", new object[] { gameIdentifier, userIdentifier });
+        }
+
+        public async Task<bool> InvokePlayTurn(string userIdentifier, GameResult gameResult)
         {
             var resultDto = gameResult.AsGameResultDto();
             return await _connection.InvokeCoreAsync<bool>("PlayTurn", new object[] { resultDto });

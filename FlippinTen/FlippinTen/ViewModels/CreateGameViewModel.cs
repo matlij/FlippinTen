@@ -22,7 +22,7 @@ namespace FlippinTen.ViewModels
             PlayerName = playerName;
         }
 
-        public async Task<CardGame> CreateGame(string gameName, string opponent)
+        public async Task<GameFlippinTen> CreateGame(string gameName, string opponent)
         {
             return await _cardGameService.Add(gameName, PlayerName, new List<string> { opponent });
         }

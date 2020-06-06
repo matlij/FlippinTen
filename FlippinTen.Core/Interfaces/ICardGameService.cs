@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 
 namespace FlippinTen.Core.Interfaces
 {
+    public interface ICardGameOnlineService : ICardGameService { }
+    public interface ICardGameOfflineService : ICardGameService { }
+
     public interface ICardGameService
     {
-        Task<CardGame> Get(string gameIdentifier, string userIdentifier);
-        Task<List<CardGame>> GetByPlayer(string playerName);
-        Task<CardGame> Add(string gameName, string user, List<string> opponents);
-        Task<bool> Update(CardGame game);
+        Task<GameFlippinTen> Get(string gameIdentifier, string userIdentifier);
+        Task<List<GameFlippinTen>> GetByPlayer(string playerName);
+        Task<GameFlippinTen> Add(string gameName, string user, List<string> opponents);
+        Task<bool> Update(GameFlippinTen game);
     }
 }

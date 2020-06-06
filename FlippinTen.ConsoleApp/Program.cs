@@ -1,14 +1,13 @@
 ﻿using FlippinTen.Core;
-using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Repository;
 using FlippinTen.Core.Services;
-using FlippinTen.Core.Utilities;
 using FlippinTen.Utilities;
-using Microsoft.AspNetCore.SignalR.Client;
-using FlippinTen.Models.Constants;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
+using FlippinTen.Core.Factories;
+using FlippinTen.Core.Entities;
 
 namespace FlippinTen.ConsoleApp
 {
@@ -30,31 +29,47 @@ namespace FlippinTen.ConsoleApp
                 playerName = "matte";
             }
 
-            var genericRepository = new GenericRepository();
-            var cardUtilities = new CardUtilities();
-            var cardGameUtilities = new CardGameUtilities(cardUtilities);
-            var cardGameService = new CardGameService(genericRepository, cardGameUtilities);
+            var playOnline = false;
+            var cardGameService = CreateCardService(playOnline);
             var game = await StartGameMenu(playerName, cardGameService);
 
-            await StartGameConsole(game, cardGameService);
+            var hubConnection = ServerHubConnectionFactory.Create(cardGameService, playOnline);
+            var cardGame = new CardGame(cardGameService, hubConnection, game.Identifier, game.Player.UserIdentifier);
+
+            _gameConsole = new GamePlayConsole(cardGame);
+            if (playOnline)
+            {
+                await _gameConsole.StartGame();
+            }
+            else
+            {
+                var computerPlayer = ComputerPlayerFactory.Create(cardGameService, hubConnection, game);
+                await _gameConsole.StartGameAgainstComputer(computerPlayer);
+            }
 
             Console.WriteLine("Closing connection");
-            await _gameConsole.EndGame();
+            _gameConsole.EndGame();
         }
 
-        private static async Task<CardGame> StartGameMenu(string playerName, ICardGameService cardGameService)
+        private static ICardGameService CreateCardService(bool playOnline)
+        {
+            var cardUtilities = new CardUtilities();
+            var cardGameUtilities = new CardGameUtilities(cardUtilities);
+            if (playOnline)
+            {
+                var genericRepository = new GenericRepository();
+                return new OnlineCardGameService(genericRepository, cardGameUtilities);
+            }
+            else
+            {
+                return new OfflineCardGameService(cardGameUtilities);
+            }
+        }
+
+        private static async Task<GameFlippinTen> StartGameMenu(string playerName, ICardGameService cardGameService)
         {
             var gameMenu = new GameMenuConsole(cardGameService);
             return await gameMenu.PickGame(playerName);
-        }
-
-        private static async Task StartGameConsole(CardGame game, ICardGameService cardGameService)
-        {
-            var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var onlineGameService = new OnlineGameService(cardGameService, hubConnection, game);
-            _gameConsole = new GamePlayConsole(onlineGameService);
-
-            await _gameConsole.StartGame();
         }
     }
 }

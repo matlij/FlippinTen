@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace FlippinTen.Core.Entities
 {
-    public class CardGame
+    public class GameFlippinTen
     {
         private const int _cardTwoNumber = 2;
         private const int _cardTenNumber = 10;
@@ -18,11 +18,11 @@ namespace FlippinTen.Core.Entities
         public Stack<Card> CardsOnTable { get; private set; }
         public Player Player { get; }
         public List<PlayerInformation> PlayerInformation { get; }
-        public bool AllPlayersOnline { get; set; }
+        public bool AllPlayersOnline { get => PlayerInformation.TrueForAll(p => p.IsConnected); }
         public bool GameOver { get; set; }
         public string Winner { get; set; }
 
-        public CardGame(
+        public GameFlippinTen(
             string identifier,
             string name,
             Stack<Card> deckOfCards,

@@ -11,6 +11,7 @@ namespace FlippinTen.Core.Entities
         }
         public string Identifier { get; }
         public bool IsPlayersTurn { get; set; }
+        public bool IsConnected { get; set; }
 
         public bool Equals(PlayerInformation other)
         {

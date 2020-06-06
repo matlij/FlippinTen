@@ -5,7 +5,7 @@
         Unknown,
         Invalid,
         Succeded,
-        CardSelected,
+        CardSelected, //remove
         ChanceSucceded,
         ChanceFailed,
         CardsFlipped,

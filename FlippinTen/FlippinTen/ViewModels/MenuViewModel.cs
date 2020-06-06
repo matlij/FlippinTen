@@ -14,7 +14,7 @@ namespace FlippinTen.ViewModels
         private readonly ICardGameService _cardGameService;
 
         public Command LoadGamesCommand { get; private set; }
-        public ObservableCollection<CardGame> OnGoingGames { get; set; } = new ObservableCollection<CardGame>();
+        public ObservableCollection<GameFlippinTen> OnGoingGames { get; set; } = new ObservableCollection<GameFlippinTen>();
 
         public MenuViewModel(ICardGameService cardGameService)
         {

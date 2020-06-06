@@ -9,40 +9,45 @@ using System.Threading.Tasks;
 
 namespace FlippinTen.Core
 {
-    public class OnlineGameService
+    public class CardGame : ICardGame
     {
         public event EventHandler<PlayerJoinedEventArgs> OnPlayerJoined;
         public event EventHandler<CardGameEventArgs> OnTurnedPlayed;
 
         private readonly ICardGameService _gameService;
         private readonly IServerHubConnection _hubConnection;
-        public CardGame Game { get; private set; }
+        private readonly string _gameIdentifier;
+        private readonly string _userIdentifier;
 
-        public OnlineGameService(ICardGameService gameService, IServerHubConnection hubConnection, CardGame game)
+        public async Task<GameFlippinTen> GetGame() => await _gameService.Get(_gameIdentifier, _userIdentifier);
+
+        public CardGame(ICardGameService gameService, IServerHubConnection hubConnection, string gameIdentifier, string userIdentifier)
         {
             _gameService = gameService;
             _hubConnection = hubConnection;
-            Game = game;
+            _gameIdentifier = gameIdentifier;
+            _userIdentifier = userIdentifier;
 
-            _hubConnection.Subscribe<string>("GameStarted", GameStarted);
-            _hubConnection.SubscribeOnTurnedPlayed(TurnedPlayed);
+            _hubConnection.SubscribeOnPlayerJoined(_userIdentifier, PlayerJoined);
+            _hubConnection.SubscribeOnTurnedPlayed(_userIdentifier, TurnedPlayed);
         }
 
-        public async Task<GameResult> Play(Func<CardGame, GameResult> play)
+        public async Task<GameResult> Play(Func<GameFlippinTen, GameResult> play)
         {
-            var result = play(Game);
+            var game = await GetGame();
+            var result = play(game);
             Debug.WriteLine($"OnlineGameService - Play result: {result.Result}");
 
             if (result.ShouldUpdateGame())
             {
-                var succeded = await UpdateGame(Game);
+                var succeded = await UpdateGame(game);
                 if (!succeded)
                 {
-                    Game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
-                    return new GameResult(Game.Identifier, Game.Player.UserIdentifier, CardPlayResult.Invalid, new Card[0]);
+                    game = await _gameService.Get(game.Identifier, game.Player.UserIdentifier);
+                    return new GameResult(game.Identifier, game.Player.UserIdentifier, CardPlayResult.Invalid, new Card[0]);
                 }
 
-                await BroadcastGameResult(result);
+                await BroadcastGameResult(_userIdentifier, result);
             }
 
             return result;
@@ -50,6 +55,8 @@ namespace FlippinTen.Core
 
         public async Task<bool> ConnectToGame()
         {
+            var game = await GetGame();
+
             if (!await ConnectToHub())
             {
                 Debug.WriteLine("Uppkoppling till server hub misslyckades.");
@@ -57,19 +64,19 @@ namespace FlippinTen.Core
             }
             Debug.WriteLine("Uppkopplad till server.");
 
-            if (!await JoinGame(Game.Identifier, Game.Player.UserIdentifier))
+            if (!await JoinGame(game.Identifier, game.Player.UserIdentifier))
             {
-                Debug.WriteLine($"Anslutning till {Game.Identifier} misslyckades.");
+                Debug.WriteLine($"Anslutning till {game.Identifier} misslyckades.");
                 return false;
             }
-            Debug.WriteLine($"Uppkopplad till {Game.Identifier}.");
+            Debug.WriteLine($"Uppkopplad till {game.Identifier}.");
 
             return true;
         }
 
-        public async Task Disconnect()
+        public void Disconnect()
         {
-            await _hubConnection.Disconnect();
+            _hubConnection.Disconnect();
         }
 
         private async Task<bool> ConnectToHub()
@@ -89,7 +96,7 @@ namespace FlippinTen.Core
         {
             try
             {
-                if (!await _hubConnection.Invoke<bool>("JoinGame", new object[] { gameIdentifier, userIdentifier }))
+                if (!await _hubConnection.JoinGame(gameIdentifier, userIdentifier))
                     return false;
 
                 return true;
@@ -101,40 +108,25 @@ namespace FlippinTen.Core
             }
         }
 
-        private async void TurnedPlayed(GameResult gameResult)
+        private void TurnedPlayed(GameResult gameResult)
         {
             Debug.WriteLine($"Turned played by {gameResult.UserIdentifier}. Result: {gameResult.Result}");
-
-            try
-            {
-                if (gameResult.ShouldUpdateGame())
-                {
-                    var game = await _gameService.Get(Game.Identifier, Game.Player.UserIdentifier);
-                    Game.UpdateGame(game.DeckOfCards, game.CardsOnTable, game.PlayerInformation, game.GameOver, game.Winner);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"Get or update game failed: " + e);
-                throw;
-            }
 
             OnTurnedPlayed?.Invoke(this, new CardGameEventArgs(gameResult));
         }
 
-        private void GameStarted(string gameIdentifier)
+        private void PlayerJoined(string gameIdentifier)
         {
-            Game.AllPlayersOnline = true;
-
-            OnPlayerJoined?.Invoke(this, null);
+            var eventArgs = new PlayerJoinedEventArgs { GameName = _gameIdentifier, UserIdentifier = _userIdentifier };
+            OnPlayerJoined?.Invoke(this, eventArgs);
         }
 
-        private async Task<bool> UpdateGame(CardGame game)
+        private async Task<bool> UpdateGame(GameFlippinTen game)
         {
             try
             {
                 var result = await _gameService.Update(game);
-                Debug.WriteLine($"Game '{game.Identifier}' updated. Succeded: {result}");
+                Debug.WriteLine($"game '{game.Identifier}' updated. Succeded: {result}");
                 return result;
             }
             catch (Exception e)
@@ -145,12 +137,12 @@ namespace FlippinTen.Core
             }
         }
 
-        private async Task<bool> BroadcastGameResult(GameResult gameResult)
+        private async Task<bool> BroadcastGameResult(string userIdentifier, GameResult gameResult)
         {
             try
             {
-                var result = await _hubConnection.InvokePlayTurn(gameResult);
-                Debug.WriteLine($"OnlineGameService - Game result '{gameResult.Result}' broadcasted. Succeded: {result}");
+                var result = await _hubConnection.InvokePlayTurn(userIdentifier, gameResult);
+                Debug.WriteLine($"OnlineGameService - game result '{gameResult.Result}' broadcasted. Succeded: {result}");
                 return result;
             }
             catch (Exception e)

@@ -23,7 +23,7 @@ namespace FlippinTenTests.Core
         {
             _repository = new Mock<IGenericRepository>();
             _cardGameUtilities = new CardGameUtilities(new CardUtilities());
-            _sut = new CardGameService(_repository.Object, _cardGameUtilities);
+            _sut = new OnlineCardGameService(_repository.Object, _cardGameUtilities);
         }
 
         [TestMethod]

@@ -11,18 +11,18 @@ using dto = FlippinTen.Models.Entities;
 
 namespace FlippinTen.Core.Services
 {
-    public class CardGameService : ICardGameService
+    public class OnlineCardGameService : ICardGameOnlineService
     {
         private readonly IGenericRepository _repository;
         private readonly ICardGameUtilities _gameUtilities;
 
-        public CardGameService(IGenericRepository repository, ICardGameUtilities gameUtilities)
+        public OnlineCardGameService(IGenericRepository repository, ICardGameUtilities gameUtilities)
         {
             _repository = repository;
             _gameUtilities = gameUtilities;
         }
 
-        public async Task<CardGame> Get(string gameIdentifier, string userIdentifier)
+        public async Task<GameFlippinTen> Get(string gameIdentifier, string userIdentifier)
         {
             var uri = new UriBuilder(UriConstants.BaseUri)
             {
@@ -33,7 +33,7 @@ namespace FlippinTen.Core.Services
             return game.AsCardGame(userIdentifier);
         }
 
-        public async Task<List<CardGame>> GetByPlayer(string userIdentifier)
+        public async Task<List<GameFlippinTen>> GetByPlayer(string userIdentifier)
         {
             var uri = new UriBuilder(UriConstants.BaseUri)
             {
@@ -48,7 +48,7 @@ namespace FlippinTen.Core.Services
                 .ToList();
         }
 
-        public async Task<CardGame> Add(string gameName, string user, List<string> opponents)
+        public async Task<GameFlippinTen> Add(string gameName, string user, List<string> opponents)
         {
             if (gameName == null)
                 throw new ArgumentNullException(nameof(gameName));
@@ -69,7 +69,7 @@ namespace FlippinTen.Core.Services
             return response.AsCardGame(user);
         }
 
-        public async Task<bool> Update(CardGame game)
+        public async Task<bool> Update(GameFlippinTen game)
         {
             if (game == null)
                 throw new ArgumentNullException(nameof(game));

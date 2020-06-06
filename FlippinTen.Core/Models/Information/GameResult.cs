@@ -53,11 +53,9 @@ namespace FlippinTen.Core.Models.Information
                 Result == CardPlayResult.CardsOnTablePickedUp;
         }
 
-        public string GetResultInfo(string requestingUser)
+        public string GetResultInfo(string requestingUser = null)
         {
-            var player = UserIdentifier == requestingUser
-                ? "Du"
-                : UserIdentifier;
+            var player = UserIdentifier == requestingUser ? "Du" : UserIdentifier;
 
             switch (Result)
             {

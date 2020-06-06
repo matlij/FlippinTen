@@ -14,15 +14,15 @@ namespace FlippinTen.Core.Translations
 {
     public static class EntityTranslation
     {
-        public static CardGame AsCardGame(this dto.CardGame game, string userIdentifier)
+        public static GameFlippinTen AsCardGame(this dto.CardGame game, string userIdentifier)
         {
             var deckOfCards = game.DeckOfCards.AsCardStack();
             var cardsOnTable = game.CardsOnTable.AsCardStack();
             var player = game.Players.FirstOrDefault(p => p.UserIdentifier == userIdentifier);
             var playerInformation = game.Players
-                .Select(p => new PlayerInformation(p.UserIdentifier) { IsPlayersTurn = p.IsPlayersTurn })
+                .Select(p => new PlayerInformation(p.UserIdentifier) { IsPlayersTurn = p.IsPlayersTurn, IsConnected = p.IsConnected })
                 .ToList();
-            return new CardGame(game.Identifier, game.Name, deckOfCards, cardsOnTable, player.AsPlayer(), playerInformation)
+            return new GameFlippinTen(game.Identifier, game.Name, deckOfCards, cardsOnTable, player.AsPlayer(), playerInformation)
             {
                 Winner = game.Winner,
                 GameOver = game.GameOver

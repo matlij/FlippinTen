@@ -2,15 +2,13 @@
 using FlippinTen.Core;
 using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using FlippinTen.Core.Utilities;
 using FlippinTen.ViewModels;
-using Microsoft.AspNetCore.SignalR.Client;
-using FlippinTen.Models.Constants;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Rg.Plugins.Popup.Pages;
-using Rg.Plugins.Popup.Extensions;
+using FlippinTen.Core.Factories;
+using FlippinTen.Models.Constants;
+using System.Linq;
 
 namespace FlippinTen.Views
 {
@@ -18,12 +16,19 @@ namespace FlippinTen.Views
     public partial class MenuPage : ContentPage
     {
         private readonly MenuViewModel _viewModel;
+        private readonly bool _playOnline;
+        private readonly ICardGameService _gameService;
 
-        public MenuPage()
+        public MenuPage(bool playOnline)
         {
             InitializeComponent();
 
-            BindingContext = _viewModel = new MenuViewModel(AppContainer.Resolve<ICardGameService>());
+            _playOnline = playOnline;
+
+            _gameService = playOnline
+                ? AppContainer.Resolve<ICardGameOnlineService>()
+                : (ICardGameService)AppContainer.Resolve<ICardGameOfflineService>();
+            BindingContext = _viewModel = new MenuViewModel(_gameService);
         }
 
         protected override void OnAppearing()
@@ -36,18 +41,30 @@ namespace FlippinTen.Views
 
         private async void OnListViewItemTapped(object sender, ItemTappedEventArgs e)
         {
-            var tappedGame = e.Item as CardGame;
+            var tappedGame = e.Item as GameFlippinTen;
 
-            var hubConnection = new ServerHubConnection(new HubConnectionBuilder(), UriConstants.BaseUri + UriConstants.GameHub);
-            var onlineGameService = new OnlineGameService(AppContainer.Resolve<ICardGameService>(), hubConnection, tappedGame);
-            var gameView = new GameViewModel(onlineGameService);
+            var hubConnection = ServerHubConnectionFactory.Create(_gameService, _playOnline);
+            var cardGame = new CardGame(_gameService, hubConnection, tappedGame.Identifier, tappedGame.Player.UserIdentifier);
+
+            GameViewModel gameView;
+            if (_playOnline)
+            {
+                gameView = new GameViewModel(cardGame, tappedGame);
+            }
+            else
+            {
+                var computerPlayer = ComputerPlayerFactory.Create(_gameService, hubConnection, tappedGame);
+                gameView = new GameViewModel(cardGame, tappedGame, computerPlayer);
+            }
 
             await Navigation.PushAsync(new GamePage(gameView));
         }
 
         private async void OnCreateGameClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new CreateGamePage());
+            var view = new CreateGameViewModel(_gameService, DatabaseConstants.PlayerName);
+
+            await Navigation.PushAsync(new CreateGamePage(view));
         }
     }
 }

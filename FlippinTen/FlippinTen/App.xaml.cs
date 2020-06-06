@@ -11,7 +11,7 @@ namespace FlippinTen
             InitializeComponent();
             AppContainer.RegisterDependencies();
 
-            MainPage = new NavigationPage(new MenuPage());
+            MainPage = new NavigationPage(new MenuPage(false));
         }
 
         protected override void OnStart()

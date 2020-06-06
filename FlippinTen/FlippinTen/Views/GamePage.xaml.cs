@@ -20,17 +20,17 @@ namespace FlippinTen.Views
 
         protected async override void OnAppearing()
         {
-            if (!_viewModel.Connected)
-                await _viewModel.ConnectToGame();
+            await _viewModel.ConnectToGame();
 
             base.OnAppearing();
         }
 
         private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
-            var viewModel = new ChanceCardViewModel(_viewModel.OnlineGameService);
+            var game = await _viewModel.CardGame.GetGame();
+            var viewModel = new ChanceCardViewModel(_viewModel.CardGame, game);
             var popup = new ChanceCardPage(viewModel);
-            popup.OnCardPlayed += (s, @event) => _viewModel.UpdateGameBoard(@event.GameResult);
+            popup.OnCardPlayed += async (s, @event) => await _viewModel.UpdateGameBoard(@event.GameResult);
             await PopupNavigation.Instance.PushAsync(popup);
         }
     }

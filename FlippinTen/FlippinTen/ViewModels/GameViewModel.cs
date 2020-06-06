@@ -15,7 +15,6 @@ namespace FlippinTen.ViewModels
 {
     public class GameViewModel : BaseViewModel
     {
-        private bool _connected;
         private bool _waitingForPlayers;
         private Card _topCardOnTable;
         private string _gameStatus;
@@ -26,12 +25,8 @@ namespace FlippinTen.ViewModels
         private bool _gameOver;
         private bool _showGame;
         private bool _isPlayersTurn;
+        private readonly ComputerPlayer _computerPlayer;
 
-        public bool Connected
-        {
-            get { return OnlineGameService.Game.Player.IsConnected; }
-            set { SetProperty(ref _connected, value); }
-        }
         public bool WaitingForPlayers
         {
             get { return _waitingForPlayers; }
@@ -87,17 +82,23 @@ namespace FlippinTen.ViewModels
 
         public Command CardOnHandTappedCommand { get; }
         public Command CardOnTableTappedCommand { get; }
-        public OnlineGameService OnlineGameService { get; }
+        public ICardGame CardGame { get; }
 
-        public GameViewModel(OnlineGameService onlineGameService)
+        public GameViewModel(ICardGame cardGame, GameFlippinTen game, ComputerPlayer computerPlayer)
+            : this(cardGame, game)
         {
-            WaitingForPlayers = IsWaitingForPlayers(onlineGameService.Game);
+            _computerPlayer = computerPlayer;
+        }
 
-            var gameName = onlineGameService.Game.Name;
+        public GameViewModel(ICardGame cardGame, GameFlippinTen game)
+        {
+            WaitingForPlayers = IsWaitingForPlayers(game);
+
+            var gameName = game.Name;
             Title = $"Vändtia - {gameName}";
-            OnlineGameService = onlineGameService;
-            OnlineGameService.OnPlayerJoined += OnPlayerJoined;
-            OnlineGameService.OnTurnedPlayed += OnTurnedPlayed;
+            CardGame = cardGame;
+            CardGame.OnPlayerJoined += OnPlayerJoined;
+            CardGame.OnTurnedPlayed += OnTurnedPlayed;
 
             CardOnHandTappedCommand = new Command(() => CardOnHandTapped());
             CardOnTableTappedCommand = new Command(() => CardOnTableTapped());
@@ -117,30 +118,31 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            Connected = await OnlineGameService.ConnectToGame();
+            var connected = await CardGame.ConnectToGame();
 
             IsBusy = false;
 
-            if (Connected)
+            if (connected)
             {
                 GameStatus = "Uppkopplad till spel!";
+                await OnPlayerConnected();
+                if (_computerPlayer != null)
+                    await _computerPlayer.Start();
             }
 
-            OnPlayerConnected();
-
-            return Connected;
+            return connected;
         }
 
-        public async Task Disconnect()
+        public void Disconnect()
         {
-            await OnlineGameService.Disconnect();
-
-            Connected = false;
+            CardGame.Disconnect();
+            if (_computerPlayer != null)
+                _computerPlayer.Dispose();
         }
 
-        public void UpdateGameBoard(GameResult result)
+        public async Task UpdateGameBoard(GameResult result)
         {
-            var game = OnlineGameService.Game;
+            var game = await CardGame.GetGame();
             var user = game.Player.UserIdentifier;
             var resultInfo = result.GetResultInfo(user);
             GameStatus = result.GetResultInfo(user);
@@ -153,7 +155,7 @@ namespace FlippinTen.ViewModels
             UpdateGameBoard(game);
         }
 
-        private void UpdateGameBoard(CardGame game)
+        private void UpdateGameBoard(GameFlippinTen game)
         {
             UpdatePlayerCards(game);
             ShowGame = game.GameOver || WaitingForPlayers ? false : true;
@@ -182,7 +184,7 @@ namespace FlippinTen.ViewModels
             Debug.WriteLine($"Game properties updated. {nameof(game.IsPlayersTurn)}: {playersTurn}");
         }
 
-        private void UpdatePlayerCards(CardGame game)
+        private void UpdatePlayerCards(GameFlippinTen game)
         {
             SelectedCards.Clear();
             CardsOnHand.Clear();
@@ -192,15 +194,15 @@ namespace FlippinTen.ViewModels
             }
         }
 
-        private async Task Play(Func<CardGame, GameResult> play)
+        private async Task Play(Func<GameFlippinTen, GameResult> play)
         {
             IsBusy = true;
 
-            var result = await OnlineGameService.Play(play);
+            var result = await CardGame.Play(play);
 
             IsBusy = false;
 
-            UpdateGameBoard(result);
+            await UpdateGameBoard(result);
         }
 
         private void CardOnHandTapped()
@@ -215,19 +217,19 @@ namespace FlippinTen.ViewModels
             await Play(g => g.PlayCards(selectedCards));
         }
 
-        private void OnTurnedPlayed(object sender, CardGameEventArgs e)
+        private async void OnTurnedPlayed(object sender, CardGameEventArgs e)
         {
-            UpdateGameBoard(e.GameResult);
+            await UpdateGameBoard(e.GameResult);
         }
 
-        private void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
+        private async void OnPlayerJoined(object sender, PlayerJoinedEventArgs e)
         {
-            OnPlayerConnected();
+            await OnPlayerConnected();
         }
 
-        private void OnPlayerConnected()
+        private async Task OnPlayerConnected()
         {
-            var game = OnlineGameService.Game;
+            var game = await CardGame.GetGame();
             WaitingForPlayers = IsWaitingForPlayers(game);
             if (!WaitingForPlayers)
             {
@@ -235,15 +237,12 @@ namespace FlippinTen.ViewModels
             }
         }
 
-        private static bool IsWaitingForPlayers(CardGame game)
+        private static bool IsWaitingForPlayers(GameFlippinTen game)
         {
-            var isWaitingForPlayers = game.GameOver || game.AllPlayersOnline
-                ? false
-                : true;
-            return isWaitingForPlayers;
+            return !game.GameOver && !game.AllPlayersOnline;
         }
 
-        private static string GetCardBack(CardGame game)
+        private static string GetCardBack(GameFlippinTen game)
         {
             var deckOfCardsCount = game.DeckOfCards.Count;
             if (deckOfCardsCount == 0)

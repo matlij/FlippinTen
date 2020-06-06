@@ -16,7 +16,7 @@ namespace FlippinTenTests
         private Card _dummyCard2;
         private Card _dummyCardNoTen;
         private Card _dummyCardNoTwo;
-        private CardGame _sut;
+        private FlippinTen.Core.Entities.GameFlippinTen _sut;
 
         [TestInitialize]
         public void Initialize()
@@ -35,7 +35,7 @@ namespace FlippinTenTests
                 .Select(p => new PlayerInformation(p.UserIdentifier))
                 .ToList();
             playerInformation.First(p => p.Identifier == _player.UserIdentifier).IsPlayersTurn = true;
-            _sut = new CardGame("TestGameId", "TestGameName", cardGameUtilities.GetDeckOfCards(), new Stack<Card>(), players.First(), playerInformation);
+            _sut = new FlippinTen.Core.Entities.GameFlippinTen("TestGameId", "TestGameName", cardGameUtilities.GetDeckOfCards(), new Stack<Card>(), players.First(), playerInformation);
         }
 
         //[TestMethod]

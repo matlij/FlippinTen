@@ -46,7 +46,7 @@ namespace FlippinTen.Utilities
             };
         }
 
-        public CardGame CreateGame(string gameName, List<string> users)
+        public GameFlippinTen CreateGame(string gameName, List<string> users)
         {
             const int cardsToHandOut = 3;
 
@@ -62,7 +62,7 @@ namespace FlippinTen.Utilities
                 .ToList();
             playerInformation.First(p => p.Identifier == player.UserIdentifier).IsPlayersTurn = true;
 
-            return new CardGame(
+            return new GameFlippinTen(
                 identifier,
                 gameName,
                 deckOfCards,

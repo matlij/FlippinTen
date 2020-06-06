@@ -1,4 +1,5 @@
 ﻿using FlippinTen.Core;
+using FlippinTen.Core.Entities;
 using FlippinTen.Core.Models.Information;
 using FlippinTen.Models;
 using System;
@@ -11,7 +12,7 @@ namespace FlippinTen.ViewModels
         private string _chanceCard;
         private string _topCard;
 
-        private readonly OnlineGameService _onlineGameService;
+        private readonly ICardGame _cardGame;
 
         public string ChanceCard
         {
@@ -24,12 +25,12 @@ namespace FlippinTen.ViewModels
             set { SetProperty(ref _topCard, value); }
         }
 
-        public ChanceCardViewModel(OnlineGameService onlineGameService, string cardBackUrl = ImageConstants.CardBack)
+        public ChanceCardViewModel(ICardGame cardGame, GameFlippinTen game, string cardBackUrl = ImageConstants.CardBack)
         {
-            _onlineGameService = onlineGameService ?? throw new ArgumentNullException(nameof(onlineGameService));
+            _cardGame = cardGame ?? throw new ArgumentNullException(nameof(cardGame));
             ChanceCard = cardBackUrl;
-            TopCard = onlineGameService.Game.CardsOnTable.Count > 0 
-                ? onlineGameService.Game.CardsOnTable.Peek().ImageUrl
+            TopCard = game.CardsOnTable.Count > 0 
+                ? game.CardsOnTable.Peek().ImageUrl
                 : null;
         }
 
@@ -37,7 +38,7 @@ namespace FlippinTen.ViewModels
         {
             IsBusy = true;
 
-            var result = await _onlineGameService.Play(g => g.PlayChanceCard());
+            var result = await _cardGame.Play(g => g.PlayChanceCard());
 
             IsBusy = false;
 

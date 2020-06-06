@@ -7,10 +7,10 @@ namespace FlippinTen.Core.Utilities
     public interface IServerHubConnection
     {
         Task<bool> StartConnection();
-        Task Disconnect();
-        void Subscribe<T>(string methodName, Action<T> handler);
-        void SubscribeOnTurnedPlayed(Action<GameResult> action);
-        Task<T> Invoke<T>(string methodName, object[] parameters);
-        Task<bool> InvokePlayTurn(GameResult gameResult);
+        void Disconnect();
+        void SubscribeOnPlayerJoined(string userIdentifier, Action<string> action);
+        void SubscribeOnTurnedPlayed(string userIdentifier, Action<GameResult> action);
+        Task<bool> InvokePlayTurn(string userIdentifier, GameResult gameResult);
+        Task<bool> JoinGame(string userIdentifier, string gameIdentifier);
     }
 }

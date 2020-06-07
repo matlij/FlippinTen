@@ -8,7 +8,7 @@
              Title="{Binding Title}"
              BackgroundColor="{StaticResource AppBackgroundColor}">
     <StackLayout Margin="20,35,20,35">
-        <Label Text="Välkommen till VändTia!"
+        <Label Text="Spela mot en vän"
                FontAttributes="Bold"
                FontSize="Large"
                VerticalOptions="CenterAndExpand" 

@@ -40,6 +40,9 @@ namespace FlippinTen.Core.Utilities
         public async Task<bool> JoinGame(string gameIdentifier, string userIdentifier)
         {
             var game = await _gameService.Get(gameIdentifier, userIdentifier);
+            if (game.Player.IsConnected)
+                return true;
+            
             game.Player.IsConnected = true;
             var result = await _gameService.Update(game);
             if (!result)

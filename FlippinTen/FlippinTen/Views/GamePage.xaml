@@ -54,34 +54,21 @@
                     <Button Text="Returmatch" Style="{StaticResource buttonStyle}" VerticalOptions="Center"/>
                 </StackLayout>
             </AbsoluteLayout>
+            <Label Text="{Binding PlayerTurnStatus}"
+                   HorizontalTextAlignment="Center"
+                   FontAttributes="Bold"/>
+            <Label Text="{Binding GameStatus}"
+                   HorizontalTextAlignment="Center"
+                   Padding="0,0,0,16"
+                   IsVisible="{Binding IsPlayersTurn}"/>
+            <ActivityIndicator IsRunning="{Binding IsPlayersTurn, Converter={Helpers:InverseBoolConverter}}"
+                               IsVisible="{Binding IsPlayersTurn, Converter={Helpers:InverseBoolConverter}}"
+                               HeightRequest="35"
+                               HorizontalOptions="CenterAndExpand"/>
+
             <StackLayout Spacing="15" 
                          IsVisible="{Binding ShowGame}"
                          IsEnabled="{Binding IsPlayersTurn}">
-                <StackLayout Padding="10,0,10,20">
-                    <Label Text="Spelinfo"
-                               FontSize="Medium"
-                               FontAttributes="Bold"/>
-                    <BoxView Color="White"
-                                 HeightRequest="1"
-                                 HorizontalOptions="Fill" />
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Text="Spelares tur: "/>
-                        <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Start" Text="{Binding PlayerTurnStatus}"/>
-                        <Label Grid.Row="1" Grid.Column="0" Text="Senaste drag: "/>
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding GameStatus}"/>
-                    </Grid>
-                    <BoxView Color="White"
-                                 HeightRequest="1"
-                                 HorizontalOptions="Fill" />
-                </StackLayout>
                 
                 <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>

@@ -39,7 +39,10 @@ namespace FlippinTen.Core
                 return;
 
             _runOpponent = true;
-            _playGameThread.Start();
+            if (!_playGameThread.IsAlive)
+            {
+                _playGameThread.Start();
+            }
         }
 
         public void Dispose()

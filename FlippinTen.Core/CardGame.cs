@@ -55,8 +55,6 @@ namespace FlippinTen.Core
 
         public async Task<bool> ConnectToGame()
         {
-            var game = await GetGame();
-
             if (!await ConnectToHub())
             {
                 Debug.WriteLine("Uppkoppling till server hub misslyckades.");
@@ -64,12 +62,12 @@ namespace FlippinTen.Core
             }
             Debug.WriteLine("Uppkopplad till server.");
 
-            if (!await JoinGame(game.Identifier, game.Player.UserIdentifier))
+            if (!await JoinGame(_gameIdentifier, _userIdentifier))
             {
-                Debug.WriteLine($"Anslutning till {game.Identifier} misslyckades.");
+                Debug.WriteLine($"Anslutning till {_gameIdentifier} misslyckades.");
                 return false;
             }
-            Debug.WriteLine($"Uppkopplad till {game.Identifier}.");
+            Debug.WriteLine($"Uppkopplad till {_gameIdentifier}.");
 
             return true;
         }

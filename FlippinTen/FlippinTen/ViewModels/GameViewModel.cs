@@ -1,9 +1,8 @@
 ﻿using FlippinTen.Core;
 using FlippinTen.Core.Entities;
-using FlippinTen.Core.Entities.Enums;
 using FlippinTen.Core.Models.Information;
+using FlippinTen.Extensions;
 using FlippinTen.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -187,11 +186,20 @@ namespace FlippinTen.ViewModels
         private void UpdatePlayerCards(GameFlippinTen game)
         {
             SelectedCards.Clear();
-            CardsOnHand.Clear();
-            foreach (var card in game.Player.CardsOnHand)
-            {
-                CardsOnHand.Add(card);
-            }
+
+            var updatedCardsOnHand = game.Player.CardsOnHand;
+
+            CardsOnHand
+                .Except(updatedCardsOnHand)
+                .ToList()
+                .ForEach(c => CardsOnHand.Remove(c));
+
+            updatedCardsOnHand
+                .Except(CardsOnHand)
+                .ToList()
+                .ForEach(c => CardsOnHand.Add(c));
+
+            CardsOnHand.Sort();
         }
 
         private async Task Play(Func<GameFlippinTen, GameResult> play)

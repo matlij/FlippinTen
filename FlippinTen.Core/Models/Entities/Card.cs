@@ -3,7 +3,7 @@ using System;
 
 namespace FlippinTen.Core.Entities
 {
-    public class Card : IEquatable<Card>
+    public class Card : IEquatable<Card>, IComparable<Card>
     {
         private const int _cardsPerType = 13;
 
@@ -67,6 +67,14 @@ namespace FlippinTen.Core.Entities
         public override string ToString()
         {
             return $"{CardType.Name} {Number}";
+        }
+
+        public int CompareTo(Card other)
+        {
+            if (other == null)
+                return 1;
+
+            return ID.CompareTo(other.ID);
         }
     }
 }

@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
              x:Class="FlippinTen.Views.GamePage"
              xmlns:Helpers="clr-namespace:FlippinTen.Helpers"
+             xmlns:control="clr-namespace:FlippinTen.CustomControls;assembly=FlippinTen"
              Title="{Binding Title}"
              BackgroundColor="{StaticResource AppBackgroundColor}">
     <ContentPage.Resources>
@@ -58,31 +58,31 @@
                          IsVisible="{Binding ShowGame}"
                          IsEnabled="{Binding IsPlayersTurn}">
                 <StackLayout Padding="10,0,10,20">
-                        <Label Text="Spelinfo"
+                    <Label Text="Spelinfo"
                                FontSize="Medium"
                                FontAttributes="Bold"/>
-                        <BoxView Color="White"
+                    <BoxView Color="White"
                                  HeightRequest="1"
                                  HorizontalOptions="Fill" />
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0" Text="Spelares tur: "/>
-                            <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Start" Text="{Binding PlayerTurnStatus}"/>
-                            <Label Grid.Row="1" Grid.Column="0" Text="Senaste drag: "/>
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding GameStatus}"/>
-                        </Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Text="Spelares tur: "/>
+                        <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Start" Text="{Binding PlayerTurnStatus}"/>
+                        <Label Grid.Row="1" Grid.Column="0" Text="Senaste drag: "/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding GameStatus}"/>
+                    </Grid>
                     <BoxView Color="White"
                                  HeightRequest="1"
                                  HorizontalOptions="Fill" />
                 </StackLayout>
-
+                
                 <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -94,13 +94,13 @@
                     </Grid.ColumnDefinitions>
                     <Label Text="{Binding CardOnTableCount, StringFormat='Spelat kort: {0} st'}"
                            HorizontalTextAlignment="Center"/>
-                    <Image Grid.Row="1"
+                    <control:CustomImage Grid.Row="1"
                            HeightRequest="150"
                            Source="{Binding TopCardOnTable.ImageUrl}">
-                        <Image.GestureRecognizers>
+                        <control:CustomImage.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding CardOnTableTappedCommand}"/>
-                        </Image.GestureRecognizers>
-                    </Image>
+                        </control:CustomImage.GestureRecognizers>
+                    </control:CustomImage>
                     <Label Grid.Column="1"
                            Text="{Binding CardDeckCount, StringFormat='Kortlek: {0} st'}"
                            HorizontalTextAlignment="Center"/>
@@ -129,8 +129,8 @@
                             <Frame CornerRadius="3"  
                                    Padding="10" 
                                    BackgroundColor="{Binding BackroundColor}">
-                                <Image HeightRequest="90"
-                                       Source="{Binding ImageUrl}"/>
+                                <control:CustomImage HeightRequest="90"
+                                                     Source="{Binding ImageUrl}"/>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>

@@ -86,7 +86,7 @@ namespace FlippinTen.Core.Entities
                 if (DeckOfCards.Count == 0)
                     return new GameResult("Kortlek tom!");
 
-                var chanceCard = DeckOfCards.Peek();
+                var chanceCard = DeckOfCards.Pop();
                 var chanceCardList = new List<Card> { chanceCard };
                 Player.AddCardsToHand(chanceCardList);
 

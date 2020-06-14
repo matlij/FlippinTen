@@ -1,11 +1,4 @@
-﻿using Android.OS;
-using FlippinTen.Core.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 
 namespace FlippinTen.CustomControls
@@ -19,8 +12,8 @@ namespace FlippinTen.CustomControls
             if (propertyName != nameof(Source) || Source == null)
                 return;
 
-            Scale = 1.2;
-            await this.ScaleTo(1, 250, Easing.Linear);
+            await this.ScaleTo(0.8, 125, Easing.Linear);
+            await this.ScaleTo(1, 125, Easing.Linear);
         }
     }
 }

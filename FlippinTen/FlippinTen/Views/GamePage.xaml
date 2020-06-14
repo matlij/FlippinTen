@@ -69,7 +69,6 @@
             <StackLayout Spacing="15" 
                          IsVisible="{Binding ShowGame}"
                          IsEnabled="{Binding IsPlayersTurn}">
-                
                 <Grid Padding="0,0,0,10" HorizontalOptions="Center">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -79,13 +78,13 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Text="{Binding CardOnTableCount, StringFormat='Spelat kort: {0} st'}"
+                    <Label Text="{Binding CardOnTableCount, StringFormat='Spelade kort: {0} st'}"
                            HorizontalTextAlignment="Center"/>
                     <control:CustomImage Grid.Row="1"
                            HeightRequest="150"
                            Source="{Binding TopCardOnTable.ImageUrl}">
                         <control:CustomImage.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding CardOnTableTappedCommand}"/>
+                            <TapGestureRecognizer Tapped="CardsOnTableTapped"/>
                         </control:CustomImage.GestureRecognizers>
                     </control:CustomImage>
                     <Label Grid.Column="1"
@@ -116,8 +115,8 @@
                             <Frame CornerRadius="3"  
                                    Padding="10" 
                                    BackgroundColor="{Binding BackroundColor}">
-                                <control:CustomImage HeightRequest="90"
-                                                     Source="{Binding ImageUrl}"/>
+                                <Image HeightRequest="90"
+                                       Source="{Binding ImageUrl}"/>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>

@@ -108,7 +108,7 @@ namespace FlippinTen.ViewModels
             await Play(g => g.PlayChanceCard());
         }
 
-        public async void PickUpCards()
+        public async Task PickUpCards()
         {
             await Play(g => g.PickUpCards());
         }
@@ -123,7 +123,6 @@ namespace FlippinTen.ViewModels
 
             if (connected)
             {
-                GameStatus = "Uppkopplad till spel!";
                 await OnPlayerConnected();
                 if (_computerPlayer != null)
                     await _computerPlayer.Start();
@@ -171,7 +170,7 @@ namespace FlippinTen.ViewModels
                 GameOver = game.GameOver;
                 GameStatus = game.Winner == game.Player.UserIdentifier
                     ? "Grattis du vann! :D"
-                    : $"Du förlorade :(";
+                    : "Du förlorade :(";
             }
 
             var playersTurn = game.IsPlayersTurn();
@@ -202,7 +201,7 @@ namespace FlippinTen.ViewModels
             CardsOnHand.Sort();
         }
 
-        private async Task Play(Func<GameFlippinTen, GameResult> play)
+        private async Task<GameResult> Play(Func<GameFlippinTen, GameResult> play)
         {
             IsBusy = true;
 
@@ -211,6 +210,8 @@ namespace FlippinTen.ViewModels
             IsBusy = false;
 
             await UpdateGameBoard(result);
+
+            return result;
         }
 
         private void CardOnHandTapped()
@@ -218,11 +219,11 @@ namespace FlippinTen.ViewModels
             //Do nothing now.
         }
 
-        private async void CardOnTableTapped()
+        public async Task<GameResult> CardOnTableTapped()
         {
             var selectedCards = SelectedCards.Select(c => c as Card).ToList();
 
-            await Play(g => g.PlayCards(selectedCards));
+            return await Play(g => g.PlayCards(selectedCards));
         }
 
         private async void OnTurnedPlayed(object sender, CardGameEventArgs e)

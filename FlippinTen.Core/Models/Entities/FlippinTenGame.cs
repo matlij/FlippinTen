@@ -128,6 +128,8 @@ namespace FlippinTen.Core.Entities
                 return new GameResult("Spelet är avslutat.");
             if (!IsPlayersTurn())
                 return new GameResult($"Inte din tur. Väntar på motståndare '{PlayerInformation.Single(p => p.IsPlayersTurn).Identifier}'");
+            if (ShouldFlipCardsOnTable())
+                CardsOnTable.Clear();
 
             try
             {
@@ -144,10 +146,50 @@ namespace FlippinTen.Core.Entities
 
         private CardPlayResult Play(List<Card> cards)
         {
-            var cardFirst = cards.First();
-            if (!CanPlayCard(cardFirst))
+            if (!CanPlayCard(cards.First()))
                 return CardPlayResult.Invalid;
 
+            AddCardsToTable(cards);
+            PickUpCards(minimumCardOnHands: 3);
+            CheckIfPlayerIsWinner();
+
+            var result = GetGameResult(cards.First());
+            if (result == CardPlayResult.Succeded)
+                ChangeCurrentPlayer();
+
+            return result;
+        }
+
+        private CardPlayResult GetGameResult(Card cardFirst)
+        {
+            if (cardFirst.Number == _cardTwoNumber)
+            {
+                return CardPlayResult.CardTwoPlayed;
+            }
+            else if (ShouldFlipCardsOnTable())
+            {
+                return CardPlayResult.CardsFlipped;
+            }
+            else
+            {
+                return CardPlayResult.Succeded;
+            }
+        }
+
+        private bool CheckIfPlayerIsWinner()
+        {
+            if (Player.CardsOnHand.Count == 0)
+            {
+                GameOver = true;
+                Winner = Player.UserIdentifier;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void AddCardsToTable(List<Card> cards)
+        {
             foreach (var card in cards)
             {
                 if (!Player.CardsOnHand.Remove(card))
@@ -155,44 +197,24 @@ namespace FlippinTen.Core.Entities
 
                 CardsOnTable.Push(card);
             }
-
-            PickUpCards(minimumCardOnHands: 3);
-            if (Player.CardsOnHand.Count == 0)
-            {
-                GameOver = true;
-                Winner = Player.UserIdentifier;
-            }
-
-            var shouldFlip = ShouldFlipCardsOnTable(cardFirst.Number);
-            var hasPlayedCardTwo = cardFirst.Number == _cardTwoNumber;
-            if (!hasPlayedCardTwo && !shouldFlip)
-                ChangeCurrentPlayer();
-
-            if (shouldFlip)
-            {
-                CardsOnTable.Clear();
-                return CardPlayResult.CardsFlipped;
-            }
-
-            return hasPlayedCardTwo
-                ? CardPlayResult.CardTwoPlayed
-                : CardPlayResult.Succeded;
         }
 
-        private bool ShouldFlipCardsOnTable(int number)
+        private bool ShouldFlipCardsOnTable()
         {
+            if (CardsOnTable.Count < 1)
+                return false;
+
+            var topCardOnTale = CardsOnTable.Peek();
             var count = 0;
             foreach (var card in CardsOnTable)
             {
-                if (card.Number != number || count == 4)
+                if (card.Number != topCardOnTale.Number || count == 4)
                     break;
 
                 count++;
             }
 
-            return number == _cardTenNumber || count == 4
-                ? true
-                : false;
+            return topCardOnTale.Number == _cardTenNumber || count == 4;
         }
 
         private void ChangeCurrentPlayer()
@@ -200,7 +222,7 @@ namespace FlippinTen.Core.Entities
             var currentPlayer = PlayerInformation.FirstOrDefault(p => p.IsPlayersTurn);
             if (currentPlayer == null)
             {
-                throw new InvalidOperationException($"Failed to update player turn. Cant find player with identifier: {Player.UserIdentifier}");
+                throw new InvalidOperationException($"Failed to update player turn. 'IsPlayersTurn' is false for all players.");
             }
             currentPlayer.IsPlayersTurn = false;
 
@@ -213,16 +235,19 @@ namespace FlippinTen.Core.Entities
 
         private void PickUpCards(int minimumCardOnHands)
         {
-            var numberOfCardsToPickUp = Player.CardsOnHand.Count < minimumCardOnHands
-                ? minimumCardOnHands - Player.CardsOnHand.Count
-                : 0;
+            if (Player.CardsOnHand.Count >= minimumCardOnHands)
+                return;
+
+            var numberOfCardsToPickUp = minimumCardOnHands - Player.CardsOnHand.Count;
+
             var cardsToPickup = new List<Card>();
             for (var i = 0; i < numberOfCardsToPickUp; i++)
             {
                 if (DeckOfCards.Count == 0)
                     break;
 
-                cardsToPickup.Add(DeckOfCards.Pop());
+                var card = DeckOfCards.Pop();
+                cardsToPickup.Add(card);
             }
 
             Player.AddCardsToHand(cardsToPickup);

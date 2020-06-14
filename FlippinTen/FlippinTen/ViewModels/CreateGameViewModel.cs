@@ -1,13 +1,7 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Core.Interfaces;
-using Microsoft.AspNetCore.SignalR.Client;
-using FlippinTen.Models;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 
 namespace FlippinTen.ViewModels
 {

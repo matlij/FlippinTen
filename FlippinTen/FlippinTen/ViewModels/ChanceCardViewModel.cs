@@ -1,18 +1,16 @@
-﻿using FlippinTen.Core;
-using FlippinTen.Core.Entities;
-using FlippinTen.Core.Models.Information;
+﻿using FlippinTen.Core.Entities;
 using FlippinTen.Models;
 using System;
-using System.Threading.Tasks;
 
 namespace FlippinTen.ViewModels
 {
     public class ChanceCardViewModel : BaseViewModel
     {
+        private readonly GameFlippinTen _game;
+
         private string _chanceCard;
         private string _topCard;
-
-        private readonly ICardGame _cardGame;
+        private bool _buttonEnabled;
 
         public string ChanceCard
         {
@@ -24,25 +22,35 @@ namespace FlippinTen.ViewModels
             get { return _topCard; }
             set { SetProperty(ref _topCard, value); }
         }
-
-        public ChanceCardViewModel(ICardGame cardGame, GameFlippinTen game, string cardBackUrl = ImageConstants.CardBack)
+        public bool ButtonEnabled
         {
-            _cardGame = cardGame ?? throw new ArgumentNullException(nameof(cardGame));
+            get { return _buttonEnabled; }
+            set { SetProperty(ref _buttonEnabled, value); }
+        }
+
+        public ChanceCardViewModel(GameFlippinTen game, string cardBackUrl = ImageConstants.CardBack)
+        {
+            _game = game ?? throw new ArgumentNullException(nameof(game));
+            ButtonEnabled = true;
             ChanceCard = cardBackUrl;
             TopCard = game.CardsOnTable.Count > 0 
                 ? game.CardsOnTable.Peek().ImageUrl
                 : null;
         }
 
-        public async Task<GameResult> PlayChanceCard()
+        public bool PlayChanceCard()
         {
             IsBusy = true;
 
-            var result = await _cardGame.Play(g => g.PlayChanceCard());
+            ButtonEnabled = false;
+
+            var chanceCard = _game.DeckOfCards.Peek();
+            var canPlayCard = _game.CanPlayCard(chanceCard);
+            ChanceCard = chanceCard.ImageUrl;
 
             IsBusy = false;
 
-            return result;
+            return canPlayCard;
         }
     }
 }

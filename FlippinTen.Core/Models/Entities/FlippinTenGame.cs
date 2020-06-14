@@ -122,6 +122,19 @@ namespace FlippinTen.Core.Entities
             });
         }
 
+        public bool CanPlayCard(Card card)
+        {
+            if (CardsOnTable.Count == 0 ||
+                card.Number == _cardTwoNumber ||
+                card.Number == _cardTenNumber)
+            {
+                return true;
+            }
+
+            var cardOnTable = CardsOnTable.Peek();
+            return card.Number >= cardOnTable.Number;
+        }
+
         private GameResult Play(Func<GameResult> play)
         {
             if (GameOver)
@@ -251,19 +264,6 @@ namespace FlippinTen.Core.Entities
             }
 
             Player.AddCardsToHand(cardsToPickup);
-        }
-
-        private bool CanPlayCard(Card card)
-        {
-            if (CardsOnTable.Count == 0 ||
-                card.Number == _cardTwoNumber ||
-                card.Number == _cardTenNumber)
-            {
-                return true;
-            }
-
-            var cardOnTable = CardsOnTable.Peek();
-            return card.Number >= cardOnTable.Number;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FlippinTen.ViewModels;
+using Rg.Plugins.Popup.Events;
 using Rg.Plugins.Popup.Services;
 using System;
 using System.Threading.Tasks;
@@ -21,17 +22,26 @@ namespace FlippinTen.Views
 
         protected async override void OnAppearing()
         {
+            PopupNavigation.Instance.Popping += OnPopUpPopped;
+
             await _viewModel.ConnectToGame();
 
             base.OnAppearing();
         }
 
+        protected override void OnDisappearing()
+        {
+            PopupNavigation.Instance.Popping -= OnPopUpPopped;
+
+            base.OnDisappearing();
+        }
+
         private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
             var game = await _viewModel.CardGame.GetGame();
-            var viewModel = new ChanceCardViewModel(_viewModel.CardGame, game);
+            var viewModel = new ChanceCardViewModel(game);
             var popup = new ChanceCardPage(viewModel);
-            popup.OnCardPlayed += async (s, @event) => await _viewModel.UpdateGameBoard(@event.GameResult);
+
             await PopupNavigation.Instance.PushAsync(popup);
         }
 
@@ -42,7 +52,7 @@ namespace FlippinTen.Views
                 var reply = await DisplayAlert("Plocka upp kort", "Är du säker på att du vill plocka upp kort?", "Ja!", "Nej!");
                 if (!reply)
                     return;
-                
+
                 await _viewModel.PickUpCards();
             }
             else
@@ -61,6 +71,17 @@ namespace FlippinTen.Views
                     cardOnTable.Rotation = 0;
                     return;
                 }
+            }
+        }
+
+        private void OnPopUpPopped(object sender, PopupNavigationEventArgs e)
+        {
+            if (!(e.Page is ChanceCardPage chanceCardPage))
+                return;
+
+            if (chanceCardPage.PlayChanceCard)
+            {
+                _viewModel.PlayChanceCard();
             }
         }
     }

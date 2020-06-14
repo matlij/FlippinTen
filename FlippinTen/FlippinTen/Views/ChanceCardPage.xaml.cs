@@ -1,10 +1,7 @@
-﻿using FlippinTen.Core;
-using FlippinTen.Core.Entities.Enums;
-using FlippinTen.ViewModels;
+﻿using FlippinTen.ViewModels;
 using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Services;
 using System;
-using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,14 +12,11 @@ namespace FlippinTen.Views
     {
         private readonly ChanceCardViewModel _viewModel;
         private bool _complete;
-        private bool _buttonEnabled;
 
-        public event EventHandler<CardGameEventArgs> OnCardPlayed;
+        public bool PlayChanceCard { get; private set; } = false;
 
         public ChanceCardPage(ChanceCardViewModel viewModel)
         {
-            _buttonEnabled = true;
-
             InitializeComponent();
             BindingContext = _viewModel = viewModel;
         }
@@ -36,34 +30,28 @@ namespace FlippinTen.Views
 
         private async void OnTakeChanceCardClicked(object sender, EventArgs e)
         {
-            if (!_buttonEnabled)
-                return;
-            _buttonEnabled = false;
-
+            PlayChanceCard = true;
             if (_complete)
                 await PopupNavigation.Instance.PopAsync();
 
-            var result = await _viewModel.PlayChanceCard();
-
             await ChanceCardImg.FadeTo(0, 500);
-            _viewModel.ChanceCard = result.Cards.FirstOrDefault()?.ImageUrl;
-            await ChanceCardImg.FadeTo(1, 1000);
+            var result = _viewModel.PlayChanceCard();
+            await ChanceCardImg.FadeTo(1, 500);
 
-            if (result.Result == CardPlayResult.ChanceSucceded)
-            {
-                ChanceCardButton.Text = "Chansning lyckades!";
-                ChanceCardButton.BackgroundColor = Color.Green;
-            }
-            else
-            {
-                ChanceCardButton.Text = "Chansing misslyckades...";
-                ChanceCardButton.BackgroundColor = Color.Red;
-            }
-
-            OnCardPlayed?.Invoke(this, new CardGameEventArgs(result));
+            UpdateChanceCardButton(result);
 
             _complete = true;
-            _buttonEnabled = true;
+        }
+
+        private void UpdateChanceCardButton(bool result)
+        {
+            ChanceCardButton.Text = result
+                ? "Chansning lyckades!"
+                : "Chansing misslyckades...";
+
+            ChanceCardButton.BackgroundColor = result
+                ? Color.Green
+                : Color.Red;
         }
     }
 }

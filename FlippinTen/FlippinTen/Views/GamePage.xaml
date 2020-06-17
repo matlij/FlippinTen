@@ -5,7 +5,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Class="FlippinTen.Views.GamePage"
              xmlns:Helpers="clr-namespace:FlippinTen.Helpers"
-             xmlns:control="clr-namespace:FlippinTen.CustomControls;assembly=FlippinTen"
              Title="{Binding Title}"
              BackgroundColor="{StaticResource AppBackgroundColor}">
     <ContentPage.Resources>
@@ -80,13 +79,15 @@
                     </Grid.ColumnDefinitions>
                     <Label Text="{Binding CardOnTableCount, StringFormat='Spelade kort: {0} st'}"
                            HorizontalTextAlignment="Center"/>
-                    <control:CustomImage Grid.Row="1"
-                           HeightRequest="150"
-                           Source="{Binding TopCardOnTable.ImageUrl}">
-                        <control:CustomImage.GestureRecognizers>
+                    <Image
+                        x:Name="TopCardOnTableImage"   
+                        Grid.Row="1"
+                        HeightRequest="150"
+                        Source="{Binding TopCardOnTable.ImageUrl}">
+                        <Image.GestureRecognizers>
                             <TapGestureRecognizer Tapped="CardsOnTableTapped"/>
-                        </control:CustomImage.GestureRecognizers>
-                    </control:CustomImage>
+                        </Image.GestureRecognizers>
+                    </Image>
                     <Label Grid.Column="1"
                            Text="{Binding CardDeckCount, StringFormat='Kortlek: {0} st'}"
                            HorizontalTextAlignment="Center"/>

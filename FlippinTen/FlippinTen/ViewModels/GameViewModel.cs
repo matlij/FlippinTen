@@ -24,6 +24,8 @@ namespace FlippinTen.ViewModels
         private bool _gameOver;
         private bool _showGame;
         private bool _isPlayersTurn;
+        private GameResult _lastGameResult;
+
         private readonly ComputerPlayer _computerPlayer;
 
         public bool WaitingForPlayers
@@ -76,6 +78,12 @@ namespace FlippinTen.ViewModels
             get { return _isPlayersTurn; }
             set { SetProperty(ref _isPlayersTurn, value); }
         }
+        public GameResult LastGameResult
+        {
+            get { return _lastGameResult; }
+            set { SetProperty(ref _lastGameResult, value); }
+        }
+
         public ObservableCollection<Card> CardsOnHand { get; set; } = new ObservableCollection<Card>();
         public ObservableCollection<object> SelectedCards { get; set; } = new ObservableCollection<object>();
 
@@ -144,6 +152,7 @@ namespace FlippinTen.ViewModels
             var user = game.Player.UserIdentifier;
             var resultInfo = result.GetResultInfo(user);
             GameStatus = result.GetResultInfo(user);
+            LastGameResult = result;
 
             Debug.WriteLine("Updating game board. ResultInfo: " + resultInfo);
 

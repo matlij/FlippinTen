@@ -14,11 +14,6 @@ namespace FlippinTen.Core.Models.Information
             _errorMessage = errorMessage;
         }
 
-        public GameResult(string gameIdentifier, string userIdentifier, CardPlayResult result, Card card) 
-            : this(gameIdentifier, userIdentifier, result, new Card[] { card })
-        {
-        }
-
         public GameResult(string gameIdentifier, string userIdentifier, CardPlayResult result, IEnumerable<Card> cards)
         {
             GameIdentifier = gameIdentifier;
@@ -32,25 +27,11 @@ namespace FlippinTen.Core.Models.Information
         public CardPlayResult Result { get; }
         public IEnumerable<Card> Cards { get; }
 
-        public bool ShouldUpdateGame()
-        {
-            return !Invalid() && Result != CardPlayResult.CardSelected;
-        }
-
         public bool Invalid()
         {
             return
                 Result == CardPlayResult.Unknown ||
                 Result == CardPlayResult.Invalid;
-        }
-
-        public bool ShouldSwitchTurn()
-        {
-            return
-                Result == CardPlayResult.ChanceFailed ||
-                Result == CardPlayResult.ChanceSucceded ||
-                Result == CardPlayResult.Succeded ||
-                Result == CardPlayResult.CardsOnTablePickedUp;
         }
 
         public string GetResultInfo(string requestingUser = null)
@@ -61,12 +42,9 @@ namespace FlippinTen.Core.Models.Information
             {
                 case CardPlayResult.Succeded:
                 case CardPlayResult.CardTwoPlayed:
-                    return $"{player} har lagt {Join(Cards)}";
+                    return $"{player} har lagt {string.Join(", ", Cards)}";
                 case CardPlayResult.ChanceFailed:
-                case CardPlayResult.ChanceSucceded:
-                    return $"{player} chansade och {(Result == CardPlayResult.ChanceSucceded ? "lyckades!" : "misslyckades...")}";
-                case CardPlayResult.CardSelected:
-                    return $"{player} har markerat {Join(Cards)}";
+                    return $"{player} chansade och misslyckades...";
                 case CardPlayResult.CardsFlipped:
                     return $"{player} vände kort på bord!";
                 case CardPlayResult.CardsOnTablePickedUp:
@@ -77,11 +55,6 @@ namespace FlippinTen.Core.Models.Information
                 default:
                     throw new InvalidEnumArgumentException(nameof(Result), (int)Result, typeof(CardPlayResult));
             }
-        }
-
-        private static string Join(IEnumerable<Card> cards)
-        {
-            return string.Join(", ", cards);
         }
     }
 }

@@ -58,7 +58,7 @@ namespace FlippinTen.Core
                 var game = await WaitForPlayersTurn();
                 if (game.GameOver)
                     break;
-                Thread.Sleep(1000); //Simulate computer thinking
+                Thread.Sleep(2000); //Simulate computer thinking
 
                 var cardsToPlay = FindCardToPlay(game);
                 var gameResult = await PlayCards(game, cardsToPlay);

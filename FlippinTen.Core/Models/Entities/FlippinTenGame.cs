@@ -91,15 +91,14 @@ namespace FlippinTen.Core.Entities
                 Player.AddCardsToHand(chanceCardList);
 
                 var result = Play(chanceCardList);
-                result = result == CardPlayResult.Invalid
-                    ? CardPlayResult.ChanceFailed
-                    : CardPlayResult.ChanceSucceded;
-
-                if (result == CardPlayResult.ChanceFailed)
+                if (result == CardPlayResult.Invalid)
+                { 
                     PickUpCards();
+                    result = CardPlayResult.ChanceFailed;
+                }
 
                 Debug.WriteLine($"{DateTime.Now} - CardGame - Chance card played. Chance card '{chanceCard}', result '{result}', ");
-                return new GameResult(Identifier, Player.UserIdentifier, result, chanceCard);
+                return new GameResult(Identifier, Player.UserIdentifier, result, chanceCardList);
             });
 
 

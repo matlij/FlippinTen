@@ -38,7 +38,7 @@ namespace FlippinTen.Core
             var result = play(game);
             Debug.WriteLine($"OnlineGameService - Play result: {result.Result}");
 
-            if (result.ShouldUpdateGame())
+            if (!result.Invalid())
             {
                 var succeded = await UpdateGame(game);
                 if (!succeded)

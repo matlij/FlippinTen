@@ -80,20 +80,18 @@ namespace FlippinTen.Views
         {
             if (e.PropertyName != nameof(_viewModel.LastGameResult))
                 return;
-            if (TopCardOnTableImage.Opacity != 1)
-                TopCardOnTableImage.Opacity = 1;
 
             var result = _viewModel.LastGameResult.Result;
 
             if (result == CardPlayResult.CardsFlipped)
             {
                 await Task.WhenAll(
-                    TopCardOnTableImage.RotateTo(180, 750, Easing.SinIn),
-                    TopCardOnTableImage.ScaleTo(0, 750, Easing.SinIn)
+                    TopCardOnTableImage.RotateYTo(720, 1000, Easing.Linear),
+                    TopCardOnTableImage.ScaleTo(0, 1000, Easing.Linear)
                     );
 
-                TopCardOnTableImage.Rotation = 0;
-                TopCardOnTableImage.Opacity = 0;
+                _viewModel.TopCardOnTable = null;
+                TopCardOnTableImage.RotationY = 0;
                 TopCardOnTableImage.Scale = 1;
             }
             else if (result == CardPlayResult.CardTwoPlayed)

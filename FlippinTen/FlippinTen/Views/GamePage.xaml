@@ -8,20 +8,19 @@
              Title="{Binding Title}"
              BackgroundColor="{StaticResource AppBackgroundColor}">
     <ContentPage.Resources>
-        <Style TargetType="Frame">
+        <Style TargetType="StackLayout">
             <Setter Property="VisualStateManager.VisualStateGroups">
                 <VisualStateGroupList>
                     <VisualStateGroup x:Name="CommonStates">
                         <VisualState x:Name="Normal">
                             <VisualState.Setters>
-                                <Setter Property="BackgroundColor"
-                                        Value="Transparent"/>
+                                <Setter Property="BackgroundColor" Value="Transparent" />
                             </VisualState.Setters>
                         </VisualState>
                         <VisualState x:Name="Selected">
                             <VisualState.Setters>
-                                <Setter Property="BackgroundColor"
-                                        Value="#78C6B5" />
+                                <Setter Property="Opacity" Value="0.8"/>
+                                <Setter Property="BackgroundColor" Value="{StaticResource AppSecondColor}" />
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -105,20 +104,19 @@
                        HorizontalTextAlignment="Center" 
                        FontSize="Medium"/>
                 <CollectionView ItemsSource="{Binding CardsOnHand}"
-                        SelectionMode="Multiple" 
-                        SelectedItems="{Binding SelectedCards}"
-                        SelectionChangedCommand="{Binding CardOnHandTappedCommand}">
+                                SelectionMode="Multiple" 
+                                SelectedItems="{Binding SelectedCards}"
+                                SelectionChangedCommand="{Binding CardOnHandTappedCommand}"
+                                ItemSizingStrategy="MeasureFirstItem">
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="4" />
+                        <GridItemsLayout Orientation="Vertical" 
+                                         Span="4"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame CornerRadius="3"  
-                                   Padding="10" 
-                                   BackgroundColor="{Binding BackroundColor}">
-                                <Image HeightRequest="90"
-                                       Source="{Binding ImageUrl}"/>
-                            </Frame>
+                            <StackLayout Padding="5">
+                                <Image HeightRequest="100" Source="{Binding ImageUrl}"/>
+                            </StackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>

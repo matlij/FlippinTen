@@ -46,8 +46,8 @@ namespace FlippinTen.Views
         private void UpdateChanceCardButton(bool result)
         {
             ChanceCardButton.Text = result
-                ? "Chansning lyckades!"
-                : "Chansing misslyckades...";
+                ? "Lyckades!"
+                : "Misslyckades...";
 
             ChanceCardButton.BackgroundColor = result
                 ? Color.Green

@@ -19,7 +19,7 @@
     </pages:PopupPage.Animation>
 
     <StackLayout VerticalOptions="Center">
-        <Grid Padding="20" RowSpacing="20">
+        <Grid Padding="20" RowSpacing="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -32,12 +32,13 @@
                    Text="Kort att slå" 
                    TextColor="White"
                    HorizontalOptions="CenterAndExpand"
-                   FontAttributes="Bold"/>
+                   FontSize="Medium"
+                   />
             <Label Grid.Row="0" 
                    Text="Chanskort" 
                    TextColor="White"
                    HorizontalOptions="CenterAndExpand"
-                   FontAttributes="Bold"
+                   FontSize="Medium"
                    Grid.Column="1"/>
             <Image Grid.Row="1" HeightRequest="200" Source="{Binding TopCard}"/>
             <Image Grid.Row="1" Grid.Column="1" HeightRequest="200" Source="{Binding ChanceCard}" x:Name="ChanceCardImg">

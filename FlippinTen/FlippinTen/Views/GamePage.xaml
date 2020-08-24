@@ -100,6 +100,8 @@
                     </Image>
                 </Grid>
 
+                <Button Text="Kort på bord" Clicked="ShowTableCardsBtnClicked" Style="{StaticResource buttonStyle}" HeightRequest="40" WidthRequest="120"/>
+
                 <Label Text="Kort på hand"
                        HorizontalTextAlignment="Center" 
                        FontSize="Medium"/>

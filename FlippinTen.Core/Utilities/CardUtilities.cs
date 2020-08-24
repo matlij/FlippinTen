@@ -10,7 +10,7 @@ namespace FlippinTen.Utilities
     {
         public Stack<Card> GetDeckOfCards()
         {
-            const int cardsInDeck = 52;
+            const int cardsInDeck = 26;
 
             var cardsSorted = new List<Card>();
 

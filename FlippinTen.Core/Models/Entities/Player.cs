@@ -1,7 +1,4 @@
-﻿using FlippinTen.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace FlippinTen.Core.Entities
@@ -18,15 +15,11 @@ namespace FlippinTen.Core.Entities
         public IList<Card> CardsHidden { get; private set; } = new List<Card>();
         public IList<Card> CardsVisible { get; private set; } = new List<Card>();
 
-        public void UpdatePlayer(IList<Card> cardsOnHand, IList<Card> cardsHidden, IList<Card> cardsVisible)
+        public void AddCardsToHand(IList<Card> cards)
         {
-            CardsOnHand = cardsOnHand;
-            CardsHidden = cardsHidden;
-            CardsVisible = cardsVisible;
-        }
+            if (cards.Count == 0)
+                return;
 
-        public void AddCardsToHand(IEnumerable<Card> cards)
-        {
             foreach (var card in cards)
             {
                 CardsOnHand.Add(card);

@@ -43,7 +43,7 @@ namespace FlippinTen.Core.Translations
                 player.CardsHidden.Add(item.AsCard());
 
             foreach (var item in playerDto.CardsVisible)
-                player.CardsHidden.Add(item.AsCard());
+                player.CardsVisible.Add(item.AsCard());
 
             return player;
         }
@@ -99,7 +99,6 @@ namespace FlippinTen.Core.Translations
             {
                 CardType = card.CardType.AsCardTypeDto(),
                 ID = card.ID,
-                ImageUrl = card.ImageUrl,
                 Number = card.Number
             };
         }

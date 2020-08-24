@@ -1,4 +1,6 @@
 ﻿using FlippinTen.Core.Entities.Enums;
+using FlippinTen.Models;
+using FlippinTen.Translations;
 using FlippinTen.ViewModels;
 using Rg.Plugins.Popup.Events;
 using Rg.Plugins.Popup.Services;
@@ -41,9 +43,21 @@ namespace FlippinTen.Views
             base.OnDisappearing();
         }
 
+        private async void ShowTableCardsBtnClicked(object sender, EventArgs e)
+        {
+            var game = await _viewModel.CardGame.GetGame();
+            var tableCards = game.Player.AsTableCards();
+            var viewModel = new TableCardsViewModel(tableCards);
+            var popup = new TableCardsPage(viewModel);
+            await PopupNavigation.Instance.PushAsync(popup);
+        }
+
         private async void DeckOfCardsTapped(object sender, EventArgs e)
         {
             var game = await _viewModel.CardGame.GetGame();
+            if (game.DeckOfCards.Count == 0)
+                return;
+
             var viewModel = new ChanceCardViewModel(game);
             var popup = new ChanceCardPage(viewModel);
 
@@ -52,15 +66,22 @@ namespace FlippinTen.Views
 
         private async void CardsOnTableTapped(object sender, EventArgs e)
         {
-            if (_viewModel.SelectedCards.Count == 0)
+            try
             {
-                var game = await _viewModel.CardGame.GetGame();
-                var popup = new PickupCardsPage(game.CardsOnTable.ToList());
-                await PopupNavigation.Instance.PushAsync(popup);
+                if (_viewModel.SelectedCards.Count == 0)
+                {
+                    var game = await _viewModel.CardGame.GetGame();
+                    var popup = new PickupCardsPage(game.CardsOnTable.Select(c => c.AsCard(false)).ToList());
+                    await PopupNavigation.Instance.PushAsync(popup);
+                }
+                else
+                {
+                    await _viewModel.CardOnTableTapped();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _viewModel.CardOnTableTapped();
+                await DisplayAlert("Hoppsan!", $"Något gick fel: {ex.Message}\n{ex.StackTrace.FirstOrDefault()}", "OK");
             }
         }
 

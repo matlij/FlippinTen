@@ -1,4 +1,4 @@
-﻿using FlippinTen.Core.Entities;
+﻿using FlippinTen.Models;
 using Rg.Plugins.Popup.Pages;
 using Rg.Plugins.Popup.Services;
 using System;

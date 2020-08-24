@@ -1,5 +1,6 @@
 ﻿using FlippinTen.Core.Entities;
 using FlippinTen.Models;
+using FlippinTen.Translations;
 using System;
 
 namespace FlippinTen.ViewModels
@@ -34,7 +35,7 @@ namespace FlippinTen.ViewModels
             ButtonEnabled = true;
             ChanceCard = cardBackUrl;
             TopCard = game.CardsOnTable.Count > 0 
-                ? game.CardsOnTable.Peek().ImageUrl
+                ? game.CardsOnTable.Peek().AsCard(false).ImageUrl
                 : null;
         }
 
@@ -45,8 +46,8 @@ namespace FlippinTen.ViewModels
             ButtonEnabled = false;
 
             var chanceCard = _game.DeckOfCards.Peek();
-            var canPlayCard = _game.CanPlayCard(chanceCard);
-            ChanceCard = chanceCard.ImageUrl;
+            var canPlayCard = _game.CanPlayCards(new[] { chanceCard });
+            ChanceCard = chanceCard.AsCard(false).ImageUrl;
 
             IsBusy = false;
 

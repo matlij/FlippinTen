@@ -46,31 +46,6 @@ namespace FlippinTen.Utilities
             };
         }
 
-        public GameFlippinTen CreateGame(string gameName, List<string> users)
-        {
-            const int cardsToHandOut = 3;
-
-            var identifier = Guid.NewGuid().ToString();
-            var deckOfCards = _cardUtilities.GetDeckOfCards();
-            var cardsOnTable = new Stack<Card>();
-            var players = users
-                .Select(u => CreatePlayer(cardsToHandOut, deckOfCards, u))
-                .ToList();
-            var player = players.First();
-            var playerInformation = users
-                .Select(p => new PlayerInformation(p))
-                .ToList();
-            playerInformation.First(p => p.Identifier == player.UserIdentifier).IsPlayersTurn = true;
-
-            return new GameFlippinTen(
-                identifier,
-                gameName,
-                deckOfCards,
-                cardsOnTable,
-                player,
-                playerInformation);
-        }
-
         private static Player CreatePlayer(int cardsToHandOut, Stack<Card> deckOfCards, string userIdentifier)
         {
             var player = new Player(userIdentifier);

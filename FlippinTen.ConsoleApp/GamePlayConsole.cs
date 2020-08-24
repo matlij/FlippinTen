@@ -121,11 +121,6 @@ namespace FlippinTen.ConsoleApp
         {
             var cardToPlay = game.Player.CardsOnHand[cardIndex];
             var result = await _cardGame.Play(c => c.PlayCards(new List<Card> { cardToPlay }));
-            if (result.Invalid())
-            {
-                foreach (var card in game.Player.CardsOnHand)
-                    card.Selected = false;
-            }
             return result;
         }
 

@@ -1,13 +1,8 @@
 ﻿using FlippinTen.Core.Interfaces;
 using FlippinTen.Core.Services;
 using FlippinTen.Utilities;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using dto = FlippinTen.Models.Entities;
 
 namespace FlippinTenTests.Core
 {
@@ -24,16 +19,6 @@ namespace FlippinTenTests.Core
             _repository = new Mock<IGenericRepository>();
             _cardGameUtilities = new CardGameUtilities(new CardUtilities());
             _sut = new OnlineCardGameService(_repository.Object, _cardGameUtilities);
-        }
-
-        [TestMethod]
-        public void Update()
-        {
-            var game = _cardGameUtilities.CreateGame("TestGame", new List<string> { "Player", "Opponent" });
-
-            _sut.Update(game);
-
-            _repository.Verify(r => r.PatchAsync(It.IsAny<string>(), It.IsAny<JsonPatchDocument<dto.CardGame>>()));
         }
     }
 }

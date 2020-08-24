@@ -3,6 +3,7 @@ using FlippinTen.Core.Entities;
 using FlippinTen.Core.Models.Information;
 using FlippinTen.Extensions;
 using FlippinTen.Models;
+using FlippinTen.Translations;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,7 +16,7 @@ namespace FlippinTen.ViewModels
     public class GameViewModel : BaseViewModel
     {
         private bool _waitingForPlayers;
-        private Card _topCardOnTable;
+        private Models.Card _topCardOnTable;
         private string _gameStatus;
         private string _playerTurnStatus;
         private int _cardOnTableCount;
@@ -33,7 +34,7 @@ namespace FlippinTen.ViewModels
             get { return _waitingForPlayers; }
             set { SetProperty(ref _waitingForPlayers, value); }
         }
-        public Card TopCardOnTable
+        public Models.Card TopCardOnTable
         {
             get { return _topCardOnTable; }
             set { SetProperty(ref _topCardOnTable, value); }
@@ -84,7 +85,7 @@ namespace FlippinTen.ViewModels
             set { SetProperty(ref _lastGameResult, value); }
         }
 
-        public ObservableCollection<Card> CardsOnHand { get; set; } = new ObservableCollection<Card>();
+        public ObservableCollection<Models.Card> CardsOnHand { get; set; } = new ObservableCollection<Models.Card>();
         public ObservableCollection<object> SelectedCards { get; set; } = new ObservableCollection<object>();
 
         public Command CardOnHandTappedCommand { get; }
@@ -108,7 +109,7 @@ namespace FlippinTen.ViewModels
             CardGame.OnTurnedPlayed += OnTurnedPlayed;
 
             CardOnHandTappedCommand = new Command(() => CardOnHandTapped());
-            CardOnTableTappedCommand = new Command(() => CardOnTableTapped());
+            CardOnTableTappedCommand = new Command(async () => await CardOnTableTapped());
         }
 
         public async void PlayChanceCard()
@@ -168,7 +169,7 @@ namespace FlippinTen.ViewModels
             ShowGame = game.GameOver || WaitingForPlayers ? false : true;
 
             TopCardOnTable = game.CardsOnTable.Count > 0
-                ? game.CardsOnTable.Peek()
+                ? game.CardsOnTable.Peek().AsCard(false)
                 : null;
             CardOnTableCount = game.CardsOnTable.Count;
             CardDeckCount = game.DeckOfCards.Count;
@@ -195,17 +196,18 @@ namespace FlippinTen.ViewModels
         {
             SelectedCards.Clear();
 
-            var updatedCardsOnHand = game.Player.CardsOnHand;
-
-            CardsOnHand
-                .Except(updatedCardsOnHand)
-                .ToList()
-                .ForEach(c => CardsOnHand.Remove(c));
-
-            updatedCardsOnHand
-                .Except(CardsOnHand)
-                .ToList()
-                .ForEach(c => CardsOnHand.Add(c));
+            if (game.Player.CardsOnHand.Count == 0)
+            {
+                var tableCards = game.Player.AsTableCards();
+                CardsOnHand.Update(tableCards);
+            }
+            else
+            {
+                var cardsOnHand = game.Player.CardsOnHand
+                    .Select(c => c.AsCard(false))
+                    .ToList();
+                CardsOnHand.Update(cardsOnHand);
+            }
 
             CardsOnHand.Sort();
         }
@@ -230,7 +232,9 @@ namespace FlippinTen.ViewModels
 
         public async Task<GameResult> CardOnTableTapped()
         {
-            var selectedCards = SelectedCards.Select(c => c as Card).ToList();
+            var selectedCards = SelectedCards
+                .Select(c => (c as Models.Card).AsCard())
+                .ToList();
 
             return await Play(g => g.PlayCards(selectedCards));
         }

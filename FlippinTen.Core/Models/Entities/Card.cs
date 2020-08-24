@@ -28,7 +28,6 @@ namespace FlippinTen.Core.Entities
             }
 
             ID = cardId;
-            ImageUrl = GetCardImgUrl(Number, CardType);
         }
 
         public Card(int number, CardType cardType)
@@ -42,33 +41,33 @@ namespace FlippinTen.Core.Entities
             Number = number;
             CardType = cardType;
             ID = number + (cardType.Value - 1) * maxNumber;
-            ImageUrl = GetCardImgUrl(number, cardType);
-        }
-
-        private string GetCardImgUrl(int number, CardType cardType)
-        {
-            return $"{cardType.Name.ToLower()}{number}.png";
         }
 
         public int ID { get; }
         public int Number { get; }
         public CardType CardType { get; }
-        public string ImageUrl { get; }
-        public bool Selected { get; set; }
+        public override bool Equals(object other)
+        {
+            if (other is null || !(other is Card otherCard))
+                return false;
+
+            return Equals(otherCard);
+        }
 
         public bool Equals(Card other)
         {
+            if (other is null)
+            {
+                return false;
+            }
+
             return other.ID == ID;
         }
+
         public override int GetHashCode()
         {
             return ID.GetHashCode();
         }
-        public override string ToString()
-        {
-            return $"{CardType.Name} {Number}";
-        }
-
         public int CompareTo(Card other)
         {
             if (other == null)
